@@ -182,12 +182,14 @@ document.querySelectorAll('[data-friend-talk]').forEach(b=>b.addEventListener('c
 }));
 document.querySelectorAll('[data-friend-choice]').forEach(b=>b.addEventListener('click',()=>{
  const answers={
- cafe:['「やった！ 新作のいちごラテが気になってたんだ」美月はぱっと笑顔になった。ふたりで寄り道する約束をした。','一緒に寄り道する約束をした。友情が深まった！'],
+ cafe:['「やった！ 新作のいちごラテが気になってたんだ」美月はぱっと笑顔になった。ふたりで寄り道する約束をした。','一緒に寄り道する約束をした。'],
  practice:['「じゃあ私、練習終わるまで待ってる！ 帰り道にいっぱい話そうね」美月は親指を立てた。','夢も友情も大切にするって決めた。'],
  talk:['「もちろん。親友なんだから、なんでも話してよ」美月は真剣な顔でうなずいた。','美月に気持ちを聞いてもらった。心が少し軽くなった。']
  };
  const a=answers[b.dataset.friendChoice];$('friendText').textContent=a[0];$('friendResult').textContent=a[1];$('friendResult').classList.add('show');
- state.friendBond=Math.min(100,(state.friendBond||0)+3);state.bond=Math.min(100,state.bond+3);refresh();
+ if(state.sessionActive){state.friendBond=Math.min(100,(state.friendBond||0)+3);state.bond=Math.min(100,state.bond+3);spendAction('美月と会話した。親愛度 +3。');}
+ else{toast('会話を楽しめるよ。親愛度アップはプロデュース中だけ！');}
+ refresh();
 }));
 const originalRefresh=refresh;
 refresh=function(){originalRefresh();renderProduce();$('topName').textContent=state.name||'学園生活 '+state.day+'日目';};
