@@ -85,13 +85,13 @@
  </div><div class="result" id="lessonResult"></div><p class="notice">能力値は最大100。実際のレッスンはプロデュース中に行えます。</p></div>
 </section>
 <section class="view" id="view-story">
- <div class="subhero"><div class="eyebrow">EPISODE 01 · AFTER SCHOOL</div><h2>放課後の約束</h2><p>学園の廊下に、夕方の光が差し込む。初めてのレッスンを終えた彼女は、少し不安そうに窓の外を見ていた。</p></div>
- <div class="storybox"><div class="eyebrow">SCENE 01 / THE FIRST WORDS</div><h3 id="storyTitle">「私、変われるかな？」</h3><p id="storyText">「歌もダンスも、まだまだだし……。みんなみたいに、キラキラできるのかな」彼女はぎゅっと手を握る。夢を口にするのは、思ったより勇気がいることだった。</p><p>あなたはプロデューサーとして、彼女の隣に立つ。今の彼女に届けたい言葉は？</p><div class="storychoices"><button class="secondary" data-choice="kind">「一緒に、一歩ずつ進もう」</button><button class="secondary" data-choice="bold">「君の可能性を信じてる」</button><button class="secondary" data-choice="honest">「不安な気持ちも聞かせて」</button></div><div class="result" id="storyResult"></div><button class="primary" id="nextStory" style="display:none;margin-top:14px">次の場面へ　→</button></div>
+ <div class="subhero"><div class="eyebrow">EPISODE 01 · AFTER SCHOOL</div><h2>放課後の約束</h2><p>学園の廊下に、夕方の光が差し込む。レッスンを終えたあなたは、少し不安そうに窓の外を見ていた。</p></div>
+ <div class="storybox"><div class="eyebrow">SCENE 01 / THE FIRST WORDS</div><h3 id="storyTitle">「私、変われるかな？」</h3><p id="storyText">「歌もダンスも、まだまだだし……。みんなみたいに、キラキラできるのかな」私はぎゅっと手を握る。夢を口にするのは、思ったより勇気がいることだった。</p><p>そんなとき、親友の美月が隣に立ってくれた。自分自身にかけたい言葉を、選んでみよう。</p><div class="storychoices"><button class="secondary" data-choice="kind">「焦らなくていい。私らしく、一歩ずつ進もう」</button><button class="secondary" data-choice="bold">「まだできることがある。自分の可能性を信じよう」</button><button class="secondary" data-choice="honest">「不安な気持ちも、友達に話してみよう」</button></div><div class="result" id="storyResult"></div><button class="primary" id="nextStory" style="display:none;margin-top:14px">次の場面へ　→</button></div>
 </section>
 <section class="view" id="view-live">
  <div class="subhero"><div class="eyebrow">LIGHTS · MUSIC · YOU</div><h2>ライブステージ</h2><p>積み重ねた練習を、ステージの上で届けよう。今の能力がライブ評価に反映されるよ。</p></div>
  <div class="stage" id="stage"><div class="stageglow"></div><div class="stagecontent"><div class="stagestar">✦ ✧ ✦</div><div class="eyebrow" style="color:#d6c5ff;margin-top:15px">ÉTOILE ACADEMY PRESENTS</div><h2 id="stageName">FIRST LIGHT</h2><p id="stageDesc">あなたの最初のステージが、今はじまる。</p><button class="primary" id="startLive">ライブを開催する　→</button><div id="liveResult" style="margin-top:15px;font-size:12px;line-height:2"></div></div></div>
- <p class="notice">ライブはその日のプロデュースで活動を重ねてから挑戦しよう。レッスンで能力を上げるとスコアも伸びるよ。</p>
+ <p class="notice">ライブもプロデュース中の行動を1回使います。限られた行動をどう使うか考えてみよう。</p>
 </section>
 <div class="footer">ÉTOILE ACADEMY · YOUR LIGHT, YOUR STORY · <span id="saveStatus">PROGRESS AUTO-SAVED</span></div>
 </main></div></div><div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -129,7 +129,7 @@ document.querySelectorAll('[data-type]').forEach(b=>b.addEventListener('click',(
 $('saveProfile').addEventListener('click',()=>{if(!$('idolName').value.trim()&&!state.name){$('profileResult').textContent='まずはアイドルの名前を入力してね。';$('profileResult').classList.add('show');return}state.name=$('idolName').value.trim()||state.name;save();refresh();$('profileResult').textContent=state.name+'、プロフィール登録完了！ '+state.type+'なアイドルとして、'+({pink:'桜色',blue:'空色',purple:'ラベンダー',gold:'星明かり'}[state.color])+'の輝きをまとって歩き出そう。';$('profileResult').classList.add('show');toast('プロフィールを保存したよ')});
 document.querySelectorAll('[data-choice]').forEach(b=>b.addEventListener('click',()=>{
  if(state.storyDone){toast('このエピソードはクリア済みだよ');return}
- const choice=b.dataset.choice;state.storyChoice=choice;state.storyDone=true;state.bond=Math.min(100,state.bond+8);state.day+=1;
+ const choice=b.dataset.choice;state.storyChoice=choice;state.storyDone=true;state.bond=Math.min(100,state.bond+8);
  const texts={kind:'「うん……！ ひとりじゃないって思ったら、少し勇気が出てきた」彼女はほっとしたように笑った。一歩ずつでいい。その約束が、ふたりの最初の絆になった。',bold:'「信じてくれるの？ ……じゃあ、私も自分を信じてみたい」彼女の瞳に、小さな光がともる。期待に応えたいという気持ちが、新しい力に変わっていく。',honest:'「ほんとはね、失敗するのが怖いんだ」彼女は胸の内を少しずつ話し始めた。弱さを見せても大丈夫。安心できる場所が、夢への最初の一歩になった。'};
  $('storyText').textContent=texts[choice];$('storyTitle').textContent='小さな勇気、大きな一歩';$('storyResult').textContent='エピソードクリア！ 親愛度 +8。彼女との距離が少し近づいた。';$('storyResult').classList.add('show');$('nextStory').style.display='inline-block';refresh();toast('エピソードクリア！ 親愛度 +8');
 }));
@@ -137,9 +137,10 @@ $('nextStory').addEventListener('click',()=>{showView('home');toast('次のエ�
 $('startLive').addEventListener('click',()=>{
  const stage=$('stage');stage.classList.remove('playing');void stage.offsetWidth;stage.classList.add('playing');
  const score=Math.min(100,Math.round((state.vocal+state.dance+state.charm)/3));const grade=score>=75?'S':score>=55?'A':score>=35?'B':'C';
- state.liveDone=true;state.day+=1;state.bond=Math.min(100,state.bond+3);refresh();
+ if(!state.sessionActive){toast('ライブもプロデュース中に挑戦しよう');showView('produce');return}
+ state.liveDone=true;state.bond=Math.min(100,state.bond+3);refresh();
  $('liveResult').innerHTML='LIVE RESULT<br><span style="font-size:29px;font-weight:800;color:#f7dca2">GRADE '+grade+'</span><br>総合パフォーマンス '+score+' / 100<br><span style="color:#d9c7ff">観客の拍手が、夜空にきらめいた。親愛度 +3</span>';
- $('stageDesc').textContent=''+(state.name||'あなたのアイドル')+'の歌声が、会場いっぱいに響く。';toast('ライブ終了！ GRADE '+grade);
+ $('stageDesc').textContent=''+(state.name||'あなたのアイドル')+'の歌声が、会場いっぱいに響く。';toast('ライブ終了！ GRADE '+grade);spendAction('ライブを開催した！ GRADE '+grade+'。');
 });
 
 // --- Daily produce session: 3 actions, explicitly started by the player ---
