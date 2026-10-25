@@ -215,7 +215,7 @@ function showPrologue(){
  $('storySkip').addEventListener('click',finish);
  renderPage();
 }
-$('beginPrologue').addEventListener('click',()=>{const fairy=$('fairyName').value.trim();if(!fairy){$('setupError').textContent='妖精の名前を入力してね。';$('setupError').classList.add('show');return;}state.fairyName=fairy;state.name=prologues[selectedStartIdol][0];state.chosenIdol=selectedStartIdol;state.setupDone=true;state.prologueSeen=false;state.vocal=12;state.dance=10;state.charm=14;state.bond=5;save();refresh();showPrologue();});
+$('beginPrologue').addEventListener('click',()=>{const fairy=$('fairyName').value.trim();if(!fairy){$('setupError').textContent='妖精の名前を入力してね。';$('setupError').classList.add('show');return;}state.fairyName=fairy;state.name=prologues[selectedStartIdol][0];state.chosenIdol=selectedStartIdol;updateFriendRoster();state.setupDone=true;state.prologueSeen=false;state.vocal=12;state.dance=10;state.charm=14;state.bond=5;save();refresh();showPrologue();});
 
 function showView(name){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+name));document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('active',b.dataset.view===name));window.scrollTo({top:0,behavior:'smooth'})}
 document.querySelectorAll('.nav').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
@@ -294,7 +294,9 @@ const castTalk={
  komugi:{name:'日高 こむぎ',tag:'TRICOLORE PALETTE',title:'「ねえねえ、放課後クレープ食べに行こ！」',intro:'こむぎは楽しそうにぴょんぴょん跳ねながら誘ってきた。',answers:{cafe:['「やったあ！どの味にする？こむぎ、いちご！」こむぎはうれしそうにはしゃいだ。','こむぎとクレープを食べに行く約束をした。'],practice:['「じゃあ練習のあとね！こむぎ、待ってる！」こむぎは大きくうなずいた。','こむぎが練習後に待っていてくれることになった。'],talk:['「もちろん！こむぎでよければ、なんでも聞くよ！」こむぎはやさしく笑った。','こむぎに話を聞いてもらった。']}}
 };
 function selectFriend(id){activeFriend=id;const c=castTalk[id];$('friendTag').textContent=c.tag+' · AFTER SCHOOL';$('friendTitle').textContent=c.title;$('friendText').textContent=c.intro;$('friendResult').textContent='';$('friendResult').classList.remove('show');document.querySelectorAll('[data-character-chat]').forEach(b=>b.classList.toggle('selected',b.dataset.characterChat===id));}
+function updateFriendRoster(){const ownIdol=state.chosenIdol;document.querySelectorAll('[data-character-chat]').forEach(b=>{b.hidden=b.dataset.characterChat===ownIdol;});if(activeFriend===ownIdol){const next=document.querySelector('[data-character-chat]:not([hidden])');if(next)selectFriend(next.dataset.characterChat);}}
 document.querySelectorAll('[data-character-chat]').forEach(b=>b.addEventListener('click',()=>selectFriend(b.dataset.characterChat)));
+updateFriendRoster();
 document.querySelectorAll('[data-friend-choice]').forEach(b=>b.addEventListener('click',()=>{
  const c=castTalk[activeFriend],a=c.answers[b.dataset.friendChoice];$('friendText').textContent=a[0];$('friendResult').textContent=a[1];$('friendResult').classList.add('show');
  if(state.sessionActive){state.friendBond=Math.min(100,(state.friendBond||0)+3);state.bond=Math.min(100,state.bond+3);spendAction(c.name+'と会話した。親愛度 +3。');}
