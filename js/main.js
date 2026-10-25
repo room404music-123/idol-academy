@@ -58,7 +58,9 @@ const prologuePages = {
  ]
 };
 function showPrologue(returnTo='home'){
- const idol=state.idol||'mirai', pages=prologuePages[state.idol]||prologuePages.mirai, char=idols[idol].name, fairyName=state.name||state.fairyName||'ルミ';
+ const idol=state.idol||'mirai', sourcePages=prologuePages[state.idol]||prologuePages.mirai, char=idols[idol].name, fairyName=state.name||state.fairyName||'ルミ';
+ // Keep the original wording, but show only one sentence at a time.
+ const pages=sourcePages.flatMap(page=>page.split(/\n\n+/).flatMap(paragraph=>paragraph.match(/[^。！？]+(?:。|！|？)(?:」)?|[^。！？]+$/g)||[]).map(line=>line.trim()).filter(Boolean));
  let index=0;
  $('setupOverlay').classList.remove('show');
  const screen=$('storyScreen');screen.classList.add('show');screen.setAttribute('aria-hidden','false');
