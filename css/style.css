@@ -70,3 +70,20 @@ body{height:100dvh;overflow:hidden}
 .setup-overlay{z-index:2000}
 .story-screen{z-index:2100}
 @media(max-width:850px){.app{padding:0 12px}.topbar{height:68px}.layout{height:calc(100dvh - 82px);padding-top:10px;gap:10px}.sidebar{flex-shrink:0}.main{padding-right:1px}.nav{padding:9px 10px}}
+
+
+/* Focus mode: once a produce session begins, make it the only screen. */
+.app.produce-mode .topbar,
+.app.produce-mode .sidebar,
+.app.produce-mode .footer{display:none!important}
+.app.produce-mode .layout{display:block!important;height:100dvh!important;max-height:100dvh!important;padding:22px clamp(14px,4vw,56px)!important;margin:0!important}
+.app.produce-mode .main{height:100%!important;max-width:1000px;margin:0 auto!important;padding:0 6px 24px!important;overflow-y:auto!important}
+.app.produce-mode #view-produce{display:block!important;max-width:900px;margin:0 auto}
+.app.produce-mode #view-produce .subhero{padding-top:10px}
+.app.produce-mode #view-produce .subhero h2{font-size:clamp(28px,4vw,42px)}
+.app.produce-mode #view-produce .panel{padding:clamp(18px,3vw,30px);border-radius:22px;box-shadow:0 16px 45px rgba(77,55,112,.1)}
+.app.produce-mode #view-produce .lesson{min-height:76px}
+.app.produce-mode #view-produce .lessoninfo strong{font-size:14px}
+.app.produce-mode #view-produce .lessoninfo small{font-size:11px}
+.app.produce-mode #view-produce .notice{font-size:12px;line-height:1.9}
+@media(max-width:600px){.app.produce-mode .layout{padding:12px!important}.app.produce-mode .main{padding:0 0 18px!important}.app.produce-mode #view-produce .subhero{padding:8px 3px}.app.produce-mode #view-produce .panel{padding:16px}.app.produce-mode #view-produce .lesson{padding:12px 10px;gap:9px}.app.produce-mode #view-produce .gain{font-size:10px}}
