@@ -73,6 +73,7 @@ function showView(name){
   toast('オーディションに参加するには、先にプロデュースを開始してね');
   name='produce';
  }
+ if(document.getElementById('appShell'))document.getElementById('appShell').classList.toggle('produce-mode',name==='produce'&&!!state.sessionActive);
  const target=$('view-'+name);if(!target)return;
  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v===target));
  document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('active',b.dataset.view===name));
@@ -150,6 +151,7 @@ function renderProduce(){
 }
 function endProduce(message){
  state.sessionActive=false;state.actionsLeft=0;state.day+=1;
+ $('appShell').classList.remove('produce-mode');
  $('produceResult').textContent=message||'今日の活動は終了！ 頑張った自分をほめてあげよう。';
  $('produceResult').classList.add('show');renderProduce();refresh();toast('今日のプロデュースが終了したよ');
 }
@@ -164,6 +166,7 @@ function spendAction(message){
 $('startProduce').addEventListener('click',()=>{
  if(state.sessionActive){toast('今日のプロデュースは始まっているよ');return}
  state.sessionActive=true;state.actionsLeft=3;state.lessonDone=false;state.liveDone=false;
+ $('appShell').classList.add('produce-mode');showView('produce');
  $('produceResult').classList.remove('show');renderProduce();refresh();toast('今日のプロデュース開始！ 行動は3回までだよ');
 });
 $('finishProduce').addEventListener('click',()=>{if(state.sessionActive)endProduce('今日はここまで！ 使わなかった時間も大切な休息。');});
@@ -209,4 +212,4 @@ const originalRefresh=refresh;
 refresh=function(){originalRefresh();renderProduce();$('topName').textContent=state.name||'学園生活 '+state.day+'日目';};
 
 refresh();
-if(!state.setupDone){$('setupOverlay').classList.add('show');}else if(!state.prologueSeen){$('setupOverlay').classList.add('show');showPrologue();}else{$('appShell').classList.add('game-ready');showView('home');}
+if(!state.setupDone){$('setupOverlay').classList.add('show');}else if(!state.prologueSeen){$('setupOverlay').classList.add('show');showPrologue();}else{$('appShell').classList.add('game-ready');if(state.sessionActive){$('appShell').classList.add('produce-mode');showView('produce');}else{showView('home');}}
