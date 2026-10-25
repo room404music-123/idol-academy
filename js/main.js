@@ -39,46 +39,31 @@ function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));}catch(
 
 const prologuePages = {
  mirai:[
-  'むかしむかし、まだ星の名前も知らなかった小さな未来のそばに、不思議な妖精が現れた。',
-  '未来「あなた、だあれ？」',
-  '妖精「私は、あなたの夢をそばで見守る妖精。これからずっと、あなたの味方だよ。」',
-  'それから十年以上。未来は歌うことが大好きな女の子に育った。うれしい日も、自信をなくした日も、妖精はずっと隣にいた。',
-  '未来「いつか、私の歌で誰かを笑顔にしたいな。ねえ、妖精さん。私にもアイドルになれるかな？」',
-  '妖精「もちろん。未来の一歩一歩が、夢につながっているよ。」',
-  'そして迎えた、Étoile Academyの入学式。大きな校門の前で、未来は胸に手を当てた。',
-  '未来「ドキドキするけど……ここから始めるんだ。私、頑張ってみる！」',
-  '妖精「一緒に行こう、未来。あなたの物語は、今ここから輝き始める。」'
+  '私が未来と出会ったのは、10年以上前のことだった。\n\n未来（幼少期）「あたしのようせいさん、まだかなぁ？」\n\n私が姿を現すと、未来はぱっと笑顔になった。\n\n未来（幼少期）「わあ！ ようせいさんだあ！」',
+  '未来（幼少期）「ねえねえ、おなまえは？」\n\nあなた「私は「＋FAIRY＋」だよ。」\n\n未来（幼少期）「＋FAIRY＋！ これからよろしくね！」\n\nそれから、私は未来のそばで、たくさんの時間を過ごしてきた。',
+  '＊　＊　＊\n\nそして今日。アイドル養成学園の入学式を終えた未来は、椅子に座るなり机に突っ伏した。\n\n未来「スピーチ、めっちゃ緊張したー！！」\n\nあなた「でも、ちゃんとできてたよ。」\n\n未来「そうかな？」\n\nあなた「うん。中学でも頑張ってたじゃん！」\n\n未来は照れくさそうに笑った。',
+  '未来「でも、これからが本番だよね！ ここには夢を叶えようって頑張ってる人がたくさんいるんだもん。」\n\nあなた「ゆっくり頑張ればいいんだよ。」\n\n未来「うん。でも、誰かの期待を裏切りたくない。頑張るね！」\n\n未来はいつもの明るい笑顔を見せた。それでも、私は少し心配だった。\n\nあなた（心配だな……。）\n\n未来が自分の気持ちを置き去りにしてしまわないように。私はこれからも、そばで見守っていこう。\n\n――星降 未来の、新しい毎日が始まる。'
  ],
  reika:[
-  '幼い麗華は、にぎやかな場所よりも本を読む時間が好きだった。そんな彼女のそばに、ある日、小さな妖精が現れた。',
-  '麗華「……あなたは、物語の中から来たの？」',
-  '妖精「あなたの毎日を見守る妖精だよ。急がなくてもいい。あなたの歩幅で進もう。」',
-  '十年以上の時が流れても、妖精は変わらず麗華の隣にいた。麗華は自分の好きなことを大切にしながら、少しずつ世界を広げていった。',
-  '麗華「アイドルになるなんて、私には縁のない話だと思っていたわ。でも……自分の知らない景色を見てみるのも、悪くないかもしれない。」',
-  '妖精「答えは今すぐ出さなくていいよ。麗華が選んだ道を応援するから。」',
-  'Étoile Academyの入学式の日。麗華は本を鞄にしまい、校門を見上げた。',
-  '麗華「ここで何を見つけるのかしら。少しだけ、楽しみになってきたわ。」',
-  '妖精「麗華らしい一歩で大丈夫。さあ、新しい物語を始めよう。」'
+  '私が麗華と出会ったのは、10年以上前のことだった。\n\n麗華（幼少期）「物音……だれ？」\n\nあなた「あ、えーっと……」\n\n麗華は不思議そうに私を見つめた。怖がるでもなく、ただ静かに私を見極めようとしているようだった。',
+  'あなた「私は妖精だよ。これから麗華のそばにいるんだ。」\n\n麗華（幼少期）「……ふうん。あなたの名前は？」\n\nあなた「＋FAIRY＋だよ。」\n\n麗華（幼少期）「そう。よろしく。」\n\nあまりにもあっさりした返事に、私は少し拍子抜けした。けれど、しばらくして麗華は本から顔を上げた。\n\n麗華（幼少期）「……そこにいてもいいよ。」\n\nそれが麗華なりの歓迎だったのかもしれない。',
+  '＊　＊　＊\n\n長い時間が過ぎ、麗華もアイドル養成学園に入学した。\n\n麗華「入学式って案外疲れるね。」\n\nあなた「お疲れさま。緊張した？」\n\n麗華「別に。……ねえ、私は明日から何すればいいの？」\n\nあなた「まだ始まったばかりだし、ゆっくり過ごせばいいよ。友達もいるでしょ？」',
+  '麗華「……別にトップアイドルとか目指してないんだけど。」\n\nあなた「うん。麗華がどうしたいかは、麗華が決めればいいんだよ。」\n\n麗華は黙って窓の外を見た。\n\n麗華「……不安だな。」\n\nあなた「そっか。分からないことだらけだもんね。」\n\n麗華「まあ、少しずつ慣れればいいのかな。」\n\n私は麗華の隣に並んだ。夢に向かってまっすぐ走る必要はない。麗華には麗華の歩き方がある。\n\nあなた（明日から楽しみだ！）\n\n――如月 麗華の、新しい毎日が始まる。'
  ],
  komugi:[
-  '小さなこむぎは、歌やダンスで家族や友達を笑顔にするのが大好きだった。そんなこむぎの前に、ある日、光る妖精が現れた。',
-  'こむぎ「わあっ！ ねえねえ、あなたも一緒に踊る？」',
-  '妖精「もちろん！ 私はあなたの夢を見守る妖精だよ。」',
-  'それから十年以上。こむぎは元気いっぱいに練習を続けた。転んだ日も、うまく踊れなかった日も、妖精は励まし続けた。',
-  'こむぎ「いつか絶対アイドルになるんだ！ 私のステージで、みんなを笑顔にしたい！」',
-  '妖精「その気持ちがあれば大丈夫。一緒に夢へ進もう。」',
-  'そして、待ちに待ったÉtoile Academyの入学式。こむぎは校門の前で大きく深呼吸した。',
-  'こむぎ「今日からアイドルへの第一歩！ みんな、待っててねー！」',
-  '妖精「その元気を忘れずにね。こむぎの物語、スタート！」'
+  '私がこむぎと出会ったのは、10年以上前のことだった。\n\nあなた「こむぎの夢？」\n\nこむぎ（幼少期）「うん！ うち、アイドルになる！」\n\nこむぎは迷うことなく、目をきらきらさせて答えた。',
+  'こむぎ（幼少期）「歌って踊って、みんなを笑顔にするんだ！ うち、絶対アイドルになるからね！」\n\nあなた「素敵な夢だね。応援してるよ。」\n\nこむぎ（幼少期）「約束だよ！」\n\n差し出された小さな指に、私は自分の指を重ねた。\n\nあなた「約束！」',
+  '＊　＊　＊\n\nそして今日。入学式を終えたこむぎは、やる気いっぱいに拳を握った。\n\nこむぎ「ふー！ 明日から頑張らなきゃ！」\n\nあなた「頑張りすぎには注意だね。」\n\nこむぎ「えー？ だって、やっとアイドルへの第一歩なんだよ！ 歌もダンスも、もっと上手になりたいもん！」',
+  'あなた「うん。でも、ちゃんと休むのも大切だよ。」\n\nこむぎ「よし！ いっぱい頑張って、いっぱい休む！」\n\nこむぎ「ねえ、明日からも一緒だよね？」\n\nあなた「もちろん。私は＋FAIRY＋。ずっとこむぎのそばにいるよ。」\n\nこむぎ「うおおおお！ うちの底力見せてやる！」\n\nあなた「わっ！？ 急に大声出さないでよ！」\n\nこむぎ「あははっ！ ごめんごめん！」\n\nあなた（元気なのはいいこと！）\n\nこむぎの明るさは、これから出会う誰かの背中も押すのだろう。楽しいことばかりではないかもしれない。それでも、私はこむぎの隣で一緒に歩いていく。\n\n――日高 こむぎの、新しい毎日が始まる。'
  ]
 };
-function showPrologue(){
+function showPrologue(returnTo='home'){
  const idol=state.idol||'mirai', pages=prologuePages[state.idol]||prologuePages.mirai, char=idols[idol].name, fairyName=state.name||state.fairyName||'ルミ';
  let index=0;
  $('setupOverlay').classList.remove('show');
  const screen=$('storyScreen');screen.classList.add('show');screen.setAttribute('aria-hidden','false');
  screen.innerHTML='<header class="fairy-story-top"><div class="fairy-story-brand">✦ Étoile Academy <small>PROLOGUE · はじまりの約束</small></div><button id="prologueSkip" class="fairy-story-skip">スキップ ×</button></header><main class="fairy-story-main"><div class="fairy-story-stars">✧　✦　⋆　✦　✧</div><div class="fairy-story-chapter">PROLOGUE · '+esc(char)+' とあなたの物語</div><div class="fairy-story-art">'+idols[idol].emoji+'</div><div class="fairy-story-name">'+esc(char)+' ＆ '+esc(state.name||state.fairyName||'ルミ')+'（あなた／妖精）</div><div class="fairy-story-dialogue"><div id="prologueCount"></div><p id="prologueText"></p></div><div class="fairy-story-controls"><button id="prologuePrev" class="secondary">← 前へ</button><button id="prologueNext" class="primary">次へ　→</button></div></main>';
- const finish=()=>{state.prologueSeen=true;save();screen.classList.remove('show');screen.setAttribute('aria-hidden','true');if(state.ending){showFestivalEnding();return;}renderHome();renderPlan();renderStory();renderLive();renderCloset();showScreen('home');toast('アイドルとの約束を胸に、学園生活が始まったよ！');};
+ const finish=()=>{state.prologueSeen=true;save();screen.classList.remove('show');screen.setAttribute('aria-hidden','true');if(state.ending){showFestivalEnding();return;}renderHome();renderPlan();renderStory();renderLive();renderCloset();showScreen(returnTo==='story'?'story':'home');toast(returnTo==='story'?'プロローグを読み直したよ。':'アイドルとの約束を胸に、学園生活が始まったよ！');};
  const render=()=>{$('prologueCount').textContent='PAGE '+String(index+1).padStart(2,'0')+' / '+String(pages.length).padStart(2,'0');$('prologueText').textContent=pages[index].replace(/^妖精「/, fairyName+'（妖精）「').replaceAll('妖精さん','あなた').replaceAll('妖精は','あなたは').replaceAll('妖精が','あなたが').replaceAll('妖精の','あなたの');$('prologuePrev').disabled=index===0;$('prologueNext').textContent=index===pages.length-1?'学園生活へ　✦':'次へ　→';};
  $('prologuePrev').addEventListener('click',()=>{if(index>0){index--;render();}});$('prologueNext').addEventListener('click',()=>{if(index<pages.length-1){index++;render();}else finish();});$('prologueSkip').addEventListener('click',finish);render();
 }
@@ -122,7 +107,7 @@ function renderPlan(){
 function renderStory(){
  const s=nextStoryText();const already=state.storySeen.includes(state.storyIndex);
  const episodeTitles=['「センターに立ちたい」','「勝ちたい理由」','「うまくいかない日」','「ライバルの涙」','「最後の作戦会議」'];
- $('screen-story').innerHTML='<div class="section-head"><div class="eyebrow">STORY MODE · '+s.label+'</div><h2>学園フェスまでの7日間</h2><p>読み終えたエピソードも、いつでも選んで読み直せるよ。</p></div><div class="episode-archive"><div class="eyebrow">EPISODE ARCHIVE · 読み直す</div><div class="choice-stack episode-archive-list">'+episodeTitles.map((title,i)=>'<button class="choice-btn" data-read-story="'+i+'">'+(state.storySeen.includes(i)?'✓ ':'')+'EP '+String(i+1).padStart(2,'0')+'　'+title+(i===state.storyIndex?'　◀':'')+'</button>').join('')+'</div></div><div class="story-layout"><div class="story-stage"><div class="scene-label">'+s.label+'</div><h2>'+s.title+'</h2><p>'+esc(s.body)+'</p>'+(already?'<div class="notice">読了済みエピソード（選択結果は保存されています）。何度でも読み直せるよ。</div>':'<div class="choice-stack">'+s.choices.map((c,i)=>'<button class="choice-btn" data-story-choice="'+i+'">'+['A','B','C'][i]+'　'+c[0]+'</button>').join('')+'</div>')+(state.storyIndex<4?'<button class="secondary wide" data-next-story>次のエピソードへ →</button>':'<div class="notice">フェス本番が近い。最後の準備をしよう。</div>')+'</div><aside class="story-side"><div class="cast-big">'+idols[state.idol].emoji+'</div><strong>'+esc(idols[state.idol].name)+'</strong><p>'+esc(idols[state.idol].role)+'</p><div class="eyebrow">YOUR CHOICES</div><div class="log-list">'+(state.storySeen.length?state.storySeen.map(i=>'<div class="log-item"><span>✦</span><div>エピソード '+(i+1)+' をクリア</div></div>').join(''):'<div class="empty-state">まだ選択していないよ。</div>')+'</div></aside></div>';
+ $('screen-story').innerHTML='<div class="section-head"><div class="eyebrow">STORY MODE · '+s.label+'</div><h2>学園フェスまでの7日間</h2><p>読み終えたエピソードも、いつでも選んで読み直せるよ。</p></div><div class="episode-archive"><button class="secondary wide" data-read-prologue>✦ プロローグを読み直す</button><div class="eyebrow">EPISODE ARCHIVE · 読み直す</div><div class="choice-stack episode-archive-list">'+episodeTitles.map((title,i)=>'<button class="choice-btn" data-read-story="'+i+'">'+(state.storySeen.includes(i)?'✓ ':'')+'EP '+String(i+1).padStart(2,'0')+'　'+title+(i===state.storyIndex?'　◀':'')+'</button>').join('')+'</div></div><div class="story-layout"><div class="story-stage"><div class="scene-label">'+s.label+'</div><h2>'+s.title+'</h2><p>'+esc(s.body)+'</p>'+(already?'<div class="notice">読了済みエピソード（選択結果は保存されています）。何度でも読み直せるよ。</div>':'<div class="choice-stack">'+s.choices.map((c,i)=>'<button class="choice-btn" data-story-choice="'+i+'">'+['A','B','C'][i]+'　'+c[0]+'</button>').join('')+'</div>')+(state.storyIndex<4?'<button class="secondary wide" data-next-story>次のエピソードへ →</button>':'<div class="notice">フェス本番が近い。最後の準備をしよう。</div>')+'</div><aside class="story-side"><div class="cast-big">'+idols[state.idol].emoji+'</div><strong>'+esc(idols[state.idol].name)+'</strong><p>'+esc(idols[state.idol].role)+'</p><div class="eyebrow">YOUR CHOICES</div><div class="log-list">'+(state.storySeen.length?state.storySeen.map(i=>'<div class="log-item"><span>✦</span><div>エピソード '+(i+1)+' をクリア</div></div>').join(''):'<div class="empty-state">まだ選択していないよ。</div>')+'</div></aside></div>';
 }
 function renderLive(){
  const live=$('screen-live');
@@ -180,6 +165,7 @@ function bindDynamic(){
   const b=e.target.closest('button');if(!b||!$('gameMain').contains(b))return;
   if(b.dataset.go){showScreen(b.dataset.go);return;}
   if(b.dataset.action){useAction(b.dataset.action);return;}if(b.dataset.openUpgrade){const panel=$('screen-upgrade').querySelector('[data-upgrade-panel="'+b.dataset.openUpgrade+'"]');if(panel)panel.hidden=!panel.hidden;return;}if(b.dataset.upgradeLesson){const k=b.dataset.upgradeLesson;state.lessonLevels=state.lessonLevels||{vocal:1,dance:1,charm:1};const lv=state.lessonLevels[k]||1;const cost=100*lv;if(lv>=10||state.money<cost){toast('お金が足りないか、最大レベルだよ。');return;}state.money-=cost;state.lessonLevels[k]=lv+1;save();renderUpgrade();toast(statName(k)+'レッスン Lv.'+(lv+1)+'！');return;}if(b.hasAttribute('data-upgrade-costume')){state.costumeLevels=state.costumeLevels||{};const lv=state.costumeLevels[state.equipped]||0;const cost=150+50*lv;if(lv>=10||state.money<cost){toast('お金が足りないか、最大レベルだよ。');return;}state.money-=cost;state.costumeLevels[state.equipped]=lv+1;save();renderUpgrade();renderCloset();toast('衣装強化 Lv.'+(lv+1)+'！ ライブボーナス +2');return;}
+  if(b.hasAttribute('data-read-prologue')){showPrologue('story');return;}
   if(b.dataset.readStory!==undefined){state.storyIndex=Number(b.dataset.readStory);save();renderStory();return;}
    if(b.dataset.storyChoice!==undefined){chooseStory(Number(b.dataset.storyChoice));return;}
   if(b.hasAttribute('data-next-story')){if(state.storyIndex<4){state.storyIndex++;save();renderStory();$('storyDot').classList.add('show');}return;}
