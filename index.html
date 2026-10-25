@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#17142d">
 <title>Étoile Academy — 星を育てる学園</title>
-<link rel="stylesheet" href="css/style.css?v=20261025-costume1">
+<link rel="stylesheet" href="css/style.css?v=20261025-costume2">
 </head>
 <body>
 <div class="app" id="appShell">
@@ -83,14 +83,23 @@
  <div class="storybox"><div class="eyebrow">SCENE 01 / THE FIRST WORDS</div><h3 id="storyTitle">「私、変われるかな？」</h3><p id="storyText">「歌もダンスも、まだまだだし……。みんなみたいに、キラキラできるのかな」私はぎゅっと手を握る。夢を口にするのは、思ったより勇気がいることだった。</p><p>そんなとき、親友のめるが隣に立ってくれた。自分自身にかけたい言葉を、選んでみよう。</p><div class="storychoices"><button class="secondary" data-choice="kind">「焦らなくていい。私らしく、一歩ずつ進もう」</button><button class="secondary" data-choice="bold">「まだできることがある。自分の可能性を信じよう」</button><button class="secondary" data-choice="honest">「不安な気持ちも、友達に話してみよう」</button></div><div class="result" id="storyResult"></div><button class="primary" id="nextStory" style="display:none;margin-top:14px">次の場面へ　→</button></div>
 </section>
 <section class="view" id="view-costume">
- <div class="subhero costume-hero"><div class="eyebrow">COSTUME COLLECTION · DRESS UP</div><h2>きらめき衣装ガチャ</h2><p>衣装を集めて、今日のステージをもっと自分らしく。ガチャで新しい衣装を手に入れよう！</p></div>
+ <div class="subhero costume-hero"><div class="eyebrow">COSTUME COLLECTION · DRESS UP</div><h2>きらめき衣装ガチャ</h2><p>衣装を集めて、今日のステージをもっと自分らしく。着用中の衣装スキルがライブで発動するよ！</p></div>
  <div class="panel costume-panel">
-  <div class="costume-top"><div><div class="eyebrow">YOUR WARDROBE</div><h3>衣装コレクション</h3></div><div class="costume-ticket">🎟️ チケット <strong id="costumeTickets">5</strong>枚</div></div>
+  <div class="costume-top"><div><div class="eyebrow">YOUR WARDROBE</div><h3>衣装コレクション</h3></div><div class="costume-currencies"><div class="costume-ticket">🎟️ チケット <strong id="costumeTickets">5</strong>枚</div><div class="costume-ticket medal-ticket">🪙 メダル <strong id="costumeMedals">0</strong>枚</div></div></div>
   <div class="costume-feature" id="costumeFeature"><div class="costume-feature-art" id="equippedCostumeArt">👗</div><div><span class="costume-rarity">EQUIPPED</span><h3 id="equippedCostumeName">スクール制服</h3><p id="equippedCostumeDesc">いつもの制服。ここから新しい輝きを集めよう。</p><span class="costume-equipped">✓ 着用中</span></div></div>
   <div class="costume-pull-actions"><button class="primary" id="pullCostume">1回ガチャ　🎟️ ×1</button><button class="secondary" id="pullCostumeTen">10回ガチャ　🎟️ ×10</button></div>
-  <p class="notice">衣装ガチャはチケットを使うよ。チケットは今日のプロデュースを終えると1枚もらえる！同じ衣装が出たら衣装メダルに変換されるよ。</p>
+  <p class="notice">プロデュースを終えるとチケット+1。同じ衣装が出た場合はレア度に応じてメダルに変換されるよ（N +1 / R +2 / SR +4 / SSR +8）。</p>
   <div id="costumePullResult" class="costume-pull-result" aria-live="polite"></div>
-  <div class="costume-collection-head"><h3>持っている衣装</h3><span id="costumeOwnedCount">1着</span></div>
+  <div class="costume-shop"><div class="costume-shop-head"><div><div class="eyebrow">COSTUME MEDAL EXCHANGE</div><h3>衣装メダル交換所</h3></div><span>未所持衣装のみ交換可能</span></div>
+   <div class="costume-shop-grid">
+    <button class="costume-shop-item" data-costume-exchange="R"><span>🩰</span><strong>R衣装ランダム</strong><small>メダル 10枚</small></button>
+    <button class="costume-shop-item" data-costume-exchange="SR"><span>🌙</span><strong>SR衣装ランダム</strong><small>メダル 30枚</small></button>
+    <button class="costume-shop-item" data-costume-exchange="SSR"><span>👑</span><strong>SSR衣装ランダム</strong><small>メダル 80枚</small></button>
+    <button class="costume-shop-item" data-costume-exchange="tickets"><span>🎟️</span><strong>ガチャチケット ×3</strong><small>メダル 8枚</small></button>
+    <button class="costume-shop-item" data-costume-exchange="material"><span>✨</span><strong>スキル強化素材 ×1</strong><small>メダル 5枚 · 所持 <b id="skillMaterials">0</b></small></button>
+   </div>
+  </div>
+  <div class="costume-collection-head"><h3>持っている衣装 <small class="collection-sub">全24着</small></h3><span id="costumeOwnedCount">1着</span></div>
   <div class="costume-grid" id="costumeGrid"></div>
  </div>
 </section>
@@ -107,5 +116,5 @@
 </main></div></div><div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="setup-overlay" id="setupOverlay" role="dialog" aria-modal="true"><div class="setup-card" id="setupCard"><div class="eyebrow">ÉTOILE ACADEMY · YOUR STORY</div><h1>あなたとアイドルの物語</h1><p>あなたはアイドルを支えるオトモ妖精。名前を決めて、最初に見守るアイドルを選ぼう。</p><label for="fairyName"><strong>オトモ妖精の名前</strong></label><input class="setup-input" id="fairyName" maxlength="16" placeholder="妖精の名前を入力"><strong>最初に担当するアイドル</strong><div class="idol-picks"><button class="idol-pick selected" data-idol="mirai"><strong>星降 未来</strong><small>ほしふる みらい<br>明るくて頑張り屋</small></button><button class="idol-pick" data-idol="reika"><strong>如月 麗華</strong><small>きさらぎ れいか<br>自分のペースを大切にする</small></button><button class="idol-pick" data-idol="komugi"><strong>日高 こむぎ</strong><small>ひだか こむぎ<br>元気で夢にまっすぐ</small></button></div><button class="primary" id="beginPrologue" style="width:100%">このアイドルと出会う　→</button><div class="result" id="setupError"></div></div></div>
 <div class="story-screen" id="storyScreen" role="dialog" aria-modal="true" aria-hidden="true"></div>
-<script src="js/main.js?v=20261025-costume1" defer></script>
+<script src="js/main.js?v=20261025-costume2" defer></script>
 </body></html>
