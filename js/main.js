@@ -4,9 +4,9 @@ const $ = id => document.getElementById(id);
 const SAVE_KEY = 'etoile-academy-rebuild-save-v1';
 const SOUND_KEY = 'etoile-academy-sfx';
 const idols = {
- mirai:{name:'星降 未来',emoji:'🌟',role:'歌が大好きで、まっすぐ夢を追いかける努力家。',special:'vocal',voice:'「失敗したって、次はもっと輝けるよ！」'},
- reika:{name:'如月 麗華',emoji:'🌹',role:'気品あふれる表現力を持つ、芯の強いアイドル。',special:'charm',voice:'「私らしい輝きで、必ず認めさせてみせるわ。」'},
- komugi:{name:'日高 こむぎ',emoji:'🍀',role:'明るさとキレのあるダンスで、みんなを笑顔にする。',special:'dance',voice:'「いっくよー！ みんなで最高のステージにしよう！」'}
+ mirai:{name:'星降 未来',emoji:'🍒',role:'歌が大好きで、まっすぐ夢を追いかける努力家。',special:'vocal',voice:'「失敗したって、次はもっと輝けるよ！」'},
+ reika:{name:'如月 麗華',emoji:'🦋',role:'気品あふれる表現力を持つ、芯の強いアイドル。',special:'charm',voice:'「私らしい輝きで、必ず認めさせてみせるわ。」'},
+ komugi:{name:'日高 こむぎ',emoji:'🌻',role:'明るさとキレのあるダンスで、みんなを笑顔にする。',special:'dance',voice:'「いっくよー！ みんなで最高のステージにしよう！」'}
 };
 const costumes = [
  {id:'uniform',name:'はじまりの制服',emoji:'🎀',rarity:'N',desc:'基本の衣装。どんな一日にも似合う。',bonus:0},
