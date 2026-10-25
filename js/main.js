@@ -37,6 +37,7 @@ function syncSoundToggle(){
  b.setAttribute('aria-pressed',String(sfxEnabled));
  b.title=sfxEnabled?'効果音をオフにする':'効果音をオンにする';
 }
+syncSoundToggle();
 function playTone(freq, start, duration, type='sine', volume=.045, endFreq=null){
  if(!sfxEnabled)return;
  try{
