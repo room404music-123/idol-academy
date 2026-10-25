@@ -26,6 +26,28 @@
 .vn-progress{display:flex;align-items:center;gap:12px;color:#a49ab5;font-size:10px;font-weight:800;margin:12px 0}.vn-track{height:4px;flex:1;background:#eee9f5;border-radius:99px;overflow:hidden}.vn-track i{display:block;height:100%;background:linear-gradient(90deg,#f0a5c8,#9585e4);border-radius:99px;transition:width .2s}
 .vn-controls{display:flex;justify-content:space-between;gap:12px}.vn-controls button:disabled{opacity:.35;cursor:default}.vn-hint{text-align:center;color:#b1a8c2;font-size:10px;margin:12px 0 0}
 @media(max-width:560px){.setup-card.vn-card{padding:17px;border-radius:19px}.vn-top{align-items:flex-start}.vn-chapter{font-size:9px}.vn-title{margin:12px 0}.vn-dialogue{padding:15px;min-height:150px}.vn-controls button{padding:12px 13px}}
+
+/* Dedicated full-screen story mode */
+.story-screen{display:none;position:fixed;inset:0;z-index:1200;background:#19162f;color:#fff;overflow:auto;min-height:100dvh}
+.story-screen.show{display:flex;flex-direction:column}
+.story-topbar{height:74px;flex-shrink:0;display:flex;align-items:center;gap:18px;padding:0 clamp(16px,4vw,52px);border-bottom:1px solid #ffffff18;background:#211d3b}
+.story-brand{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:800;letter-spacing:.02em}.story-brand small{display:block;font-size:9px;color:#b7a8dc;letter-spacing:.2em;margin-top:4px}
+.story-brandmark{display:grid;place-items:center;width:36px;height:36px;border-radius:12px;background:linear-gradient(145deg,#f5b1d0,#9b8ae6);font-size:20px}
+.story-chapter{margin:auto;color:#c9bee6;font-size:11px;letter-spacing:.12em}.story-skip{border:1px solid #ffffff30;background:#ffffff0b;color:#d7cfee;border-radius:10px;padding:9px 12px;font-size:11px}
+.story-stage{position:relative;isolation:isolate;flex:1;min-height:calc(100dvh - 74px);display:flex;flex-direction:column;overflow:hidden;background:radial-gradient(ellipse at 50% 25%,#554879 0%,#30294f 45%,#1b1832 100%)}
+.story-bg-orb{position:absolute;z-index:-1;width:min(70vw,660px);aspect-ratio:1;border-radius:50%;border:1px solid #ffffff12;left:50%;top:3%;transform:translateX(-50%);box-shadow:0 0 0 45px #ffffff04,0 0 0 100px #ffffff03}
+.story-bg-stars{position:absolute;top:8%;left:0;right:0;text-align:center;color:#f7dba7;letter-spacing:clamp(14px,5vw,55px);font-size:clamp(15px,2vw,25px);opacity:.8}.story-bg-stars span{color:#fff}
+.story-scene-label{margin:clamp(22px,5vh,48px) 20px 0;text-align:center;color:#c2b6df;font-size:9px;letter-spacing:.22em}
+.story-scene-space{flex:1;min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 20px 45px}
+.story-emblem{width:clamp(76px,11vw,120px);height:clamp(76px,11vw,120px);display:grid;place-items:center;border-radius:50%;border:1px solid #ffffff35;background:linear-gradient(145deg,#ffffff17,#ffffff04);box-shadow:0 0 60px #d7b6ff16;font-size:clamp(32px,5vw,55px);color:#f7dba7}
+.story-scene-name{font-size:clamp(19px,3vw,27px);font-weight:700;letter-spacing:.12em;margin-top:18px}.story-scene-note{font-size:10px;color:#b9acd7;letter-spacing:.12em;margin-top:8px}
+.story-dialogue{flex-shrink:0;background:linear-gradient(180deg,#211d3bee,#17142df7);border-top:1px solid #ffffff24;padding:0 clamp(14px,5vw,68px) clamp(18px,3vh,32px);box-shadow:0 -20px 60px #100d2540}
+.story-dialogue-inner{max-width:1020px;margin:0 auto;min-height:clamp(145px,24vh,215px);padding:23px 0 15px}
+.story-speaker{display:inline-block;border:1px solid #d9c4ff42;background:#9d86d524;color:#e4d4ff;border-radius:8px;padding:6px 12px;font-weight:800;font-size:12px;margin-bottom:14px}
+.story-text{font-size:clamp(14px,2.1vw,17px);line-height:2.05;letter-spacing:.025em;color:#f7f3ff;white-space:pre-wrap;overflow-wrap:anywhere}.story-text.story-divider{text-align:center;color:#e7cda2;font-size:23px;letter-spacing:.4em}
+.story-bottom{max-width:1020px;margin:0 auto;display:flex;align-items:center;gap:13px;color:#b8add2;font-size:10px}.story-track{height:3px;background:#ffffff20;border-radius:99px;overflow:hidden;flex:1}.story-track i{display:block;height:100%;background:linear-gradient(90deg,#f2a6c9,#a99af4);transition:width .25s}
+.story-prev,.story-next{border-radius:10px;padding:11px 15px;font-size:11px;font-weight:700}.story-prev{border:1px solid #ffffff2b;background:#ffffff08;color:#ddd3f1}.story-prev:disabled{opacity:.3}.story-next{border:0;background:linear-gradient(100deg,#ed9fc4,#9d8ae8);color:#241c3b;min-width:125px}
+@media(max-width:600px){.story-topbar{height:62px;padding:0 12px;gap:9px}.story-brand{font-size:11px}.story-brandmark{width:32px;height:32px}.story-chapter{font-size:9px;letter-spacing:0}.story-skip{padding:8px;font-size:10px}.story-stage{min-height:calc(100dvh - 62px)}.story-scene-space{min-height:130px;padding:22px 14px 28px}.story-dialogue{padding:0 17px 18px}.story-dialogue-inner{min-height:clamp(145px,24vh,200px);padding-top:18px}.story-bottom{gap:7px;flex-wrap:wrap}.story-bottom>span:first-child{min-width:42px}.story-track{min-width:40px}.story-prev,.story-next{padding:11px 10px}.story-next{min-width:112px}}
 </style>
 </head>
 <body>
@@ -110,6 +132,7 @@
 <section class="view" id="view-map"><div class="subhero"><div class="eyebrow">FREE ROAM · CAMPUS LIFE</div><h2>学園を歩こう</h2><p>左下のスティックで移動。友達に近づいて「話す」を押そう。</p></div><div class="map-wrap"><div style="padding:13px 16px;background:white;font-weight:800;font-size:13px">Étoile Academy 校内マップ <span id="mapLocation" style="float:right;color:var(--muted);font-weight:500">中央通路</span></div><div class="school-map" id="schoolMap"><div class="map-path path-h"></div><div class="map-path path-v"></div><div class="map-building build-class">教室</div><div class="map-building build-gym">レッスン室</div><div class="map-building build-cafe">カフェテリア</div><div class="map-building build-garden">中庭</div><button class="map-person" id="mapMizuki" style="left:61%;top:45%"><span class="person-head">♡</span>美月</button><button class="map-person" id="mapStudent" style="left:31%;top:58%"><span class="person-head">♪</span>クラスメイト</button><div class="map-person player" id="mapPlayer" style="left:48%;top:57%"><span class="person-head">★</span><span id="mapPlayerName">あなた</span></div><div class="joy-base" id="joyBase"><div class="joy-knob" id="joyKnob"></div></div><button class="map-interact" id="mapInteract">近くの人と話す</button></div><div style="padding:12px 16px;background:white;color:var(--muted);font-size:11px">PCはWASD / 矢印キーでも移動できるよ。</div><div class="map-dialog" id="mapDialog"><h3 id="mapDialogTitle">美月</h3><p id="mapDialogText"></p><button class="secondary" id="mapDialogClose">会話を閉じる</button></div></div></section><div class="footer">ÉTOILE ACADEMY · YOUR LIGHT, YOUR STORY · <span id="saveStatus">PROGRESS AUTO-SAVED</span></div>
 </main></div></div><div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="setup-overlay" id="setupOverlay" role="dialog" aria-modal="true"><div class="setup-card" id="setupCard"><div class="eyebrow">ÉTOILE ACADEMY · YOUR STORY</div><h1>あなたとアイドルの物語</h1><p>あなたはアイドルを支えるオトモ妖精。名前を決めて、最初に見守るアイドルを選ぼう。</p><label for="fairyName"><strong>オトモ妖精の名前</strong></label><input class="setup-input" id="fairyName" maxlength="16" placeholder="妖精の名前を入力"><strong>最初に担当するアイドル</strong><div class="idol-picks"><button class="idol-pick selected" data-idol="mirai"><strong>星降 未来</strong><small>ほしふる みらい<br>明るくて頑張り屋</small></button><button class="idol-pick" data-idol="reika"><strong>如月 麗華</strong><small>きさらぎ れいか<br>自分のペースを大切にする</small></button><button class="idol-pick" data-idol="komugi"><strong>日高 こむぎ</strong><small>ひだか こむぎ<br>元気で夢にまっすぐ</small></button></div><button class="primary" id="beginPrologue" style="width:100%">このアイドルと出会う　→</button><div class="result" id="setupError"></div></div></div>
+<div class="story-screen" id="storyScreen" role="dialog" aria-modal="true" aria-hidden="true"></div>
 <script>
 const KEY='etoile-academy-save-v1';
 const initial={name:'',fairyName:'',chosenIdol:'mirai',setupDone:false,prologueSeen:false,color:'pink',type:'努力家',vocal:12,dance:10,charm:14,bond:5,day:1,lessonDone:false,storyDone:false,liveDone:false,storyChoice:'',sessionActive:false,actionsLeft:0,friendBond:0,friendTalks:0};
@@ -136,19 +159,21 @@ function showPrologue(){
  const p=prologues[state.chosenIdol]||prologues.mirai;
  const pages=p[1].replaceAll('＋FAIRY＋',state.fairyName).split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);
  let pageIndex=0;
- $('setupCard').classList.add('vn-card');
- $('setupCard').innerHTML='<div class="vn-top"><span class="eyebrow">ÉTOILE ACADEMY · PROLOGUE</span><span class="vn-chapter">出会いの記録</span></div><h1 class="vn-title">'+p[0]+'との物語</h1><div class="vn-scene"><div class="vn-scene-stars">✦　✧　✦</div><div class="vn-scene-caption">MEMORIES · 10 YEARS AGO, AND TODAY</div></div><div class="vn-dialogue"><div class="vn-speaker" id="vnSpeaker">ナレーション</div><div class="vn-text" id="vnText"></div></div><div class="vn-progress"><span id="vnCount"></span><span class="vn-track"><i id="vnTrackFill"></i></span></div><div class="vn-controls"><button class="secondary" id="vnPrev">← 前へ</button><button class="primary" id="vnNext">次へ　→</button></div><p class="vn-hint">自分のペースで読み進めてね</p>';
- const finish=()=>{state.prologueSeen=true;save();$('setupOverlay').classList.remove('show');$('setupCard').classList.remove('vn-card');showView('home');toast(p[0]+'との学園生活が始まったよ');};
+ $('setupOverlay').classList.remove('show');
+ $('storyScreen').classList.add('show');
+ $('storyScreen').setAttribute('aria-hidden','false');
+ $('storyScreen').innerHTML='<header class="story-topbar"><div class="story-brand"><span class="story-brandmark">✧</span><span>Étoile Academy<small>PROLOGUE</small></span></div><div class="story-chapter">第一章　出会いの記録</div><button class="story-skip" id="storySkip">スキップ ×</button></header><main class="story-stage"><div class="story-bg-orb"></div><div class="story-bg-stars">✦ <span>✧</span> ✦ <span>·</span> ✧</div><div class="story-scene-label">MEMORIES · '+p[0]+'</div><div class="story-scene-space"><div class="story-emblem">✧</div><div class="story-scene-name">'+p[0]+'</div><div class="story-scene-note">あなたとアイドルの物語</div></div><section class="story-dialogue" aria-live="polite"><div class="story-dialogue-inner"><div class="story-speaker" id="vnSpeaker">ナレーション</div><div class="story-text" id="vnText"></div></div><div class="story-bottom"><span id="vnCount"></span><span class="story-track"><i id="vnTrackFill"></i></span><button class="story-prev" id="vnPrev">← 前へ</button><button class="story-next" id="vnNext">次へ　→</button></div></section></main>';
+ const finish=()=>{state.prologueSeen=true;save();$('storyScreen').classList.remove('show');$('storyScreen').setAttribute('aria-hidden','true');showView('home');toast(p[0]+'との学園生活が始まったよ');};
  function renderPage(){
   const raw=pages[pageIndex]||'';
   const speakerMatch=raw.match(/^([^「\n]+)「([\s\S]*)」$/);
   const speaker=$('vnSpeaker'), body=$('vnText');
   if(raw.startsWith('＊')){
-   speaker.textContent='— 時が流れて —';body.textContent='✦　✦　✦';body.classList.add('vn-divider');
+   speaker.textContent='— 時が流れて —';body.textContent='✦　✦　✦';body.classList.add('story-divider');
   }else if(speakerMatch){
-   speaker.textContent=speakerMatch[1].trim();body.classList.remove('vn-divider');body.textContent=speakerMatch[2].trim();
+   speaker.textContent=speakerMatch[1].trim();body.classList.remove('story-divider');body.textContent=speakerMatch[2].trim();
   }else{
-   speaker.textContent='ナレーション';body.classList.remove('vn-divider');body.textContent=raw;
+   speaker.textContent='ナレーション';body.classList.remove('story-divider');body.textContent=raw;
   }
   $('vnCount').textContent=String(pageIndex+1).padStart(2,'0')+' / '+String(pages.length).padStart(2,'0');
   $('vnTrackFill').style.width=((pageIndex+1)/pages.length*100)+'%';
@@ -157,6 +182,7 @@ function showPrologue(){
  }
  $('vnPrev').addEventListener('click',()=>{if(pageIndex>0){pageIndex--;renderPage()}});
  $('vnNext').addEventListener('click',()=>{if(pageIndex<pages.length-1){pageIndex++;renderPage()}else finish()});
+ $('storySkip').addEventListener('click',finish);
  renderPage();
 }
 $('beginPrologue').addEventListener('click',()=>{const fairy=$('fairyName').value.trim();if(!fairy){$('setupError').textContent='妖精の名前を入力してね。';$('setupError').classList.add('show');return;}state.fairyName=fairy;state.name=prologues[selectedStartIdol][0];state.chosenIdol=selectedStartIdol;state.setupDone=true;state.prologueSeen=false;state.vocal=12;state.dance=10;state.charm=14;state.bond=5;save();refresh();showPrologue();});
