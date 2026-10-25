@@ -26,6 +26,57 @@ const initial={name:'',fairyName:'',chosenIdol:'mirai',setupDone:false,prologueS
 let state={...initial};
 try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved&&typeof saved==='object')state={...initial,...saved}}catch(e){}
 const $=id=>document.getElementById(id);
+
+// --- Synthesized sound effects (no external audio files required) ---
+const SFX_KEY='etoile-academy-sfx';
+let sfxEnabled=true, sfxContext=null;
+try { sfxEnabled=localStorage.getItem(SFX_KEY)!=='off'; } catch(e) {}
+function syncSoundToggle(){
+ const b=$('soundToggle'); if(!b)return;
+ b.textContent=sfxEnabled?'🔊 SE ON':'🔇 SE OFF';
+ b.setAttribute('aria-pressed',String(sfxEnabled));
+ b.title=sfxEnabled?'効果音をオフにする':'効果音をオンにする';
+}
+function playTone(freq, start, duration, type='sine', volume=.045, endFreq=null){
+ if(!sfxEnabled)return;
+ try{
+  const AudioCtx=window.AudioContext||window.webkitAudioContext;
+  if(!AudioCtx)return;
+  if(!sfxContext)sfxContext=new AudioCtx();
+  if(sfxContext.state==='suspended')sfxContext.resume();
+  const now=sfxContext.currentTime+(start||0), osc=sfxContext.createOscillator(), gain=sfxContext.createGain();
+  osc.type=type;osc.frequency.setValueAtTime(freq,now);
+  if(endFreq)osc.frequency.exponentialRampToValueAtTime(Math.max(1,endFreq),now+duration);
+  gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(volume,now+.012);gain.gain.exponentialRampToValueAtTime(.0001,now+duration);
+  osc.connect(gain);gain.connect(sfxContext.destination);osc.start(now);osc.stop(now+duration+.02);
+ }catch(e){}
+}
+function playSfx(kind='tap'){
+ if(!sfxEnabled)return;
+ if(kind==='tap'){playTone(620,0,.055,'sine',.025,480);return}
+ if(kind==='card'){playTone(520,0,.10,'triangle',.045,760);playTone(780,.065,.13,'sine',.035,1040);return}
+ if(kind==='success'){playTone(523,0,.18,'sine',.045);playTone(659,.12,.18,'sine',.045);playTone(784,.24,.28,'sine',.05);return}
+ if(kind==='gacha'){
+  playTone(330,0,.14,'triangle',.035,440);playTone(440,.10,.14,'triangle',.04,660);
+  playTone(880,.22,.24,'sine',.05,1320);return;
+ }
+ if(kind==='rare'){playTone(660,0,.16,'sine',.04);playTone(880,.12,.18,'sine',.045);playTone(1175,.24,.35,'sine',.055);return}
+}
+document.addEventListener('click',e=>{
+ const button=e.target.closest('button');
+ if(!button)return;
+ if(button.id==='soundToggle'){
+  sfxEnabled=!sfxEnabled;
+  try{localStorage.setItem(SFX_KEY,sfxEnabled?'on':'off')}catch(e){}
+  syncSoundToggle();
+  if(sfxEnabled)playSfx('success');
+  return;
+ }
+ if(button.matches('[data-battle-card]'))playSfx('card');
+ else if(button.id==='startLive'||button.id==='beginPrologue'||button.id==='startProduce')playSfx('success');
+ else if(button.id==='pullCostume'||button.id==='pullCostumeTen'||button.matches('[data-pull-costume]'))playSfx('gacha');
+ else playSfx('tap');
+});
 const names={vocal:'歌唱力',dance:'ダンス',charm:'表現力'};
 
 // --- Costume gacha and wardrobe ---
@@ -94,6 +145,7 @@ function pullCostume(times){
  }
  save();renderCostumes();
  $('costumePullResult').innerHTML='<h3>ガチャ結果 ✨</h3><div class="costume-result-grid">'+results.map(r=>'<div class="costume-result-item rarity-'+r.item.rarity.toLowerCase()+'"><span>'+r.item.icon+'</span><small>'+r.item.rarity+' · '+r.item.label+'</small><strong>'+r.item.name+'</strong><em>'+(r.duplicate?'所持済み → 衣装メダル +'+r.medals:'NEW！衣装を獲得')+'</em></div>').join('')+'</div><p class="notice">所持衣装 '+state.costumeOwned.length+'着 ／ 衣装メダル '+(state.costumeMedals||0)+'枚</p>';
+ playSfx(results.some(r=>r.item.rarity==='SSR')?'rare':'gacha');
  toast('衣装ガチャを引いたよ！');
 }
 function levelUpCostume(id){
