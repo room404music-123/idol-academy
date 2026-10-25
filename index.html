@@ -17,7 +17,8 @@
 <aside class="sidebar">
  <div class="navlabel">ACADEMY</div>
  <button class="nav active" data-view="home"><span class="ico">⌂</span>ホーム</button>
- <button class="nav" data-view="produce"><span class="ico">✦</span>プロデュース</button><button class="nav" data-view="map"><span class="ico">⌖</span>学園を歩く</button>
+ <button class="nav" data-view="produce"><span class="ico">✦</span>プロデュース</button>
+ <button class="nav" data-view="costume"><span class="ico">♔</span>衣装ガチャ</button><button class="nav" data-view="map"><span class="ico">⌖</span>学園を歩く</button>
  <button class="nav" data-view="friends"><span class="ico">♡</span>友達</button>
   <button class="nav" data-view="story"><span class="ico">▤</span>ストーリー</button>
  <div class="sidecard"><strong>YOUR STORY STARTS HERE</strong><p>小さな一歩が、いつか大きな星になる。あなただけの輝きを見つけよう。</p></div>
@@ -80,6 +81,18 @@
 <section class="view" id="view-story">
  <div class="subhero"><div class="eyebrow">EPISODE 01 · AFTER SCHOOL</div><h2>放課後の約束</h2><p>学園の廊下に、夕方の光が差し込む。レッスンを終えたあなたは、少し不安そうに窓の外を見ていた。</p></div>
  <div class="storybox"><div class="eyebrow">SCENE 01 / THE FIRST WORDS</div><h3 id="storyTitle">「私、変われるかな？」</h3><p id="storyText">「歌もダンスも、まだまだだし……。みんなみたいに、キラキラできるのかな」私はぎゅっと手を握る。夢を口にするのは、思ったより勇気がいることだった。</p><p>そんなとき、親友のめるが隣に立ってくれた。自分自身にかけたい言葉を、選んでみよう。</p><div class="storychoices"><button class="secondary" data-choice="kind">「焦らなくていい。私らしく、一歩ずつ進もう」</button><button class="secondary" data-choice="bold">「まだできることがある。自分の可能性を信じよう」</button><button class="secondary" data-choice="honest">「不安な気持ちも、友達に話してみよう」</button></div><div class="result" id="storyResult"></div><button class="primary" id="nextStory" style="display:none;margin-top:14px">次の場面へ　→</button></div>
+</section>
+<section class="view" id="view-costume">
+ <div class="subhero costume-hero"><div class="eyebrow">COSTUME COLLECTION · DRESS UP</div><h2>きらめき衣装ガチャ</h2><p>衣装を集めて、今日のステージをもっと自分らしく。ガチャで新しい衣装を手に入れよう！</p></div>
+ <div class="panel costume-panel">
+  <div class="costume-top"><div><div class="eyebrow">YOUR WARDROBE</div><h3>衣装コレクション</h3></div><div class="costume-ticket">🎟️ チケット <strong id="costumeTickets">5</strong>枚</div></div>
+  <div class="costume-feature" id="costumeFeature"><div class="costume-feature-art" id="equippedCostumeArt">👗</div><div><span class="costume-rarity">EQUIPPED</span><h3 id="equippedCostumeName">スクール制服</h3><p id="equippedCostumeDesc">いつもの制服。ここから新しい輝きを集めよう。</p><span class="costume-equipped">✓ 着用中</span></div></div>
+  <div class="costume-pull-actions"><button class="primary" id="pullCostume">1回ガチャ　🎟️ ×1</button><button class="secondary" id="pullCostumeTen">10回ガチャ　🎟️ ×10</button></div>
+  <p class="notice">衣装ガチャはチケットを使うよ。チケットは今日のプロデュースを終えると1枚もらえる！同じ衣装が出たら衣装メダルに変換されるよ。</p>
+  <div id="costumePullResult" class="costume-pull-result" aria-live="polite"></div>
+  <div class="costume-collection-head"><h3>持っている衣装</h3><span id="costumeOwnedCount">1着</span></div>
+  <div class="costume-grid" id="costumeGrid"></div>
+ </div>
 </section>
 <section class="view" id="view-live">
  <div class="subhero"><div class="eyebrow">LIVE AUDITION · CARD BATTLE</div><h2>ライブオーディション</h2><p>全3ターン。手札からカードを選んでスコアを稼ごう。同じタイプを連続で出すとコンボ、違うタイプでつなぐとブレイクボーナス！</p></div>
