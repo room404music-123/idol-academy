@@ -113,34 +113,39 @@ function playCard(i){if(!battle||battle.finished||battle.waiting)return;const c=
  battle.waiting=battle.turn<3;save();renderLive();$('jewelCount').textContent=state.jewels;$('fanCount').textContent=state.fans;}
 function finishCardTurn(){if(!battle||!battle.waiting)return;battle.waiting=false;renderLive();}
 function pullGacha(){if(!state.tickets)state.tickets=0;if(state.tickets<1){toast('チケットがないよ。ジュエルで交換できるよ。');return;}state.tickets--;const pool=costumes.filter(c=>c.id!=='uniform');const c=pool[Math.floor(Math.random()*pool.length)];const res=$('gachaResult');res.style.display='block';if(state.closet.includes(c.id)){const reward=c.rarity==='SSR'?30:c.rarity==='SR'?18:8;state.jewels+=reward;res.textContent='かぶり：'+c.emoji+' '+c.name+'。ジュエル +'+reward+'に変換！';}else{state.closet.push(c.id);res.textContent='新衣装GET！ '+c.emoji+' '+c.name+'（'+c.rarity+'）';sfx(c.rarity==='SSR'?'rare':'win');}save();renderCloset();$('jewelCount').textContent=state.jewels;toast(res.textContent);}
+let dynamicDelegateBound=false;
 function bindDynamic(){
- $('gameMain').querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.go)));
- $('gameMain').querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>useAction(b.dataset.action)));
- $('gameMain').querySelectorAll('[data-story-choice]').forEach(b=>b.addEventListener('click',()=>chooseStory(Number(b.dataset.storyChoice))));
- $('gameMain').querySelectorAll('[data-next-story]').forEach(b=>b.addEventListener('click',()=>{if(state.storyIndex<4){state.storyIndex++;save();renderStory();$('storyDot').classList.add('show');}}));
- $('gameMain').querySelectorAll('[data-start-live]').forEach(b=>b.addEventListener('click',startLive));
- $('gameMain').querySelectorAll('[data-play-card]').forEach(b=>b.addEventListener('click',()=>playCard(Number(b.dataset.playCard))));
- $('gameMain').querySelectorAll('[data-next-turn]').forEach(b=>b.addEventListener('click',finishCardTurn));
- $('gameMain').querySelectorAll('[data-equip]').forEach(b=>b.addEventListener('click',()=>{state.equipped=b.dataset.equip;save();renderCloset();toast('衣装を変更したよ！');}));
- $('gameMain').querySelectorAll('[data-gacha]').forEach(b=>b.addEventListener('click',pullGacha));
- $('gameMain').querySelectorAll('[data-buy-ticket]').forEach(b=>b.addEventListener('click',()=>{if(state.jewels<35)return;state.jewels-=35;state.tickets=(state.tickets||0)+1;save();renderCloset();$('jewelCount').textContent=state.jewels;toast('チケットを1枚交換したよ！');}));
- $('gameMain').querySelectorAll('[data-restart]').forEach(b=>b.addEventListener('click',resetToSetup));
+ if(dynamicDelegateBound)return;dynamicDelegateBound=true;
+ $('gameMain').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b||!$('gameMain').contains(b))return;
+  if(b.dataset.go){showScreen(b.dataset.go);return;}
+  if(b.dataset.action){useAction(b.dataset.action);return;}
+  if(b.dataset.storyChoice!==undefined){chooseStory(Number(b.dataset.storyChoice));return;}
+  if(b.hasAttribute('data-next-story')){if(state.storyIndex<4){state.storyIndex++;save();renderStory();$('storyDot').classList.add('show');}return;}
+  if(b.hasAttribute('data-start-live')){startLive();return;}
+  if(b.dataset.playCard!==undefined){playCard(Number(b.dataset.playCard));return;}
+  if(b.hasAttribute('data-next-turn')){finishCardTurn();return;}
+  if(b.dataset.equip){state.equipped=b.dataset.equip;save();renderCloset();toast('衣装を変更したよ！');return;}
+  if(b.hasAttribute('data-gacha')){pullGacha();return;}
+  if(b.hasAttribute('data-buy-ticket')){if(state.jewels<35)return;state.jewels-=35;state.tickets=(state.tickets||0)+1;save();renderCloset();$('jewelCount').textContent=state.jewels;toast('チケットを1枚交換したよ！');return;}
+  if(b.hasAttribute('data-restart')){resetToSetup();return;}
+ });
 }
 function chooseStory(i){const s=nextStoryText();if(state.storySeen.includes(state.storyIndex))return;const c=s.choices[i];if(!c)return;const key=c[1];if(key==='bold'){state.stats.vocal=clamp(state.stats.vocal+3);state.stats.charm=clamp(state.stats.charm+2);addLog('🔥','物語で強気な選択。歌唱力 +3、表現力 +2。');}else if(key==='kind'){state.stats.bond=clamp(state.stats.bond+4);state.stats.charm=clamp(state.stats.charm+2);addLog('♡','物語で思いやりを選んだ。絆 +4、表現力 +2。');}else if(key==='team'){state.stats.bond=clamp(state.stats.bond+3);state.jewels+=5;addLog('✦','仲間と作戦を立てた。絆 +3、ジュエル +5。');}else if(['vocal','dance','charm'].includes(key)){state.stats[key]=clamp(state.stats[key]+5);addLog('✦','フェスの作戦を決めた。'+statName(key)+' +5。');}state.storySeen.push(state.storyIndex);save();renderStory();renderHome();toast('選択を記録したよ。結果はステータスに反映！');sfx('card');}
 function resetToSetup(){if(!confirm('セーブデータを消して最初から始める？'))return;localStorage.removeItem(SAVE_KEY);state=null;battle=null;pendingEvent=null;document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));$('setupOverlay').classList.add('show');$('playerName').value='ひかり';document.querySelectorAll('.idol-pick').forEach(b=>b.classList.toggle('selected',b.dataset.idol==='mirai'));}
 document.querySelectorAll('.nav[data-screen]').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.screen)));
 document.querySelectorAll('.idol-pick').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.idol-pick').forEach(x=>x.classList.toggle('selected',x===b));}));
-$('beginGame').addEventListener('click',()=>{const name=$('playerName').value.trim().slice(0,12)||'ひかり';const idol=document.querySelector('.idol-pick.selected')?.dataset.idol||'mirai';state=freshState(name,idol);state.tickets=1;state.logs=[];save();$('setupOverlay').classList.remove('show');showScreen('home');renderStory();toast('ようこそ、Étoile Academyへ！');sfx('win');});
+$('beginGame').addEventListener('click',()=>{const name=$('playerName').value.trim().slice(0,12)||'ひかり';const idol=document.querySelector('.idol-pick.selected')?.dataset.idol||'mirai';state=freshState(name,idol);state.tickets=1;state.logs=[];save();$('setupOverlay').classList.remove('show');showScreen('home');renderPlan();renderStory();renderLive();renderCloset();bindDynamic();toast('ようこそ、Étoile Academyへ！');sfx('win');});
 $('resetGame').addEventListener('click',resetToSetup);
 $('soundToggle').addEventListener('click',()=>{if(!state){state={sfx:localStorage.getItem(SOUND_KEY)!=='off'};}state.sfx=!state.sfx;localStorage.setItem(SOUND_KEY,state.sfx?'on':'off');updateSoundButton();if(state.sfx)sfx('tap');save();});
 $('eventChoices').addEventListener('click',e=>{const b=e.target.closest('[data-event-choice]');if(b)chooseEvent(Number(b.dataset.eventChoice));});
 document.body.addEventListener('click',e=>{const b=e.target.closest('[data-day-live],[data-next-day]');if(!b)return;const m=$('dayEndModal');if(m)m.remove();if(b.hasAttribute('data-day-live')){showScreen('live');renderLive();}else nextDay();});
 function boot(){
  state=loadState();
- if(state){state.sfx=localStorage.getItem(SOUND_KEY)!=='off';$('setupOverlay').classList.remove('show');if(state.ending)showFestivalEnding();else{showScreen('home');if(state.sessionStarted&&state.actions===0){}if(!state.eventDays)state.eventDays=[];}}
- else{state={sfx:localStorage.getItem(SOUND_KEY)!=='off'};updateSoundButton();}
- updateSoundButton();
- if(state&&state.stats){renderHome();renderPlan();renderStory();renderLive();renderCloset();bindDynamic();}
+ if(state){state.sfx=localStorage.getItem(SOUND_KEY)!=='off';$('setupOverlay').classList.remove('show');if(!state.eventDays)state.eventDays=[];}
+ else{state={sfx:localStorage.getItem(SOUND_KEY)!=='off'};}
+ updateSoundButton();bindDynamic();
+ if(state&&state.stats){if(state.ending){showFestivalEnding();}else{renderHome();renderPlan();renderStory();renderLive();renderCloset();showScreen('home');}}
 }
 boot();
 })();
