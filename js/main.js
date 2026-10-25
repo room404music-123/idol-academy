@@ -74,7 +74,7 @@ function renderCostumes(){
  $('costumeOwnedCount').textContent=state.costumeOwned.length+'着';$('costumeFeature').className='costume-feature rarity-'+equipped.rarity.toLowerCase();
  const sort=$('costumeSort')?$('costumeSort').value:'rarity',rarityOrder={SSR:0,SR:1,R:2,N:3},owned=state.costumeOwned.map(id=>costumeById(id));
  owned.sort((a,b)=>sort==='name'?a.name.localeCompare(b.name,'ja'):sort==='level'?costumeLevel(b.id)-costumeLevel(a.id)||rarityOrder[a.rarity]-rarityOrder[b.rarity]:rarityOrder[a.rarity]-rarityOrder[b.rarity]||a.name.localeCompare(b.name,'ja'));
- $('costumeGrid').innerHTML=owned.map(c=>{const isEquipped=c.id===state.equippedCostume,lv=costumeLevel(c.id),cost=lv*100,skill=effectiveCostumeSkill(c);return '<article class="costume-card rarity-'+c.rarity.toLowerCase()+' '+(isEquipped?'is-equipped':'')+'"><div class="costume-card-art">'+c.icon+'</div><span class="costume-rarity">'+c.label+'</span><strong>'+c.name+'</strong><span class="costume-level-badge">COSTUME Lv.'+lv+'</span><p>'+c.desc+'</p><div class="costume-skill-mini">✦ '+c.skill.name+'<small>'+c.skill.desc+' · 現在効果 '+skill.amount+(c.skill.kind==='stat'||c.skill.kind==='all'||c.skill.kind==='final'?'%':'pt')+'</small></div><div class="costume-card-actions"><button class="'+(isEquipped?'secondary':'primary')+'" data-equip-costume="'+c.id+'" '+(isEquipped?'disabled':'')+'>'+(isEquipped?'着用中':'着替える')+'</button><button class="secondary levelup-costume" data-level-costume="'+c.id+'">Lv.UP 💰'+cost+' +✨1</button></div></article>'}).join('');
+ $('costumeGrid').innerHTML=owned.map(c=>{const isEquipped=c.id===state.equippedCostume,lv=costumeLevel(c.id),cost=lv*100,skill=effectiveCostumeSkill(c);return '<article class="costume-card rarity-'+c.rarity.toLowerCase()+' '+(isEquipped?'is-equipped':'')+'"><div class="costume-card-art">'+c.icon+'</div><span class="costume-rarity">'+c.label+'</span><strong>'+c.name+'</strong><span class="costume-level-badge">COSTUME Lv.'+lv+'</span><p>'+c.desc+'</p><div class="costume-skill-mini">✦ '+c.skill.name+'<small>'+c.skill.desc+' · 現在効果 '+skill.amount+(c.skill.kind==='stat'||c.skill.kind==='all'||c.skill.kind==='final'?'%':'pt')+'</small></div><div class="costume-card-actions"><button class="'+(isEquipped?'secondary':'primary')+'" data-equip-costume="'+c.id+'" '+(isEquipped?'disabled':'')+'>'+(isEquipped?'着用中':'着替える')+'</button><button class="secondary levelup-costume" data-level-costume="'+c.id+'">Lv.UP 💎'+cost+' +✨1</button></div></article>'}).join('');
  document.querySelectorAll('[data-equip-costume]').forEach(b=>b.addEventListener('click',()=>{state.equippedCostume=b.dataset.equipCostume;save();renderCostumes();renderAuditionSkill();toast(costumeById(state.equippedCostume).name+'に着替えたよ！')}));
  document.querySelectorAll('[data-level-costume]').forEach(b=>b.addEventListener('click',()=>levelUpCostume(b.dataset.levelCostume)));
  renderAuditionSkill();
@@ -99,7 +99,7 @@ function pullCostume(times){
 function levelUpCostume(id){
  const item=costumeById(id),level=costumeLevel(id),cost=level*100;
  if(level>=10){toast('この衣装は最大レベルだよ！');return}
- if((Number(state.budget)||0)<cost){toast('予算が足りないよ（必要：'+cost+'）');return}
+ if((Number(state.budget)||0)<cost){toast('ジュエルが足りないよ（必要：'+cost+'）');return}
  if((Number(state.skillMaterials)||0)<1){toast('スキル強化素材が足りないよ。メダル交換所で交換できるよ！');return}
  state.budget-=cost;state.skillMaterials-=1;state.costumeLevels[id]=level+1;
  save();renderCostumes();refresh();toast(item.name+'が Lv.'+(level+1)+'にアップ！ スキル効果も強化されたよ');
@@ -202,7 +202,7 @@ document.querySelectorAll('.nav').forEach(b=>b.addEventListener('click',()=>show
 document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.goto)));
 document.querySelectorAll('[data-train]').forEach(b=>b.addEventListener('click',()=>{
  if(!state.sessionActive){showView('produce');toast('まず「プロデュースを開始する」を押してね');return}
- const k=b.dataset.train;const trainingCost=20;if((Number(state.budget)||0)<trainingCost){toast('予算が足りないよ（レッスン費用：20）');return}state.budget-=trainingCost;const before=state[k];state[k]=Math.min(100,state[k]+5);state.bond=Math.min(100,state.bond+2);state.lessonDone=true;
+ const k=b.dataset.train;const trainingCost=20;if((Number(state.budget)||0)<trainingCost){toast('ジュエルが足りないよ（レッスン費用：20）');return}state.budget-=trainingCost;const before=state[k];state[k]=Math.min(100,state[k]+5);state.bond=Math.min(100,state.bond+2);state.lessonDone=true;
  const msg=names[k]+'が '+(state[k]-before)+' アップ！ 親愛度 +2。行動を1回使ったよ。';
  $('lessonResult').textContent=msg;$('lessonResult').classList.add('show');$('produceResult').textContent=msg;$('produceResult').classList.add('show');spendAction(msg);
 }));
@@ -250,7 +250,7 @@ function playBattleCard(i){
  const rival=10+Math.floor(Math.random()*12)+Math.floor((state.vocal+state.dance+state.charm)/30);
  battle.rival+=rival;battle.turn++;battle.waiting=true;battle.hand=[];
  $('battleLog').textContent=c.name+'！ '+points+'pt獲得。ライバルは '+rival+'pt。'+combo;
- if(battle.turn>=3){battle.done=true;battle.waiting=false;const win=battle.player>=battle.rival;const reward=win?30:12;state.fans=(state.fans||0)+reward;const budgetReward=win?150:40;state.budget=(Number(state.budget)||0)+budgetReward;state.bond=Math.min(100,state.bond+(win?5:2));$('liveResult').innerHTML=(win?'🏆 合格！':'✦ 惜しい結果…')+'<br>最終スコア '+battle.player+' 対 '+battle.rival+'<br>ファン +'+reward+' / 予算 +'+budgetReward+' / 親愛度 +'+(win?5:2);state.liveDone=true;refresh();spendAction((win?'オーディション合格！':'オーディション終了。')+' ファン +'+reward);}
+ if(battle.turn>=3){battle.done=true;battle.waiting=false;const win=battle.player>=battle.rival;const reward=win?30:12;state.fans=(state.fans||0)+reward;const budgetReward=win?150:40;state.budget=(Number(state.budget)||0)+budgetReward;state.bond=Math.min(100,state.bond+(win?5:2));$('liveResult').innerHTML=(win?'🏆 合格！':'✦ 惜しい結果…')+'<br>最終スコア '+battle.player+' 対 '+battle.rival+'<br>ファン +'+reward+' / ジュエル +'+budgetReward+' / 親愛度 +'+(win?5:2);state.liveDone=true;refresh();spendAction((win?'オーディション合格！':'オーディション終了。')+' ファン +'+reward);}
  else {battle.waiting=true;$('battleNext').style.display='inline-block';$('battleNext').textContent='次のターンへ　→';}
  renderBattle();
 }
