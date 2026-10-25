@@ -22,11 +22,61 @@ window.addEventListener('unhandledrejection', function(event){
   console.error('Étoile Academy unhandled rejection:',event.reason);
 });
 const KEY='etoile-academy-save-v2';
-const initial={name:'',fairyName:'',chosenIdol:'mirai',setupDone:false,prologueSeen:false,color:'pink',type:'努力家',vocal:12,dance:10,charm:14,bond:5,day:1,lessonDone:false,storyDone:false,liveDone:false,storyChoice:'',sessionActive:false,actionsLeft:0,friendBond:0,friendTalks:0};
+const initial={name:'',fairyName:'',chosenIdol:'mirai',setupDone:false,prologueSeen:false,color:'pink',type:'努力家',vocal:12,dance:10,charm:14,bond:5,day:1,lessonDone:false,storyDone:false,liveDone:false,storyChoice:'',sessionActive:false,actionsLeft:0,friendBond:0,friendTalks:0,costumeTickets:5,costumeOwned:['school'],equippedCostume:'school',costumeMedals:0};
 let state={...initial};
 try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved&&typeof saved==='object')state={...initial,...saved}}catch(e){}
 const $=id=>document.getElementById(id);
 const names={vocal:'歌唱力',dance:'ダンス',charm:'表現力'};
+
+// --- Costume gacha and wardrobe ---
+const costumeCatalog=[
+ {id:'school',name:'スクール制服',rarity:'N',label:'ノーマル',icon:'🎀',desc:'学園生活の定番。初めての一着。'},
+ {id:'pastel',name:'パステルステージ',rarity:'R',label:'レア',icon:'🩰',desc:'淡いピンクとリボンがかわいいステージ衣装。'},
+ {id:'starry',name:'星降るナイトドレス',rarity:'SR',label:'スーパーレア',icon:'🌙',desc:'星の刺繍がきらめく夜空のドレス。'},
+ {id:'sakura',name:'桜色プリンセス',rarity:'SR',label:'スーパーレア',icon:'🌸',desc:'春の花びらをまとった華やかな衣装。'},
+ {id:'marine',name:'マリン・シンフォニー',rarity:'R',label:'レア',icon:'🫧',desc:'爽やかなブルーのマリンステージ衣装。'},
+ {id:'royal',name:'ロイヤル・パープル',rarity:'SSR',label:'スーパースペシャルレア',icon:'👑',desc:'紫と金の装飾が輝く特別なドレス。'},
+ {id:'moon',name:'ムーンライト・ベル',rarity:'SSR',label:'スーパースペシャルレア',icon:'✨',desc:'月明かりを閉じ込めた幻想的な衣装。'},
+ {id:'lemon',name:'レモンソーダポップ',rarity:'R',label:'レア',icon:'🍋',desc:'明るい黄色が弾けるポップな衣装。'}
+];
+function costumeById(id){return costumeCatalog.find(c=>c.id===id)||costumeCatalog[0]}
+function renderCostumes(){
+ if(!$('costumeTickets'))return;
+ state.costumeTickets=Math.max(0,Number(state.costumeTickets)||0);
+ if(!Array.isArray(state.costumeOwned)||!state.costumeOwned.length)state.costumeOwned=['school'];
+ if(!state.costumeOwned.includes('school'))state.costumeOwned.unshift('school');
+ if(!state.costumeOwned.includes(state.equippedCostume))state.equippedCostume='school';
+ const equipped=costumeById(state.equippedCostume);
+ $('costumeTickets').textContent=state.costumeTickets;
+ $('equippedCostumeArt').textContent=equipped.icon;
+ $('equippedCostumeName').textContent=equipped.name;
+ $('equippedCostumeDesc').textContent=equipped.desc;
+ $('costumeOwnedCount').textContent=state.costumeOwned.length+'着';
+ $('costumeFeature').className='costume-feature rarity-'+equipped.rarity.toLowerCase();
+ $('costumeGrid').innerHTML=state.costumeOwned.map(id=>{const c=costumeById(id),isEquipped=id===state.equippedCostume;return '<article class="costume-card rarity-'+c.rarity.toLowerCase()+'"><div class="costume-card-art">'+c.icon+'</div><span class="costume-rarity">'+c.label+'</span><strong>'+c.name+'</strong><p>'+c.desc+'</p><button class="'+(isEquipped?'secondary':'primary')+'" data-equip-costume="'+c.id+'" '+(isEquipped?'disabled':'')+'>'+(isEquipped?'着用中':'この衣装に着替える')+'</button></article>'}).join('');
+ document.querySelectorAll('[data-equip-costume]').forEach(b=>b.addEventListener('click',()=>{state.equippedCostume=b.dataset.equipCostume;save();renderCostumes();toast(costumeById(state.equippedCostume).name+'に着替えたよ！')}));
+}
+function pullCostume(times){
+ times=times===10?10:1;
+ if(state.costumeTickets<times){toast('チケットが足りないよ！ 今日のプロデュースを終えてチケットをもらおう');return}
+ state.costumeTickets-=times;
+ const results=[];
+ for(let i=0;i<times;i++){
+  const roll=Math.random()*100;
+  const rarity=roll<3?'SSR':roll<15?'SR':roll<45?'R':'N';
+  const pool=costumeCatalog.filter(c=>c.rarity===rarity);
+  const item=pool[Math.floor(Math.random()*pool.length)];
+  if(state.costumeOwned.includes(item.id)){state.costumeMedals=(Number(state.costumeMedals)||0)+1;results.push({item,duplicate:true})}
+  else{state.costumeOwned.push(item.id);results.push({item,duplicate:false})}
+ }
+ save();renderCostumes();
+ $('costumePullResult').innerHTML='<h3>ガチャ結果 ✨</h3><div class="costume-result-grid">'+results.map(r=>'<div class="costume-result-item rarity-'+r.item.rarity.toLowerCase()+'"><span>'+r.item.icon+'</span><small>'+r.item.rarity+' · '+r.item.label+'</small><strong>'+r.item.name+'</strong><em>'+(r.duplicate?'所持済み → 衣装メダル +1':'NEW！衣装を獲得')+'</em></div>').join('')+'</div><p class="notice">所持衣装 '+state.costumeOwned.length+'着 ／ 衣装メダル '+(state.costumeMedals||0)+'枚</p>';
+ toast('衣装ガチャを引いたよ！');
+}
+$('pullCostume').addEventListener('click',()=>pullCostume(1));
+$('pullCostumeTen').addEventListener('click',()=>pullCostume(10));
+renderCostumes();
+
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state));$('saveStatus').textContent='PROGRESS AUTO-SAVED'}catch(e){$('saveStatus').textContent='SAVE UNAVAILABLE'}}
 function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),2400)}
 function refresh(){
@@ -170,10 +220,10 @@ function renderProduce(){
  $('finishProduce').style.display=active?'inline-block':'none';
 }
 function endProduce(message){
- state.sessionActive=false;state.actionsLeft=0;state.day+=1;
+ state.sessionActive=false;state.actionsLeft=0;state.day+=1;state.costumeTickets=(Number(state.costumeTickets)||0)+1;
  $('appShell').classList.remove('produce-mode');
  $('produceResult').textContent=message||'今日の活動は終了！ 頑張った自分をほめてあげよう。';
- $('produceResult').classList.add('show');renderProduce();refresh();showView('home');toast('今日のプロデュースが終了したよ');
+ $('produceResult').classList.add('show');renderProduce();refresh();showView('home');toast('今日のプロデュースが終了！ 衣装ガチャチケット +1');
 }
 function spendAction(message){
  if(!state.sessionActive)return;
@@ -229,7 +279,7 @@ function renderMap(){const p=$('mapPlayer');p.style.left=roam.x+'%';p.style.top=
 function mapFrame(t){if(roam.moving){let dt=Math.min(32,t-(roam.last||t));roam.x=Math.max(5,Math.min(95,roam.x+roam.dx*dt*.035));roam.y=Math.max(6,Math.min(93,roam.y+roam.dy*dt*.035));renderMap()}roam.last=t;requestAnimationFrame(mapFrame)}requestAnimationFrame(mapFrame);const joy=$('joyBase'),knob=$('joyKnob');function joyMove(e){const r=joy.getBoundingClientRect();let x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2,max=r.width*.31,len=Math.hypot(x,y);if(len>max){x=x/len*max;y=y/len*max}knob.style.transform='translate('+x+'px,'+y+'px)';roam.dx=x/max;roam.dy=y/max;roam.moving=true;e.preventDefault()}function joyStop(){roam.moving=false;roam.dx=roam.dy=0;knob.style.transform='translate(0,0)'}joy.addEventListener('pointerdown',e=>{joy.setPointerCapture(e.pointerId);joyMove(e)});joy.addEventListener('pointermove',e=>{if(e.buttons||e.pressure>0)joyMove(e)});joy.addEventListener('pointerup',joyStop);joy.addEventListener('pointercancel',joyStop);document.addEventListener('keydown',e=>{let k=e.key.toLowerCase();if(!['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(k))return;roam.moving=true;roam.dx=k==='a'||k==='arrowleft'?-1:k==='d'||k==='arrowright'?1:0;roam.dy=k==='w'||k==='arrowup'?-1:k==='s'||k==='arrowdown'?1:0});document.addEventListener('keyup',e=>{if(['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(e.key.toLowerCase()))joyStop()});$('mapInteract').addEventListener('click',()=>{if(!roam.near){toast('人の近くまで歩いてみてね');return}const n=roam.near;$('mapDialogTitle').textContent=n.name;$('mapDialogText').textContent=n.line;$('mapDialog').classList.add('show');if(state.sessionActive){state.bond=Math.min(100,state.bond+2);refresh()}});
 $('mapDialogClose').addEventListener('click',()=>$('mapDialog').classList.remove('show'));renderMap();
 const originalRefresh=refresh;
-refresh=function(){originalRefresh();renderProduce();$('topName').textContent=state.name||'学園生活 '+state.day+'日目';};
+refresh=function(){originalRefresh();renderProduce();renderCostumes();$('topName').textContent=state.name||'学園生活 '+state.day+'日目';};
 
 refresh();
 if(!state.setupDone){$('setupOverlay').classList.add('show');}else if(!state.prologueSeen){$('setupOverlay').classList.add('show');showPrologue();}else{$('appShell').classList.add('game-ready');if(state.sessionActive){$('appShell').classList.add('produce-mode');showView('produce');}else{showView('home');}}
