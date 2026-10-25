@@ -5,117 +5,25 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#17142d">
 <title>Étoile Academy — 星を育てる学園</title>
-<link rel="stylesheet" href="css/style.css?v=20261025-sfx1">
+<link rel="stylesheet" href="css/style.css?v=20261025-rebuild1">
 </head>
 <body>
-<div class="app" id="appShell">
-<header class="topbar">
-  <div class="brand"><div class="brandmark">✧</div><div>Étoile Academy<small>星を育てる学園</small></div></div>
-  <div class="topright"><span class="season">SPRING TERM · 1年目</span><span id="topName">学園生活 1日目</span><span class="economy-pill jewel-pill"><span class="currency-icon">💎</span><span class="currency-label">ジュエル</span><b id="budgetValue">500</b></span><span class="economy-pill fans-pill"><span class="currency-icon">💗</span><span class="currency-label">ファン</span><b id="fansValue">0</b><span class="currency-unit">人</span></span><button type="button" class="sound-toggle" id="soundToggle" aria-pressed="true" title="効果音のオン・オフ">🔊 SE ON</button></div>
-</header>
-<div class="layout">
-<aside class="sidebar">
- <div class="navlabel">ACADEMY</div>
- <button class="nav active" data-view="home"><span class="ico">⌂</span>ホーム</button>
- <button class="nav" data-view="produce"><span class="ico">✦</span>プロデュース</button>
- <button class="nav" data-view="costume"><span class="ico">♔</span>衣装ガチャ</button><button class="nav" data-view="map"><span class="ico">⌖</span>学園を歩く</button>
- <button class="nav" data-view="friends"><span class="ico">♡</span>友達</button>
-  <button class="nav" data-view="story"><span class="ico">▤</span>ストーリー</button>
- <div class="sidecard"><strong>YOUR STORY STARTS HERE</strong><p>小さな一歩が、いつか大きな星になる。あなただけの輝きを見つけよう。</p></div>
-</aside>
-<main class="main">
-<section class="view active" id="view-home">
- <div class="home-topline"><div><div class="eyebrow">ÉTOILE ACADEMY · CAMPUS LIFE</div><h1>おかえりなさい、<span id="homeGreetingName">アイドル</span>さん。</h1><p>今日の小さな一歩が、未来のステージにつながる。</p></div><div class="daypill"><span class="home-day-icon">✦</span><span id="dayLabel">1日目</span></div></div>
- <div class="home-hero">
-  <div class="home-hero-copy"><span class="home-tag"><i></i> YOUR ACADEMY DIARY</span><p class="home-kicker">TODAY IS YOUR STAGE</p><h2>夢のつづきは、<br><em>ここから。</em></h2><p class="home-intro">レッスンも、友達との時間も、あなたらしいペースで。今日の学園生活をはじめよう。</p>
-   <div class="home-hero-actions"><button class="primary" data-start-produce>プロデュース画面へ　→</button><button class="home-quiet-btn" data-goto="map">学園を歩く　⌖</button></div>
-   <div class="home-session-note" id="homeSessionNote"><span class="session-dot"></span><span>今日のプロデュースはまだ始まっていません</span></div>
-  </div>
-  <div class="home-visual"><div class="home-halo"></div><div class="home-ring ring-one"></div><div class="home-ring ring-two"></div><span class="home-spark spark-one">✦</span><span class="home-spark spark-two">✧</span><span class="home-spark spark-three">✦</span><div class="home-portrait"><div class="portrait-hair"></div><div class="portrait-face"><span class="portrait-eye left"></span><span class="portrait-eye right"></span><span class="portrait-cheek left"></span><span class="portrait-cheek right"></span><span class="portrait-mouth"></span></div><div class="portrait-bangs"></div><div class="portrait-neck"></div><div class="portrait-outfit"></div><div class="portrait-collar"></div><div class="portrait-bow">✧</div></div><div class="home-idol-label"><span>YOUR STORY</span><strong id="homeIdolName">星降 未来</strong><small>MAIN CAST</small></div></div>
- </div>
- <div class="home-section-title"><div><div class="eyebrow">YOUR CURRENT STATUS</div><h3>アイドルステータス</h3></div></div>
- <div class="stats home-stats">
-  <div class="stat"><div class="stathead">歌唱力 <span class="staticon">♫</span></div><div class="statvalue"><span id="vocal">12</span><small> / 100</small></div><div class="meter"><span id="bar-vocal" style="width:12%"></span></div></div>
-  <div class="stat"><div class="stathead">ダンス <span class="staticon" style="background:#edf7ff">♧</span></div><div class="statvalue"><span id="dance">10</span><small> / 100</small></div><div class="meter"><span id="bar-dance" style="width:10%;background:linear-gradient(90deg,#8bc8ef,#8e80df)"></span></div></div>
-  <div class="stat"><div class="stathead">表現力 <span class="staticon" style="background:#fff8e8">✧</span></div><div class="statvalue"><span id="charm">14</span><small> / 100</small></div><div class="meter"><span id="bar-charm" style="width:14%;background:linear-gradient(90deg,#eac77a,#f18bb8)"></span></div></div>
-  <div class="stat"><div class="stathead">親愛度 <span class="staticon" style="background:#fff0f6">♡</span></div><div class="statvalue"><span id="bond">5</span><small> / 100</small></div><div class="meter"><span id="bar-bond" style="width:5%;background:linear-gradient(90deg,#f18bb8,#db78aa)"></span></div></div>
- </div>
- <div class="home-columns">
-  <div class="home-card schedule-card"><div class="home-card-head"><div><div class="eyebrow">A DAY AT A GLANCE</div><h3>今日のスケジュール</h3></div><span class="home-card-mark">☼</span></div><div class="home-timeline"><div class="home-time-row" id="task-lesson"><span class="home-time">10:00</span><span class="home-time-dot"></span><span class="home-time-copy"><strong>基礎レッスン</strong><small>自分のペースで実力を磨こう</small></span><span class="home-time-state">予定</span></div><div class="home-time-row" id="task-story"><span class="home-time">14:00</span><span class="home-time-dot"></span><span class="home-time-copy"><strong>放課後の約束</strong><small>友達と過ごす大切な時間</small></span><span class="home-time-state">予定</span></div><div class="home-time-row" id="task-live"><span class="home-time">17:00</span><span class="home-time-dot"></span><span class="home-time-copy"><strong>ミニステージ</strong><small>今日の成長を確かめよう</small></span><span class="home-time-state">予定</span></div></div><button class="home-card-footer" data-goto="produce">今日の活動を確認する　→</button></div>
-  <div class="home-card"><div class="home-card-head"><div><div class="eyebrow">CAMPUS GUIDE</div><h3>どこへ行く？</h3></div><span class="home-card-mark">✧</span></div><div class="home-destinations"><button class="home-destination" data-goto="produce"><span class="destination-icon dest-pink">✦</span><span><strong>プロデュース</strong><small>レッスン・今日の行動</small></span><b>→</b></button><button class="home-destination" data-goto="friends"><span class="destination-icon dest-blue">♡</span><span><strong>友達に会う</strong><small>仲間とおしゃべり</small></span><b>→</b></button><button class="home-destination" data-goto="story"><span class="destination-icon dest-gold">▤</span><span><strong>ストーリー</strong><small>学園で起こる物語を読む</small></span><b>→</b></button></div></div>
- </div>
- <div class="home-bottom-banner"><span class="banner-star">✦</span><div><strong>あせらなくて大丈夫。</strong><p>あなたの輝き方は、あなたが決めていい。</p></div><span class="banner-flower">✿</span></div>
- <div id="lessonResult" class="result" style="display:none"></div>
-</section>
-<section class="view" id="view-produce">
- <div class="subhero"><div class="eyebrow">YOUR IDOL LIFE</div><h2>今日のプロデュース</h2><p>あなた自身がアイドル。1日につき行動は3回まで。レッスンや友達との会話を選んで、今日の自分を育てよう。</p></div>
- <div class="panel" id="producePanel"><div class="sectionhead"><div><div class="eyebrow">DAILY PLAN</div><h3 id="produceHeading">まだ今日の活動を始めていません</h3></div><div class="daypill"><span id="actionsLeft">行動 3 / 3</span></div></div><p id="produceDescription" class="notice">「プロデュースを開始する」を押すと、今日の活動が始まります。開始前は行動できません。</p><button class="primary" id="startProduce">プロデュースを開始する　→</button><button class="primary" id="goAudition" style="display:none;margin-left:8px">オーディションに参加　☆</button><div class="lessonlist" id="produceActions" style="margin-top:18px;display:none">
- <button class="lesson" data-train="vocal"><span class="lessonicon li-pink">♫</span><span class="lessoninfo"><strong>ボーカルトレーニング</strong><small>歌の基礎を磨く</small></span><span class="gain">歌唱力 +5 · 💎20</span></button>
- <button class="lesson" data-train="dance"><span class="lessonicon li-blue">♧</span><span class="lessoninfo"><strong>ダンスレッスン</strong><small>リズムと振り付けを練習</small></span><span class="gain">ダンス +5 · 💎20</span></button>
- <button class="lesson" data-train="charm"><span class="lessonicon li-gold">✧</span><span class="lessoninfo"><strong>表現力ワークショップ</strong><small>自分らしい表現を探す</small></span><span class="gain">表現力 +5 · 💎20</span></button>
- <button class="lesson" data-friend-talk><span class="lessonicon" style="background:#fff0f6">♡</span><span class="lessoninfo"><strong>友達とおしゃべり</strong><small>学園の仲間と交流する</small></span><span class="gain">親愛度 +5</span></button>
- </div><div class="result" id="produceResult"></div><button class="secondary" id="finishProduce" style="display:none;margin-top:14px">今日はここまで　→</button></div>
-</section>
-<section class="view" id="view-friends">
- <div class="subhero"><div class="eyebrow">SCHOOL FRIENDS · MAIN CAST</div><h2>みんなに会いに行こう</h2><p>学園で出会う仲間たち。それぞれの性格や関係を知って、少しずつ絆を深めよう。</p></div>
- <div class="cast-grid">
-  <button class="cast-card selected" data-character-chat="meru"><span class="cast-art cast-meru"><i>♡</i></span><span class="cast-meta"><small>夢掛ロゼッタ</small><strong>夢見 める</strong><em>ツンデレで素直じゃない</em></span><b>話す →</b></button>
-  <button class="cast-card" data-character-chat="tsukiyo"><span class="cast-art cast-tsukiyo"><i>☾</i></span><span class="cast-meta"><small>夢掛ロゼッタ</small><strong>願掛 月夜</strong><em>静かで礼儀正しい</em></span><b>話す →</b></button>
-  <button class="cast-card" data-character-chat="arashi"><span class="cast-art cast-arashi"><i>⚡</i></span><span class="cast-meta"><small>Amorphous</small><strong>朝比奈 嵐</strong><em>自信家でまっすぐ</em></span><b>話す →</b></button>
-  <button class="cast-card" data-character-chat="setsuna"><span class="cast-art cast-setsuna"><i>✦</i></span><span class="cast-meta"><small>Amorphous</small><strong>夜永 セツナ</strong><em>口は悪いけど仲間思い</em></span><b>話す →</b></button>
-  <button class="cast-card" data-character-chat="reika"><span class="cast-art cast-reika"><i>❀</i></span><span class="cast-meta"><small>トリコロール・パレット</small><strong>如月 麗華</strong><em>自分のペースを大切にする</em></span><b>話す →</b></button>
-  <button class="cast-card" data-character-chat="mirai"><span class="cast-art cast-mirai"><i>☆</i></span><span class="cast-meta"><small>トリコロール・パレット</small><strong>星降 未来</strong><em>明るくて頑張り屋</em></span><b>話す →</b></button>
-  <button class="cast-card" data-character-chat="komugi"><span class="cast-art cast-komugi"><i>☀</i></span><span class="cast-meta"><small>トリコロール・パレット</small><strong>日高 こむぎ</strong><em>元気で夢にまっすぐ</em></span><b>話す →</b></button>
- </div>
- <div class="panel cast-chat-panel"><div class="eventtag" id="friendTag">DREAM-KAKE ROSETTA · AFTER SCHOOL</div><h3 id="friendTitle" style="margin:10px 0">「ねえ、放課後ちょっと付き合ってよ」</h3><p id="friendText" style="color:var(--muted);font-size:12px;line-height:1.9">めるが少し照れたように、あなたの顔をのぞき込んだ。</p><div class="storychoices" id="friendChoices"><button class="secondary" data-friend-choice="cafe">「一緒に寄り道しよう！」</button><button class="secondary" data-friend-choice="practice">「レッスンを見ていてくれる？」</button><button class="secondary" data-friend-choice="talk">「少し相談してもいい？」</button></div><div class="result" id="friendResult"></div><p class="notice">プロデュース中に会話すると、行動を1回使って親愛度を上げられるよ。</p><button class="primary" data-goto="produce">プロデュース画面へ　→</button></div>
-</section>
-
-<section class="view" id="view-lesson">
- <div class="subhero"><div class="eyebrow">PRACTICE MAKES A STAR</div><h2>レッスンルーム</h2><p>レッスンは「プロデュースを開始する」から始めよう。1日の行動回数には限りがあるので、今日は何を伸ばすか考えてみて。</p><button class="primary" data-goto="produce" style="margin-top:15px">プロデュースへ　→</button></div>
- <div class="panel"><div class="lessonlist">
- <button class="lesson" data-train="vocal"><span class="lessonicon li-pink">♫</span><span class="lessoninfo"><strong>ボーカルトレーニング</strong><small>音程・呼吸・歌の表現を磨く</small></span><span class="gain">歌唱力 +5</span></button>
- <button class="lesson" data-train="dance"><span class="lessonicon li-blue">♧</span><span class="lessoninfo"><strong>ダンスレッスン</strong><small>リズム・ステップ・振り付けを練習</small></span><span class="gain">ダンス +5</span></button>
- <button class="lesson" data-train="charm"><span class="lessonicon li-gold">✧</span><span class="lessoninfo"><strong>表現力ワークショップ</strong><small>表情・視線・自分らしさを探す</small></span><span class="gain">表現力 +5</span></button>
- </div><div class="result" id="lessonResult"></div><p class="notice">能力値は最大100。実際のレッスンはプロデュース中に行えます。</p></div>
-</section>
-<section class="view" id="view-story">
- <div class="subhero"><div class="eyebrow">EPISODE 01 · AFTER SCHOOL</div><h2>放課後の約束</h2><p>学園の廊下に、夕方の光が差し込む。レッスンを終えたあなたは、少し不安そうに窓の外を見ていた。</p></div>
- <div class="storybox"><div class="eyebrow">SCENE 01 / THE FIRST WORDS</div><h3 id="storyTitle">「私、変われるかな？」</h3><p id="storyText">「歌もダンスも、まだまだだし……。みんなみたいに、キラキラできるのかな」私はぎゅっと手を握る。夢を口にするのは、思ったより勇気がいることだった。</p><p>そんなとき、親友のめるが隣に立ってくれた。自分自身にかけたい言葉を、選んでみよう。</p><div class="storychoices"><button class="secondary" data-choice="kind">「焦らなくていい。私らしく、一歩ずつ進もう」</button><button class="secondary" data-choice="bold">「まだできることがある。自分の可能性を信じよう」</button><button class="secondary" data-choice="honest">「不安な気持ちも、友達に話してみよう」</button></div><div class="result" id="storyResult"></div><button class="primary" id="nextStory" style="display:none;margin-top:14px">次の場面へ　→</button></div>
-</section>
-<section class="view" id="view-costume">
- <div class="subhero costume-hero"><div class="eyebrow">COSTUME COLLECTION · DRESS UP</div><h2>きらめき衣装ガチャ</h2><p>衣装を集めて、今日のステージをもっと自分らしく。着用中の衣装スキルがライブで発動するよ！</p></div>
- <div class="panel costume-panel">
-  <div class="costume-top"><div><div class="eyebrow">YOUR WARDROBE</div><h3>衣装コレクション</h3></div><div class="costume-currencies"><div class="costume-ticket">🎟️ チケット <strong id="costumeTickets">5</strong>枚</div><div class="costume-ticket medal-ticket">🪙 メダル <strong id="costumeMedals">0</strong>枚</div></div></div>
-  <div class="costume-feature" id="costumeFeature"><div class="costume-feature-art" id="equippedCostumeArt">👗</div><div><span class="costume-rarity">EQUIPPED</span><h3 id="equippedCostumeName">スクール制服</h3><p id="equippedCostumeDesc">いつもの制服。ここから新しい輝きを集めよう。</p><span class="costume-equipped">✓ 着用中</span></div></div>
-  <div class="costume-pull-actions"><button class="primary" id="pullCostume">1回ガチャ　🎟️ ×1</button><button class="secondary" id="pullCostumeTen">10回ガチャ　🎟️ ×10</button></div>
-  <p class="notice">プロデュースを終えるとチケット+1。同じ衣装が出た場合はレア度に応じてメダルに変換されるよ（N +1 / R +2 / SR +4 / SSR +8）。</p>
-  <div id="costumePullResult" class="costume-pull-result" aria-live="polite"></div>
-  <div class="costume-shop"><div class="costume-shop-head"><div><div class="eyebrow">COSTUME MEDAL EXCHANGE</div><h3>衣装メダル交換所</h3></div><span>未所持衣装のみ交換可能</span></div>
-   <div class="costume-shop-grid">
-    <button class="costume-shop-item" data-costume-exchange="R"><span>🩰</span><strong>R衣装ランダム</strong><small>メダル 10枚</small></button>
-    <button class="costume-shop-item" data-costume-exchange="SR"><span>🌙</span><strong>SR衣装ランダム</strong><small>メダル 30枚</small></button>
-    <button class="costume-shop-item" data-costume-exchange="SSR"><span>👑</span><strong>SSR衣装ランダム</strong><small>メダル 80枚</small></button>
-    <button class="costume-shop-item" data-costume-exchange="tickets"><span>🎟️</span><strong>ガチャチケット ×3</strong><small>メダル 8枚</small></button>
-    <button class="costume-shop-item" data-costume-exchange="material"><span>✨</span><strong>スキル強化素材 ×1</strong><small>メダル 5枚 · 所持 <b id="skillMaterials">0</b></small></button>
-   </div>
-  </div>
-  <div class="costume-collection-head"><h3>持っている衣装 <small class="collection-sub">全24着</small></h3><div class="collection-tools"><span id="costumeOwnedCount">1着</span><label for="costumeSort">並べ替え <select id="costumeSort"><option value="rarity">レア度順</option><option value="name">名前順</option><option value="level">レベル順</option></select></label></div></div>
-  <div class="costume-grid" id="costumeGrid"></div>
- </div>
-</section>
-<section class="view" id="view-live">
- <div class="subhero"><div class="eyebrow">LIVE AUDITION · CARD BATTLE</div><h2>ライブオーディション</h2><p>全3ターン。手札からカードを選んでスコアを稼ごう。同じタイプを連続で出すとコンボ、違うタイプでつなぐとブレイクボーナス！</p></div>
- <div class="panel"><div class="sectionhead"><div><div class="eyebrow">LIVE STATUS</div><h3 id="battleHeading">ステージに立つ準備はできた？</h3></div><div class="daypill" id="battleTurn">TURN — / 3</div></div>
- <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0"><div style="background:#f7f0ff;border-radius:14px;padding:14px"><small style="color:#827d9a">YOUR SCORE</small><div id="playerScore" style="font-size:26px;font-weight:900">0</div></div><div style="background:#f3f7ff;border-radius:14px;padding:14px"><small style="color:#827d9a">RIVAL SCORE</small><div id="rivalScore" style="font-size:26px;font-weight:900">0</div></div></div>
- <div id="battleLog" class="result show" style="margin:12px 0">開始すると3枚の手札が配られるよ。能力の高いカードだけでなく、コンボも狙おう。</div>
- <div class="audition-skill-panel" id="auditionSkillPanel"><div class="eyebrow">EQUIPPED COSTUME SKILL</div><h4 id="auditionSkillName">はじめの一歩</h4><p id="auditionSkillDesc">ライブ開始時にスコア +8pt</p><small id="auditionSkillCondition">発動条件：オーディション開始時に自動発動</small><div class="audition-fee">参加費 💎50 ／ 合格報酬 💎150・ファン+30 ／ 不合格報酬 💎40・ファン+12</div></div>
- <div id="battleHand" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px 0"></div>
- <button class="primary" id="startLive">オーディション開始　→</button><button class="secondary" id="backToProduce" style="margin-left:8px">プロデュースに戻る　←</button><button class="secondary" id="battleNext" style="display:none;margin-left:8px">次のターン　→</button><div id="liveResult" style="margin-top:15px;font-size:13px;line-height:2"></div>
- </div><p class="notice">オーディションはプロデュース中の行動を1回消費。3ターンの判断で最終スコアが変わるよ。</p>
-</section>
-<section class="view" id="view-map"><div class="subhero"><div class="eyebrow">FREE ROAM · CAMPUS LIFE</div><h2>学園を歩こう</h2><p>左下のスティックで移動。友達に近づいて「話す」を押そう。</p></div><div class="map-wrap"><div style="padding:13px 16px;background:white;font-weight:800;font-size:13px">Étoile Academy 校内マップ <span id="mapLocation" style="float:right;color:var(--muted);font-weight:500">中央通路</span></div><div class="school-map" id="schoolMap"><div class="map-path path-h"></div><div class="map-path path-v"></div><div class="map-building build-class">教室</div><div class="map-building build-gym">レッスン室</div><div class="map-building build-cafe">カフェテリア</div><div class="map-building build-garden">中庭</div><button class="map-person" id="mapMeru" style="left:61%;top:45%"><span class="person-head">♡</span>める</button><button class="map-person" id="mapArashi" style="left:31%;top:58%"><span class="person-head">⚡</span>嵐</button><button class="map-person" id="mapSetsuna" style="left:72%;top:70%"><span class="person-head">✦</span>セツナ</button><button class="map-person" id="mapTsukiyo" style="left:23%;top:34%"><span class="person-head">☾</span>月夜</button><div class="map-person player" id="mapPlayer" style="left:48%;top:57%"><span class="person-head">★</span><span id="mapPlayerName">あなた</span></div><div class="joy-base" id="joyBase"><div class="joy-knob" id="joyKnob"></div></div><button class="map-interact" id="mapInteract">近くの人と話す</button></div><div style="padding:12px 16px;background:white;color:var(--muted);font-size:11px">PCはWASD / 矢印キーでも移動できるよ。</div><div class="map-dialog" id="mapDialog"><h3 id="mapDialogTitle">夢見 める</h3><p id="mapDialogText"></p><button class="secondary" id="mapDialogClose">会話を閉じる</button></div></div></section><div class="footer">ÉTOILE ACADEMY · YOUR LIGHT, YOUR STORY · <span id="saveStatus">PROGRESS AUTO-SAVED</span></div>
-</main></div></div><div class="toast" id="toast" role="status" aria-live="polite"></div>
-<div class="setup-overlay" id="setupOverlay" role="dialog" aria-modal="true"><div class="setup-card" id="setupCard"><div class="eyebrow">ÉTOILE ACADEMY · YOUR STORY</div><h1>あなたとアイドルの物語</h1><p>あなたはアイドルを支えるオトモ妖精。名前を決めて、最初に見守るアイドルを選ぼう。</p><label for="fairyName"><strong>オトモ妖精の名前</strong></label><input class="setup-input" id="fairyName" maxlength="16" placeholder="妖精の名前を入力"><strong>最初に担当するアイドル</strong><div class="idol-picks"><button class="idol-pick selected" data-idol="mirai"><strong>星降 未来</strong><small>ほしふる みらい<br>明るくて頑張り屋</small></button><button class="idol-pick" data-idol="reika"><strong>如月 麗華</strong><small>きさらぎ れいか<br>自分のペースを大切にする</small></button><button class="idol-pick" data-idol="komugi"><strong>日高 こむぎ</strong><small>ひだか こむぎ<br>元気で夢にまっすぐ</small></button></div><button class="primary" id="beginPrologue" style="width:100%">このアイドルと出会う　→</button><div class="result" id="setupError"></div></div></div>
-<div class="story-screen" id="storyScreen" role="dialog" aria-modal="true" aria-hidden="true"></div>
-<script src="js/main.js?v=20261025-sfx1" defer></script>
-</body></html>
+<div class="app">
+<header class="topbar"><a class="brand" href="#" aria-label="ホーム"><span class="brandmark">✦</span><span>Étoile Academy<small>星を育てる学園</small></span></a><div class="topstats"><span id="dayBadge">SEASON 01 · DAY 1</span><span>💎 <b id="jewelCount">100</b></span><span>♡ <b id="fanCount">0</b></span><button id="soundToggle" class="sound-toggle" aria-pressed="true">🔊 SE ON</button></div></header>
+<div class="shell">
+<aside class="sidebar"><div class="side-label">YOUR JOURNEY</div><button class="nav active" data-screen="home">⌂ <span>ホーム</span></button><button class="nav" data-screen="plan">✦ <span>今日の行動</span></button><button class="nav" data-screen="story">▤ <span>ストーリー</span><i id="storyDot"></i></button><button class="nav" data-screen="live">♫ <span>オーディション</span></button><button class="nav" data-screen="closet">♔ <span>衣装ルーム</span></button><div class="sidebar-note"><span>✧ YOUR GOAL</span><p>7日後の学園フェスで、ライバルを超えろ。</p><small>選択ひとつで未来が変わる。</small></div><button id="resetGame" class="reset-link">最初からやり直す ↺</button></aside>
+<main id="gameMain" class="main">
+<section class="screen active" id="screen-home"></section>
+<section class="screen" id="screen-plan"></section>
+<section class="screen" id="screen-story"></section>
+<section class="screen" id="screen-live"></section>
+<section class="screen" id="screen-closet"></section>
+</main>
+</div>
+</div>
+<div id="setupOverlay" class="overlay show"><div class="modal setup-modal"><div class="eyebrow">WELCOME TO ÉTOILE ACADEMY</div><div class="big-star">✦</div><h1>ここから、<em>運命を変えよう。</em></h1><p class="modal-lead">あなたは、まだ無名の新人アイドル。7日後の学園フェスまでに実力と仲間を育て、ライバルに勝とう。</p><label class="field-label" for="playerName">あなたの名前</label><input id="playerName" maxlength="12" placeholder="名前を入力" value="ひかり"><div class="field-label">あなたの相棒を選ぼう</div><div class="idol-picks"><button class="idol-pick selected" data-idol="mirai"><span class="idol-emoji pink">🌟</span><strong>星降 未来</strong><small>歌が得意 / 前向き</small></button><button class="idol-pick" data-idol="meru"><span class="idol-emoji purple">🎀</span><strong>夢見 める</strong><small>表現が得意 / 負けず嫌い</small></button><button class="idol-pick" data-idol="setsuna"><span class="idol-emoji blue">🌙</span><strong>夜永 セツナ</strong><small>ダンスが得意 / クール</small></button></div><button id="beginGame" class="primary wide">物語を始める　→</button><p class="tiny-note">セーブはこのブラウザに保存されるよ。</p></div></div>
+<div id="eventOverlay" class="overlay"><div class="modal event-modal"><div id="eventKicker" class="eyebrow">UNEXPECTED EVENT</div><div id="eventIcon" class="big-star">⚡</div><h2 id="eventTitle"></h2><p id="eventBody" class="modal-lead"></p><div id="eventChoices" class="choice-stack"></div></div></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="js/main.js?v=20261025-rebuild1"></script>
+</body>
+</html>
