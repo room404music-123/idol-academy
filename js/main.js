@@ -153,7 +153,7 @@ function endProduce(message){
  state.sessionActive=false;state.actionsLeft=0;state.day+=1;
  $('appShell').classList.remove('produce-mode');
  $('produceResult').textContent=message||'今日の活動は終了！ 頑張った自分をほめてあげよう。';
- $('produceResult').classList.add('show');renderProduce();refresh();toast('今日のプロデュースが終了したよ');
+ $('produceResult').classList.add('show');renderProduce();refresh();showView('home');toast('今日のプロデュースが終了したよ');
 }
 function spendAction(message){
  if(!state.sessionActive)return;
