@@ -125,3 +125,29 @@ body{height:100dvh;overflow:hidden}
  .app.produce-mode #view-produce .lesson{padding:12px 10px!important;gap:9px!important}
  .app.produce-mode #view-produce .gain{font-size:10px!important}
 }
+
+/* Costume gacha */
+.costume-hero{background:linear-gradient(115deg,#fff0f7,#f3edff 58%,#eaf6ff);border:1px solid #fff;box-shadow:0 12px 35px #7c5e9910}
+.costume-panel{margin-top:18px}
+.costume-top,.costume-collection-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.costume-top h3,.costume-collection-head h3{margin:5px 0;font-size:17px}
+.costume-ticket{padding:10px 14px;background:#fff4d8;border:1px solid #f5e4b7;border-radius:13px;color:#98713c;font-size:12px;white-space:nowrap}
+.costume-ticket strong{font-size:19px;margin:0 3px}
+.costume-feature{display:flex;align-items:center;gap:22px;margin:20px 0;padding:22px;border:1px solid #eadff4;border-radius:20px;background:linear-gradient(120deg,#fff,#f8f2ff)}
+.costume-feature-art{flex:none;display:grid;place-items:center;width:110px;height:120px;border-radius:18px;background:linear-gradient(145deg,#fce2f0,#ded6ff);font-size:56px;box-shadow:inset 0 0 0 1px #fff9}
+.costume-feature h3{margin:8px 0;font-size:20px}.costume-feature p{margin:0 0 10px;color:var(--muted);font-size:12px;line-height:1.8}
+.costume-rarity{font-size:9px;font-weight:900;letter-spacing:.12em;color:#9b82b7}
+.costume-equipped{display:inline-block;background:#e8f7ee;color:#4c9977;border-radius:99px;padding:6px 10px;font-size:10px;font-weight:800}
+.costume-pull-actions{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 12px}
+.costume-pull-result{margin-top:20px}.costume-pull-result:empty{display:none}.costume-pull-result>h3{font-size:16px}
+.costume-result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.costume-result-item{display:flex;flex-direction:column;align-items:center;text-align:center;gap:7px;padding:14px 9px;border-radius:15px;background:#fff;border:1px solid #eee5f5}
+.costume-result-item>span{font-size:35px}.costume-result-item small{font-size:9px;color:#9a82b7;font-weight:800}.costume-result-item strong{font-size:11px}.costume-result-item em{font-size:9px;font-style:normal;color:#8a8198}
+.costume-collection-head{margin:28px 0 13px}.costume-collection-head>span{font-size:11px;color:var(--muted)}
+.costume-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.costume-card{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:14px;border:1px solid #eee6f4;border-radius:17px;background:#fff;min-width:0}
+.costume-card-art{display:grid;place-items:center;align-self:stretch;min-height:100px;border-radius:13px;background:linear-gradient(145deg,#fff0f7,#ece7ff);font-size:42px}
+.costume-card strong{font-size:12px;line-height:1.6}.costume-card p{font-size:10px;line-height:1.7;color:var(--muted);margin:0;flex:1}
+.costume-card button{font-size:10px;padding:10px 12px;width:100%;margin-top:4px}.costume-card button:disabled{opacity:.8;cursor:default}
+.rarity-ssr{border-color:#e5c875!important;background:linear-gradient(145deg,#fffdf2,#fff8e6)!important}.rarity-sr{border-color:#d6b9f2!important}.rarity-r{border-color:#c9dff8!important}
+@media(max-width:700px){.costume-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.costume-feature{gap:13px;padding:15px}.costume-feature-art{width:78px;height:90px;font-size:42px}.costume-feature h3{font-size:16px}.costume-top{align-items:flex-start}.costume-ticket{padding:8px;font-size:10px}.costume-ticket strong{font-size:16px}}
