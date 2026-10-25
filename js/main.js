@@ -22,7 +22,7 @@ window.addEventListener('unhandledrejection', function(event){
   console.error('Étoile Academy unhandled rejection:',event.reason);
 });
 const KEY='etoile-academy-save-v2';
-const initial={name:'',fairyName:'',chosenIdol:'mirai',setupDone:false,prologueSeen:false,color:'pink',type:'努力家',vocal:12,dance:10,charm:14,bond:5,day:1,lessonDone:false,storyDone:false,liveDone:false,storyChoice:'',sessionActive:false,actionsLeft:0,friendBond:0,friendTalks:0,costumeTickets:5,costumeOwned:['school'],equippedCostume:'school',costumeMedals:0};
+const initial={name:'',fairyName:'',chosenIdol:'mirai',setupDone:false,prologueSeen:false,color:'pink',type:'努力家',vocal:12,dance:10,charm:14,bond:5,day:1,lessonDone:false,storyDone:false,liveDone:false,storyChoice:'',sessionActive:false,actionsLeft:0,friendBond:0,friendTalks:0,costumeTickets:5,costumeOwned:['school'],equippedCostume:'school',costumeMedals:0,budget:500,fans:0,skillMaterials:2,costumeLevels:{}};
 let state={...initial};
 try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved&&typeof saved==='object')state={...initial,...saved}}catch(e){}
 const $=id=>document.getElementById(id);
@@ -56,23 +56,28 @@ const costumeCatalog=[
  {id:'prism',name:'プリズム・レガリア',rarity:'SSR',label:'スーパースペシャルレア',icon:'🌈',desc:'七色の光が集まる最上級の衣装。',skill:{name:'プリズムフィーバー',desc:'全カードのスコア +10%',kind:'all',amount:10}}
 ];
 function costumeById(id){return costumeCatalog.find(c=>c.id===id)||costumeCatalog[0]}
+function costumeLevel(id){if(!state.costumeLevels||typeof state.costumeLevels!=='object')state.costumeLevels={};return Math.max(1,Number(state.costumeLevels[id])||1)}
+function effectiveCostumeSkill(costume){const level=costumeLevel(costume.id);return {...costume.skill,amount:costume.skill.amount+(level-1)*2,level}}
+function renderAuditionSkill(){if(!$('auditionSkillName'))return;const c=costumeById(state.equippedCostume||'school'),s=effectiveCostumeSkill(c);$('auditionSkillName').textContent=s.name+' · Lv.'+s.level;$('auditionSkillDesc').textContent=c.skill.desc+'（現在効果：'+s.amount+(s.kind==='stat'||s.kind==='all'||s.kind==='final'?'%':'pt')+'）';const conditions={start:'発動条件：オーディション開始時に自動発動',flat:'発動条件：カードをプレイするたび',stat:'発動条件：'+({vocal:'ボーカル',dance:'ダンス',charm:'表現'}[s.stat]||'指定')+'カードをプレイしたとき',all:'発動条件：すべてのカードをプレイしたとき',combo:'発動条件：同じタイプのカードを連続で出したとき',final:'発動条件：第3ターンにカードをプレイしたとき'};$('auditionSkillCondition').textContent=conditions[s.kind]||'発動条件：ライブ中'}
 function renderCostumes(){
  if(!$('costumeTickets'))return;
  state.costumeTickets=Math.max(0,Number(state.costumeTickets)||0);
  if(!Array.isArray(state.costumeOwned)||!state.costumeOwned.length)state.costumeOwned=['school'];
  if(!state.costumeOwned.includes('school'))state.costumeOwned.unshift('school');
  if(!state.costumeOwned.includes(state.equippedCostume))state.equippedCostume='school';
+ if(!state.costumeLevels||typeof state.costumeLevels!=='object')state.costumeLevels={};
  const equipped=costumeById(state.equippedCostume);
- $('costumeTickets').textContent=state.costumeTickets;
- $('costumeMedals').textContent=Number(state.costumeMedals)||0;
+ $('costumeTickets').textContent=state.costumeTickets;$('costumeMedals').textContent=Number(state.costumeMedals)||0;
  if($('skillMaterials'))$('skillMaterials').textContent=Number(state.skillMaterials)||0;
- $('equippedCostumeArt').textContent=equipped.icon;
- $('equippedCostumeName').textContent=equipped.name;
- $('equippedCostumeDesc').textContent=equipped.desc+' スキル「'+equipped.skill.name+'」：'+equipped.skill.desc;
- $('costumeOwnedCount').textContent=state.costumeOwned.length+'着';
- $('costumeFeature').className='costume-feature rarity-'+equipped.rarity.toLowerCase();
- $('costumeGrid').innerHTML=state.costumeOwned.map(id=>{const c=costumeById(id),isEquipped=id===state.equippedCostume;return '<article class="costume-card rarity-'+c.rarity.toLowerCase()+'"><div class="costume-card-art">'+c.icon+'</div><span class="costume-rarity">'+c.label+'</span><strong>'+c.name+'</strong><p>'+c.desc+'</p><button class="'+(isEquipped?'secondary':'primary')+'" data-equip-costume="'+c.id+'" '+(isEquipped?'disabled':'')+'>'+(isEquipped?'着用中':'この衣装に着替える')+'</button></article>'}).join('');
- document.querySelectorAll('[data-equip-costume]').forEach(b=>b.addEventListener('click',()=>{state.equippedCostume=b.dataset.equipCostume;save();renderCostumes();toast(costumeById(state.equippedCostume).name+'に着替えたよ！')}));
+ $('equippedCostumeArt').textContent=equipped.icon;$('equippedCostumeName').textContent=equipped.name;
+ $('equippedCostumeDesc').textContent=equipped.desc+' スキル「'+equipped.skill.name+'」：'+equipped.skill.desc+'（Lv.'+costumeLevel(equipped.id)+'）';
+ $('costumeOwnedCount').textContent=state.costumeOwned.length+'着';$('costumeFeature').className='costume-feature rarity-'+equipped.rarity.toLowerCase();
+ const sort=$('costumeSort')?$('costumeSort').value:'rarity',rarityOrder={SSR:0,SR:1,R:2,N:3},owned=state.costumeOwned.map(id=>costumeById(id));
+ owned.sort((a,b)=>sort==='name'?a.name.localeCompare(b.name,'ja'):sort==='level'?costumeLevel(b.id)-costumeLevel(a.id)||rarityOrder[a.rarity]-rarityOrder[b.rarity]:rarityOrder[a.rarity]-rarityOrder[b.rarity]||a.name.localeCompare(b.name,'ja'));
+ $('costumeGrid').innerHTML=owned.map(c=>{const isEquipped=c.id===state.equippedCostume,lv=costumeLevel(c.id),cost=lv*100,skill=effectiveCostumeSkill(c);return '<article class="costume-card rarity-'+c.rarity.toLowerCase()+' '+(isEquipped?'is-equipped':'')+'"><div class="costume-card-art">'+c.icon+'</div><span class="costume-rarity">'+c.label+'</span><strong>'+c.name+'</strong><span class="costume-level-badge">COSTUME Lv.'+lv+'</span><p>'+c.desc+'</p><div class="costume-skill-mini">✦ '+c.skill.name+'<small>'+c.skill.desc+' · 現在効果 '+skill.amount+(c.skill.kind==='stat'||c.skill.kind==='all'||c.skill.kind==='final'?'%':'pt')+'</small></div><div class="costume-card-actions"><button class="'+(isEquipped?'secondary':'primary')+'" data-equip-costume="'+c.id+'" '+(isEquipped?'disabled':'')+'>'+(isEquipped?'着用中':'着替える')+'</button><button class="secondary levelup-costume" data-level-costume="'+c.id+'">Lv.UP 💰'+cost+'</button></div></article>'}).join('');
+ document.querySelectorAll('[data-equip-costume]').forEach(b=>b.addEventListener('click',()=>{state.equippedCostume=b.dataset.equipCostume;save();renderCostumes();renderAuditionSkill();toast(costumeById(state.equippedCostume).name+'に着替えたよ！')}));
+ document.querySelectorAll('[data-level-costume]').forEach(b=>b.addEventListener('click',()=>levelUpCostume(b.dataset.levelCostume)));
+ renderAuditionSkill();
 }
 function pullCostume(times){
  times=times===10?10:1;
@@ -90,6 +95,14 @@ function pullCostume(times){
  save();renderCostumes();
  $('costumePullResult').innerHTML='<h3>ガチャ結果 ✨</h3><div class="costume-result-grid">'+results.map(r=>'<div class="costume-result-item rarity-'+r.item.rarity.toLowerCase()+'"><span>'+r.item.icon+'</span><small>'+r.item.rarity+' · '+r.item.label+'</small><strong>'+r.item.name+'</strong><em>'+(r.duplicate?'所持済み → 衣装メダル +'+r.medals:'NEW！衣装を獲得')+'</em></div>').join('')+'</div><p class="notice">所持衣装 '+state.costumeOwned.length+'着 ／ 衣装メダル '+(state.costumeMedals||0)+'枚</p>';
  toast('衣装ガチャを引いたよ！');
+}
+function levelUpCostume(id){
+ const item=costumeById(id),level=costumeLevel(id),cost=level*100;
+ if(level>=10){toast('この衣装は最大レベルだよ！');return}
+ if((Number(state.budget)||0)<cost){toast('予算が足りないよ（必要：'+cost+'）');return}
+ if((Number(state.skillMaterials)||0)<1){toast('スキル強化素材が足りないよ。メダル交換所で交換できるよ！');return}
+ state.budget-=cost;state.skillMaterials-=1;state.costumeLevels[id]=level+1;
+ save();renderCostumes();refresh();toast(item.name+'が Lv.'+(level+1)+'にアップ！ スキル効果も強化されたよ');
 }
 function exchangeCostume(kind){
  const costs={R:10,SR:30,SSR:80};
@@ -110,6 +123,7 @@ function exchangeCostume(kind){
  toast(item.name+'を交換したよ！');
 }
 document.querySelectorAll('[data-costume-exchange]').forEach(b=>b.addEventListener('click',()=>exchangeCostume(b.dataset.costumeExchange)));
+if($('costumeSort'))$('costumeSort').addEventListener('change',renderCostumes);
 $('pullCostume').addEventListener('click',()=>pullCostume(1));
 $('pullCostumeTen').addEventListener('click',()=>pullCostume(10));
 renderCostumes();
@@ -118,6 +132,7 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(state));$('saveStatu
 function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),2400)}
 function refresh(){
  $('topName').textContent=state.name||'見習いプロデューサー';$('dayLabel').textContent=state.day+'日目';
+ if($('budgetValue'))$('budgetValue').textContent=(Number(state.budget)||0).toLocaleString();if($('fansValue'))$('fansValue').textContent=(Number(state.fans)||0).toLocaleString();
  const idolLabel=state.name||({mirai:'星降 未来',reika:'如月 麗華',komugi:'日高 こむぎ'}[state.chosenIdol]||'見習いアイドル');
  if($('homeGreetingName'))$('homeGreetingName').textContent=idolLabel;
  if($('homeIdolName'))$('homeIdolName').textContent=idolLabel;
@@ -187,7 +202,7 @@ document.querySelectorAll('.nav').forEach(b=>b.addEventListener('click',()=>show
 document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.goto)));
 document.querySelectorAll('[data-train]').forEach(b=>b.addEventListener('click',()=>{
  if(!state.sessionActive){showView('produce');toast('まず「プロデュースを開始する」を押してね');return}
- const k=b.dataset.train;const before=state[k];state[k]=Math.min(100,state[k]+5);state.bond=Math.min(100,state.bond+2);state.lessonDone=true;
+ const k=b.dataset.train;const trainingCost=20;if((Number(state.budget)||0)<trainingCost){toast('予算が足りないよ（レッスン費用：20）');return}state.budget-=trainingCost;const before=state[k];state[k]=Math.min(100,state[k]+5);state.bond=Math.min(100,state.bond+2);state.lessonDone=true;
  const msg=names[k]+'が '+(state[k]-before)+' アップ！ 親愛度 +2。行動を1回使ったよ。';
  $('lessonResult').textContent=msg;$('lessonResult').classList.add('show');$('produceResult').textContent=msg;$('produceResult').classList.add('show');spendAction(msg);
 }));
@@ -224,7 +239,7 @@ function playBattleCard(i){
  if(!battle||battle.done||battle.waiting)return;
  const c=battle.hand[i];if(!c)return;
  const stat=state[c.type]||0;let points=c.base+Math.floor(stat*.35);
- const activeCostume=costumeById(state.equippedCostume||'school'),skill=activeCostume.skill;
+ const activeCostume=costumeById(state.equippedCostume||'school'),skill=effectiveCostumeSkill(activeCostume);
  if(skill.kind==='all'||(skill.kind==='stat'&&skill.stat===c.type))points+=Math.floor(points*skill.amount/100);
  if(skill.kind==='flat')points+=skill.amount;
  if(skill.kind==='final'&&battle.turn===2)points+=Math.floor(points*skill.amount/100);
@@ -235,7 +250,7 @@ function playBattleCard(i){
  const rival=10+Math.floor(Math.random()*12)+Math.floor((state.vocal+state.dance+state.charm)/30);
  battle.rival+=rival;battle.turn++;battle.waiting=true;battle.hand=[];
  $('battleLog').textContent=c.name+'！ '+points+'pt獲得。ライバルは '+rival+'pt。'+combo;
- if(battle.turn>=3){battle.done=true;battle.waiting=false;const win=battle.player>=battle.rival;const reward=win?30:12;state.fans=(state.fans||0)+reward;state.bond=Math.min(100,state.bond+(win?5:2));$('liveResult').innerHTML=(win?'🏆 合格！':'✦ 惜しい結果…')+'<br>最終スコア '+battle.player+' 対 '+battle.rival+'<br>ファン +'+reward+' / 親愛度 +'+(win?5:2);state.liveDone=true;refresh();spendAction((win?'オーディション合格！':'オーディション終了。')+' ファン +'+reward);}
+ if(battle.turn>=3){battle.done=true;battle.waiting=false;const win=battle.player>=battle.rival;const reward=win?30:12;state.fans=(state.fans||0)+reward;const budgetReward=win?150:40;state.budget=(Number(state.budget)||0)+budgetReward;state.bond=Math.min(100,state.bond+(win?5:2));$('liveResult').innerHTML=(win?'🏆 合格！':'✦ 惜しい結果…')+'<br>最終スコア '+battle.player+' 対 '+battle.rival+'<br>ファン +'+reward+' / 予算 +'+budgetReward+' / 親愛度 +'+(win?5:2);state.liveDone=true;refresh();spendAction((win?'オーディション合格！':'オーディション終了。')+' ファン +'+reward);}
  else {battle.waiting=true;$('battleNext').style.display='inline-block';$('battleNext').textContent='次のターンへ　→';}
  renderBattle();
 }
@@ -243,10 +258,11 @@ $('backToProduce').addEventListener('click',()=>showView('produce'));
 $('goAudition').addEventListener('click',()=>{if(!state.sessionActive){toast('先に今日のプロデュースを開始してね');return}showView('live')});
 $('startLive').addEventListener('click',()=>{
  if(!state.sessionActive){toast('まず今日のプロデュースを開始してね');showView('produce');return}
- const liveCostume=costumeById(state.equippedCostume||'school');
- const startBonus=liveCostume.skill.kind==='start'?liveCostume.skill.amount:0;
+ const auditionCost=50;if((Number(state.budget)||0)<auditionCost){toast('オーディション参加費が足りないよ（50）');return}state.budget-=auditionCost;
+ const liveCostume=costumeById(state.equippedCostume||'school'),liveSkill=effectiveCostumeSkill(liveCostume);
+ const startBonus=liveSkill.kind==='start'?liveSkill.amount:0;
  battle={turn:0,player:startBonus,rival:0,lastType:null,combo:0,hand:drawHand(),done:false,waiting:false};
- $('liveResult').textContent='';$('battleLog').textContent='手札が配られた！ 着用スキル「'+liveCostume.skill.name+'」発動！'+(startBonus?' 開始ボーナス +'+startBonus+'pt。':'')+' 3ターンでライバルを上回ろう。';renderBattle();
+ $('liveResult').textContent='';$('battleLog').textContent='手札が配られた！ 着用スキル「'+liveSkill.name+'」Lv.'+liveSkill.level+'発動！'+(startBonus?' 開始ボーナス +'+startBonus+'pt。':'')+' 3ターンでライバルを上回ろう。';renderBattle();
 });
 $('battleNext').addEventListener('click',()=>{if(!battle||battle.done)return;battle.hand=drawHand();battle.waiting=false;$('battleNext').style.display='none';renderBattle()});
 
