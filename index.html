@@ -162,9 +162,13 @@ body{height:100dvh;overflow:hidden}
  <div class="storybox"><div class="eyebrow">SCENE 01 / THE FIRST WORDS</div><h3 id="storyTitle">「私、変われるかな？」</h3><p id="storyText">「歌もダンスも、まだまだだし……。みんなみたいに、キラキラできるのかな」私はぎゅっと手を握る。夢を口にするのは、思ったより勇気がいることだった。</p><p>そんなとき、親友のめるが隣に立ってくれた。自分自身にかけたい言葉を、選んでみよう。</p><div class="storychoices"><button class="secondary" data-choice="kind">「焦らなくていい。私らしく、一歩ずつ進もう」</button><button class="secondary" data-choice="bold">「まだできることがある。自分の可能性を信じよう」</button><button class="secondary" data-choice="honest">「不安な気持ちも、友達に話してみよう」</button></div><div class="result" id="storyResult"></div><button class="primary" id="nextStory" style="display:none;margin-top:14px">次の場面へ　→</button></div>
 </section>
 <section class="view" id="view-live">
- <div class="subhero"><div class="eyebrow">LIGHTS · MUSIC · YOU</div><h2>ライブステージ</h2><p>積み重ねた練習を、ステージの上で届けよう。今の能力がライブ評価に反映されるよ。</p></div>
- <div class="stage" id="stage"><div class="stageglow"></div><div class="stagecontent"><div class="stagestar">✦ ✧ ✦</div><div class="eyebrow" style="color:#d6c5ff;margin-top:15px">ÉTOILE ACADEMY PRESENTS</div><h2 id="stageName">FIRST LIGHT</h2><p id="stageDesc">あなたの最初のステージが、今はじまる。</p><button class="primary" id="startLive">ライブを開催する　→</button><div id="liveResult" style="margin-top:15px;font-size:12px;line-height:2"></div></div></div>
- <p class="notice">ライブもプロデュース中の行動を1回使います。限られた行動をどう使うか考えてみよう。</p>
+ <div class="subhero"><div class="eyebrow">LIVE AUDITION · CARD BATTLE</div><h2>ライブオーディション</h2><p>全3ターン。手札からカードを選んでスコアを稼ごう。同じタイプを連続で出すとコンボ、違うタイプでつなぐとブレイクボーナス！</p></div>
+ <div class="panel"><div class="sectionhead"><div><div class="eyebrow">LIVE STATUS</div><h3 id="battleHeading">ステージに立つ準備はできた？</h3></div><div class="daypill" id="battleTurn">TURN — / 3</div></div>
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0"><div style="background:#f7f0ff;border-radius:14px;padding:14px"><small style="color:#827d9a">YOUR SCORE</small><div id="playerScore" style="font-size:26px;font-weight:900">0</div></div><div style="background:#f3f7ff;border-radius:14px;padding:14px"><small style="color:#827d9a">RIVAL SCORE</small><div id="rivalScore" style="font-size:26px;font-weight:900">0</div></div></div>
+ <div id="battleLog" class="result show" style="margin:12px 0">開始すると3枚の手札が配られるよ。能力の高いカードだけでなく、コンボも狙おう。</div>
+ <div id="battleHand" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px 0"></div>
+ <button class="primary" id="startLive">オーディション開始　→</button><button class="secondary" id="battleNext" style="display:none;margin-left:8px">次のターン　→</button><div id="liveResult" style="margin-top:15px;font-size:13px;line-height:2"></div>
+ </div><p class="notice">オーディションはプロデュース中の行動を1回消費。3ターンの判断で最終スコアが変わるよ。</p>
 </section>
 <section class="view" id="view-map"><div class="subhero"><div class="eyebrow">FREE ROAM · CAMPUS LIFE</div><h2>学園を歩こう</h2><p>左下のスティックで移動。友達に近づいて「話す」を押そう。</p></div><div class="map-wrap"><div style="padding:13px 16px;background:white;font-weight:800;font-size:13px">Étoile Academy 校内マップ <span id="mapLocation" style="float:right;color:var(--muted);font-weight:500">中央通路</span></div><div class="school-map" id="schoolMap"><div class="map-path path-h"></div><div class="map-path path-v"></div><div class="map-building build-class">教室</div><div class="map-building build-gym">レッスン室</div><div class="map-building build-cafe">カフェテリア</div><div class="map-building build-garden">中庭</div><button class="map-person" id="mapMeru" style="left:61%;top:45%"><span class="person-head">♡</span>める</button><button class="map-person" id="mapArashi" style="left:31%;top:58%"><span class="person-head">⚡</span>嵐</button><button class="map-person" id="mapSetsuna" style="left:72%;top:70%"><span class="person-head">✦</span>セツナ</button><button class="map-person" id="mapTsukiyo" style="left:23%;top:34%"><span class="person-head">☾</span>月夜</button><div class="map-person player" id="mapPlayer" style="left:48%;top:57%"><span class="person-head">★</span><span id="mapPlayerName">あなた</span></div><div class="joy-base" id="joyBase"><div class="joy-knob" id="joyKnob"></div></div><button class="map-interact" id="mapInteract">近くの人と話す</button></div><div style="padding:12px 16px;background:white;color:var(--muted);font-size:11px">PCはWASD / 矢印キーでも移動できるよ。</div><div class="map-dialog" id="mapDialog"><h3 id="mapDialogTitle">夢見 める</h3><p id="mapDialogText"></p><button class="secondary" id="mapDialogClose">会話を閉じる</button></div></div></section><div class="footer">ÉTOILE ACADEMY · YOUR LIGHT, YOUR STORY · <span id="saveStatus">PROGRESS AUTO-SAVED</span></div>
 </main></div></div><div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -250,14 +254,50 @@ document.querySelectorAll('[data-choice]').forEach(b=>b.addEventListener('click'
  $('storyText').textContent=texts[choice];$('storyTitle').textContent='小さな勇気、大きな一歩';$('storyResult').textContent='エピソードクリア！ 親愛度 +8。彼女との距離が少し近づいた。';$('storyResult').classList.add('show');$('nextStory').style.display='inline-block';refresh();toast('エピソードクリア！ 親愛度 +8');
 }));
 $('nextStory').addEventListener('click',()=>{showView('home');toast('次のエピソードもお楽しみに')});
+// --- Three-turn strategic card audition ---
+let battle=null;
+const cardPool=[
+ {name:'サビで勝負！',type:'vocal',icon:'♫',base:12,desc:'歌唱力を活かす'},
+ {name:'キレキレターン',type:'dance',icon:'♧',base:12,desc:'ダンスで魅せる'},
+ {name:'視線を独り占め',type:'charm',icon:'✧',base:12,desc:'表現力で惹きつける'},
+ {name:'ハーモニー',type:'vocal',icon:'♪',base:9,desc:'安定した歌声'},
+ {name:'フォーメーション',type:'dance',icon:'❖',base:9,desc:'息の合った動き'},
+ {name:'ファンサービス',type:'charm',icon:'♡',base:9,desc:'観客の心をつかむ'}
+];
+const typeName={vocal:'ボーカル',dance:'ダンス',charm:'表現'};
+function drawHand(){return Array.from({length:3},()=>cardPool[Math.floor(Math.random()*cardPool.length)])}
+function renderBattle(){
+ $('playerScore').textContent=battle.player;$('rivalScore').textContent=battle.rival;
+ $('battleTurn').textContent=battle.done?'FINAL':('TURN '+(battle.turn+1)+' / 3');
+ $('battleHeading').textContent=battle.done?'オーディション結果':('第'+(battle.turn+1)+'ターン：カードを選ぼう');
+ $('battleHand').innerHTML=battle.done?'':battle.hand.map((c,i)=>'<button class="lesson" data-battle-card="'+i+'" style="display:block;text-align:left;min-height:125px;border:1px solid #e6dcf4;padding:13px"><span style="font-size:24px">'+c.icon+'</span><strong style="display:block;margin:8px 0;font-size:12px">'+c.name+'</strong><small style="color:#827d9a;line-height:1.6">'+typeName[c.type]+' / '+c.desc+'</small><b style="display:block;color:#8e80df;margin-top:8px">基礎 '+(c.base+Math.floor(state[c.type]*.35))+' pt</b></button>').join('');
+ document.querySelectorAll('[data-battle-card]').forEach(b=>b.addEventListener('click',()=>playBattleCard(Number(b.dataset.battleCard))));
+ $('startLive').style.display=battle&&!battle.done?'none':'inline-block';
+ $('startLive').textContent=battle&&battle.done?'もう一度挑戦':'オーディション開始　→';
+ $('battleNext').style.display=battle&&!battle.done&&battle.waiting?'inline-block':'none';
+}
+function playBattleCard(i){
+ if(!battle||battle.done||battle.waiting)return;
+ const c=battle.hand[i];if(!c)return;
+ const stat=state[c.type]||0;let points=c.base+Math.floor(stat*.35);
+ let combo='';
+ if(battle.lastType===c.type){points+=8+battle.combo*3;battle.combo++;combo=' 同タイプ連続！コンボ +'+(8+(battle.combo-1)*3)+'pt！';}
+ else if(battle.lastType){points+=5;battle.combo=0;combo=' タイプチェンジ・ブレイク +5pt！';}
+ battle.lastType=c.type;battle.player+=points;
+ const rival=10+Math.floor(Math.random()*12)+Math.floor((state.vocal+state.dance+state.charm)/30);
+ battle.rival+=rival;battle.turn++;battle.waiting=true;battle.hand=[];
+ $('battleLog').textContent=c.name+'！ '+points+'pt獲得。ライバルは '+rival+'pt。'+combo;
+ if(battle.turn>=3){battle.done=true;battle.waiting=false;const win=battle.player>=battle.rival;const reward=win?30:12;state.fans=(state.fans||0)+reward;state.bond=Math.min(100,state.bond+(win?5:2));$('liveResult').innerHTML=(win?'🏆 合格！':'✦ 惜しい結果…')+'<br>最終スコア '+battle.player+' 対 '+battle.rival+'<br>ファン +'+reward+' / 親愛度 +'+(win?5:2);state.liveDone=true;refresh();spendAction((win?'オーディション合格！':'オーディション終了。')+' ファン +'+reward);}
+ else {battle.waiting=true;$('battleNext').style.display='inline-block';$('battleNext').textContent='次のターンへ　→';}
+ renderBattle();
+}
 $('startLive').addEventListener('click',()=>{
- const stage=$('stage');stage.classList.remove('playing');void stage.offsetWidth;stage.classList.add('playing');
- const score=Math.min(100,Math.round((state.vocal+state.dance+state.charm)/3));const grade=score>=75?'S':score>=55?'A':score>=35?'B':'C';
- if(!state.sessionActive){toast('ライブもプロデュース中に挑戦しよう');showView('produce');return}
- state.liveDone=true;state.bond=Math.min(100,state.bond+3);refresh();
- $('liveResult').innerHTML='LIVE RESULT<br><span style="font-size:29px;font-weight:800;color:#f7dca2">GRADE '+grade+'</span><br>総合パフォーマンス '+score+' / 100<br><span style="color:#d9c7ff">観客の拍手が、夜空にきらめいた。親愛度 +3</span>';
- $('stageDesc').textContent=''+(state.name||'あなたのアイドル')+'の歌声が、会場いっぱいに響く。';toast('ライブ終了！ GRADE '+grade);spendAction('ライブを開催した！ GRADE '+grade+'。');
+ if(!state.sessionActive){toast('まず今日のプロデュースを開始してね');showView('produce');return}
+ battle={turn:0,player:0,rival:0,lastType:null,combo:0,hand:drawHand(),done:false,waiting:false};
+ $('liveResult').textContent='';$('battleLog').textContent='手札が配られた！ 3ターンでライバルを上回ろう。';renderBattle();
 });
+$('battleNext').addEventListener('click',()=>{if(!battle||battle.done)return;battle.hand=drawHand();battle.waiting=false;$('battleNext').style.display='none';renderBattle()});
+
 
 // --- Daily produce session: 3 actions, explicitly started by the player ---
 function renderProduce(){
