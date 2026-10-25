@@ -90,7 +90,7 @@ function showView(name){
   toast('オーディションに参加するには、先にプロデュースを開始してね');
   name='produce';
  }
- if(document.getElementById('appShell'))document.getElementById('appShell').classList.toggle('produce-mode',name==='produce'&&!!state.sessionActive);
+ if(document.getElementById('appShell'))document.getElementById('appShell').classList.toggle('produce-mode',(name==='produce'||name==='live')&&!!state.sessionActive);
  const target=$('view-'+name);if(!target)return;
  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v===target));
  document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('active',b.dataset.view===name));
@@ -148,6 +148,8 @@ function playBattleCard(i){
  else {battle.waiting=true;$('battleNext').style.display='inline-block';$('battleNext').textContent='次のターンへ　→';}
  renderBattle();
 }
+$('backToProduce').addEventListener('click',()=>showView('produce'));
+$('goAudition').addEventListener('click',()=>{if(!state.sessionActive){toast('先に今日のプロデュースを開始してね');return}showView('live')});
 $('startLive').addEventListener('click',()=>{
  if(!state.sessionActive){toast('まず今日のプロデュースを開始してね');showView('produce');return}
  battle={turn:0,player:0,rival:0,lastType:null,combo:0,hand:drawHand(),done:false,waiting:false};
@@ -163,6 +165,7 @@ function renderProduce(){
  $('actionsLeft').textContent='行動 '+(active?state.actionsLeft:3)+' / 3';
  $('produceDescription').textContent=active?'何をするか選ぼう。行動回数を使い切ると今日の活動は終了。':(state.actionsLeft===0&&state.day>1?'今日の活動はおしまい。休んで、次の日にまた始めよう。':'開始ボタンを押すまでは、レッスンや会話で行動回数は消費されません。');
  $('startProduce').style.display=active?'none':'inline-block';
+ $('goAudition').style.display=active?'inline-block':'none';
  $('produceActions').style.display=active?'grid':'none';
  $('finishProduce').style.display=active?'inline-block':'none';
 }
