@@ -1,397 +1,146 @@
-
-// Runtime guard: surface unexpected errors so a broken interaction is diagnosable.
-window.addEventListener('error', function(event){
-  try {
-    const t=document.getElementById('toast');
-    if(t){
-      const detail=(event.message||'不明なエラー')+(event.lineno?' ('+event.lineno+'行目)':'');
-      t.textContent='動作エラー：'+detail;
-      t.classList.add('show');
-      t.style.zIndex='999999';
-      t.style.maxWidth='min(92vw,700px)';
-      t.style.whiteSpace='normal';
-    }
-  } catch(_) {}
-  console.error('Étoile Academy runtime error:', event.error || event.message, event.filename, event.lineno);
-});
-window.addEventListener('unhandledrejection', function(event){
-  try {
-    const t=document.getElementById('toast');
-    if(t){t.textContent='動作エラー：'+String(event.reason&&event.reason.message||event.reason||'非同期処理に失敗');t.classList.add('show');t.style.zIndex='999999';}
-  } catch(_) {}
-  console.error('Étoile Academy unhandled rejection:',event.reason);
-});
-const KEY='etoile-academy-save-v2';
-const initial={name:'',fairyName:'',chosenIdol:'mirai',setupDone:false,prologueSeen:false,color:'pink',type:'努力家',vocal:12,dance:10,charm:14,bond:5,day:1,lessonDone:false,storyDone:false,liveDone:false,storyChoice:'',sessionActive:false,actionsLeft:0,friendBond:0,friendTalks:0,costumeTickets:5,costumeOwned:['school'],equippedCostume:'school',costumeMedals:0,budget:500,fans:0,skillMaterials:2,costumeLevels:{}};
-let state={...initial};
-try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved&&typeof saved==='object')state={...initial,...saved}}catch(e){}
-const $=id=>document.getElementById(id);
-
-// --- Synthesized sound effects (no external audio files required) ---
-const SFX_KEY='etoile-academy-sfx';
-let sfxEnabled=true, sfxContext=null;
-try { sfxEnabled=localStorage.getItem(SFX_KEY)!=='off'; } catch(e) {}
-function syncSoundToggle(){
- const b=$('soundToggle'); if(!b)return;
- b.textContent=sfxEnabled?'🔊 SE ON':'🔇 SE OFF';
- b.setAttribute('aria-pressed',String(sfxEnabled));
- b.title=sfxEnabled?'効果音をオフにする':'効果音をオンにする';
-}
-syncSoundToggle();
-function playTone(freq, start, duration, type='sine', volume=.045, endFreq=null){
- if(!sfxEnabled)return;
- try{
-  const AudioCtx=window.AudioContext||window.webkitAudioContext;
-  if(!AudioCtx)return;
-  if(!sfxContext)sfxContext=new AudioCtx();
-  if(sfxContext.state==='suspended')sfxContext.resume();
-  const now=sfxContext.currentTime+(start||0), osc=sfxContext.createOscillator(), gain=sfxContext.createGain();
-  osc.type=type;osc.frequency.setValueAtTime(freq,now);
-  if(endFreq)osc.frequency.exponentialRampToValueAtTime(Math.max(1,endFreq),now+duration);
-  gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(volume,now+.012);gain.gain.exponentialRampToValueAtTime(.0001,now+duration);
-  osc.connect(gain);gain.connect(sfxContext.destination);osc.start(now);osc.stop(now+duration+.02);
- }catch(e){}
-}
-function playSfx(kind='tap'){
- if(!sfxEnabled)return;
- if(kind==='tap'){playTone(620,0,.055,'sine',.025,480);return}
- if(kind==='card'){playTone(520,0,.10,'triangle',.045,760);playTone(780,.065,.13,'sine',.035,1040);return}
- if(kind==='success'){playTone(523,0,.18,'sine',.045);playTone(659,.12,.18,'sine',.045);playTone(784,.24,.28,'sine',.05);return}
- if(kind==='gacha'){
-  playTone(330,0,.14,'triangle',.035,440);playTone(440,.10,.14,'triangle',.04,660);
-  playTone(880,.22,.24,'sine',.05,1320);return;
- }
- if(kind==='rare'){playTone(660,0,.16,'sine',.04);playTone(880,.12,.18,'sine',.045);playTone(1175,.24,.35,'sine',.055);return}
-}
-document.addEventListener('click',e=>{
- const button=e.target.closest('button');
- if(!button)return;
- if(button.id==='soundToggle'){
-  sfxEnabled=!sfxEnabled;
-  try{localStorage.setItem(SFX_KEY,sfxEnabled?'on':'off')}catch(e){}
-  syncSoundToggle();
-  if(sfxEnabled)playSfx('success');
-  return;
- }
- if(button.matches('[data-battle-card]'))playSfx('card');
- else if(button.id==='startLive'||button.id==='beginPrologue'||button.id==='startProduce')playSfx('success');
- else if(button.id==='pullCostume'||button.id==='pullCostumeTen'||button.matches('[data-pull-costume]'))playSfx('gacha');
- else playSfx('tap');
-});
-const names={vocal:'歌唱力',dance:'ダンス',charm:'表現力'};
-
-// --- Costume gacha and wardrobe ---
-const costumeCatalog=[
- {id:'school',name:'スクール制服',rarity:'N',label:'ノーマル',icon:'🎀',desc:'学園生活の定番。初めての一着。',skill:{name:'はじめの一歩',desc:'ライブ開始時にスコア +8pt',kind:'start',amount:8}},
- {id:'after',name:'放課後カジュアル',rarity:'N',label:'ノーマル',icon:'🧥',desc:'放課後のお出かけにぴったり。',skill:{name:'リラックス',desc:'毎ターン +2pt',kind:'flat',amount:2}},
- {id:'sporty',name:'スポーティーウェア',rarity:'N',label:'ノーマル',icon:'👟',desc:'動きやすさ抜群のレッスンウェア。',skill:{name:'レッスンの成果',desc:'ダンスカードのスコア +5%',kind:'stat',stat:'dance',amount:5}},
- {id:'classic',name:'クラシックワンピース',rarity:'N',label:'ノーマル',icon:'👗',desc:'上品で落ち着いたクラシカルな一着。',skill:{name:'クラシカルスマイル',desc:'表現カードのスコア +5%',kind:'stat',stat:'charm',amount:5}},
- {id:'summer',name:'サマーカジュアル',rarity:'N',label:'ノーマル',icon:'🌻',desc:'夏の日差しに似合う爽やかな装い。',skill:{name:'サマーブリーズ',desc:'毎ターン +2pt',kind:'flat',amount:2}},
- {id:'winter',name:'ウィンターニット',rarity:'N',label:'ノーマル',icon:'🧶',desc:'あたたかいニットで冬も元気に。',skill:{name:'ぬくもり',desc:'ライブ開始時にスコア +8pt',kind:'start',amount:8}},
- {id:'pastel',name:'パステルステージ',rarity:'R',label:'レア',icon:'🩰',desc:'淡いピンクとリボンがかわいいステージ衣装。',skill:{name:'スイートスマイル',desc:'表現カードのスコア +8%',kind:'stat',stat:'charm',amount:8}},
- {id:'marine',name:'マリン・シンフォニー',rarity:'R',label:'レア',icon:'🫧',desc:'爽やかなブルーのマリンステージ衣装。',skill:{name:'ブルーウェーブ',desc:'ボーカルカードのスコア +8%',kind:'stat',stat:'vocal',amount:8}},
- {id:'lemon',name:'レモンソーダポップ',rarity:'R',label:'レア',icon:'🍋',desc:'明るい黄色が弾けるポップな衣装。',skill:{name:'ポップフィーバー',desc:'毎ターン +3pt',kind:'flat',amount:3}},
- {id:'berry',name:'スイート・ベリー',rarity:'R',label:'レア',icon:'🍓',desc:'ベリーカラーが甘くきらめく衣装。',skill:{name:'ベリーキュート',desc:'表現カードのスコア +8%',kind:'stat',stat:'charm',amount:8}},
- {id:'mint',name:'ミント・フロート',rarity:'R',label:'レア',icon:'🍈',desc:'ミントグリーンの軽やかなステージ衣装。',skill:{name:'ミントステップ',desc:'ダンスカードのスコア +8%',kind:'stat',stat:'dance',amount:8}},
- {id:'cherry',name:'チェリーブロッサム',rarity:'R',label:'レア',icon:'🌺',desc:'鮮やかな花色がステージに映える。',skill:{name:'花咲くコンボ',desc:'コンボボーナス +4pt',kind:'combo',amount:4}},
- {id:'midnight',name:'ミッドナイト・ジャズ',rarity:'R',label:'レア',icon:'🎷',desc:'夜のステージを彩る大人っぽい装い。',skill:{name:'リズムに乗って',desc:'コンボボーナス +8pt',kind:'combo',amount:8}},
- {id:'snowdrop',name:'スノードロップ',rarity:'R',label:'レア',icon:'❄️',desc:'雪の結晶を思わせる透明感のある衣装。',skill:{name:'スノーグレイス',desc:'ライブ開始時にスコア +12pt',kind:'start',amount:12}},
- {id:'starry',name:'星降るナイトドレス',rarity:'SR',label:'スーパーレア',icon:'🌙',desc:'星の刺繍がきらめく夜空のドレス。',skill:{name:'スターダスト',desc:'ライブ開始時にスコア +20pt',kind:'start',amount:20}},
- {id:'sakura',name:'桜色プリンセス',rarity:'SR',label:'スーパーレア',icon:'🌸',desc:'春の花びらをまとった華やかな衣装。',skill:{name:'花びらの祝福',desc:'表現カードのスコア +12%',kind:'stat',stat:'charm',amount:12}},
- {id:'crystal',name:'クリスタル・セレナーデ',rarity:'SR',label:'スーパーレア',icon:'💎',desc:'クリスタルの輝きをまとった舞台衣装。',skill:{name:'クリスタルボイス',desc:'ボーカルカードのスコア +12%',kind:'stat',stat:'vocal',amount:12}},
- {id:'angel',name:'エンジェル・ウィング',rarity:'SR',label:'スーパーレア',icon:'🪽',desc:'羽のように軽やかな天使のドレス。',skill:{name:'エンジェルコール',desc:'3ターン目のスコア +15%',kind:'final',amount:15}},
- {id:'rose',name:'ローズ・ノクターン',rarity:'SR',label:'スーパーレア',icon:'🥀',desc:'深紅の薔薇が印象的な夜会の衣装。',skill:{name:'ローズノクターン',desc:'毎ターン +5pt',kind:'flat',amount:5}},
- {id:'stardust',name:'スターダスト・パレード',rarity:'SR',label:'スーパーレア',icon:'🎆',desc:'星屑が舞う華やかなパレード衣装。',skill:{name:'スターダストパレード',desc:'コンボボーナス +10pt',kind:'combo',amount:10}},
- {id:'royal',name:'ロイヤル・パープル',rarity:'SSR',label:'スーパースペシャルレア',icon:'👑',desc:'紫と金の装飾が輝く特別なドレス。',skill:{name:'ロイヤルステージ',desc:'全カードのスコア +8%',kind:'all',amount:8}},
- {id:'moon',name:'ムーンライト・ベル',rarity:'SSR',label:'スーパースペシャルレア',icon:'✨',desc:'月明かりを閉じ込めた幻想的な衣装。',skill:{name:'月光の奇跡',desc:'3ターン目のスコア +20%',kind:'final',amount:20}},
- {id:'eternal',name:'エターナル・スター',rarity:'SSR',label:'スーパースペシャルレア',icon:'🌟',desc:'永遠の星をイメージした究極のステージ衣装。',skill:{name:'永遠の輝き',desc:'コンボボーナス +15pt',kind:'combo',amount:15}},
- {id:'prism',name:'プリズム・レガリア',rarity:'SSR',label:'スーパースペシャルレア',icon:'🌈',desc:'七色の光が集まる最上級の衣装。',skill:{name:'プリズムフィーバー',desc:'全カードのスコア +10%',kind:'all',amount:10}}
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const SAVE_KEY = 'etoile-academy-rebuild-save-v1';
+const SOUND_KEY = 'etoile-academy-sfx';
+const idols = {
+ mirai:{name:'星降 未来',emoji:'🌟',role:'歌で心を動かす、まっすぐな努力家。',special:'vocal',voice:'「失敗したって、次はもっと輝けるよ！」'},
+ meru:{name:'夢見 める',emoji:'🎀',role:'表情と演技が得意な、負けず嫌い。',special:'charm',voice:'「べ、別に負けるつもりなんてないんだから！」'},
+ setsuna:{name:'夜永 セツナ',emoji:'🌙',role:'キレのあるダンスが武器のクールな実力派。',special:'dance',voice:'「結果で見せる。それだけだろ。」'}
+};
+const costumes = [
+ {id:'uniform',name:'はじまりの制服',emoji:'🎀',rarity:'N',desc:'基本の衣装。どんな一日にも似合う。',bonus:0},
+ {id:'starlight',name:'スターライト',emoji:'🌟',rarity:'R',desc:'歌の評価が少し上がるステージ衣装。',bonus:2},
+ {id:'moon',name:'ムーンリット',emoji:'🌙',rarity:'SR',desc:'集中力が増す夜色の衣装。',bonus:4},
+ {id:'crown',name:'プリズムクラウン',emoji:'👑',rarity:'SSR',desc:'大舞台で伝説を作る特別な衣装。',bonus:7},
+ {id:'bloom',name:'ブルームドレス',emoji:'🌸',rarity:'SR',desc:'ファンの心をつかむ華やかなドレス。',bonus:4},
+ {id:'neon',name:'ネオンビート',emoji:'💜',rarity:'R',desc:'ダンスの勢いを引き出す衣装。',bonus:2}
 ];
-function costumeById(id){return costumeCatalog.find(c=>c.id===id)||costumeCatalog[0]}
-function costumeLevel(id){if(!state.costumeLevels||typeof state.costumeLevels!=='object')state.costumeLevels={};return Math.max(1,Number(state.costumeLevels[id])||1)}
-function effectiveCostumeSkill(costume){const level=costumeLevel(costume.id);return {...costume.skill,amount:costume.skill.amount+(level-1)*2,level}}
-function renderAuditionSkill(){if(!$('auditionSkillName'))return;const c=costumeById(state.equippedCostume||'school'),s=effectiveCostumeSkill(c);$('auditionSkillName').textContent=s.name+' · Lv.'+s.level;$('auditionSkillDesc').textContent=c.skill.desc+'（現在効果：'+s.amount+(s.kind==='stat'||s.kind==='all'||s.kind==='final'?'%':'pt')+'）';const conditions={start:'発動条件：オーディション開始時に自動発動',flat:'発動条件：カードをプレイするたび',stat:'発動条件：'+({vocal:'ボーカル',dance:'ダンス',charm:'表現'}[s.stat]||'指定')+'カードをプレイしたとき',all:'発動条件：すべてのカードをプレイしたとき',combo:'発動条件：同じタイプのカードを連続で出したとき',final:'発動条件：第3ターンにカードをプレイしたとき'};$('auditionSkillCondition').textContent=conditions[s.kind]||'発動条件：ライブ中'}
-function renderCostumes(){
- if(!$('costumeTickets'))return;
- state.costumeTickets=Math.max(0,Number(state.costumeTickets)||0);
- if(!Array.isArray(state.costumeOwned)||!state.costumeOwned.length)state.costumeOwned=['school'];
- if(!state.costumeOwned.includes('school'))state.costumeOwned.unshift('school');
- if(!state.costumeOwned.includes(state.equippedCostume))state.equippedCostume='school';
- if(!state.costumeLevels||typeof state.costumeLevels!=='object')state.costumeLevels={};
- const equipped=costumeById(state.equippedCostume);
- $('costumeTickets').textContent=state.costumeTickets;$('costumeMedals').textContent=Number(state.costumeMedals)||0;
- if($('skillMaterials'))$('skillMaterials').textContent=Number(state.skillMaterials)||0;
- $('equippedCostumeArt').textContent=equipped.icon;$('equippedCostumeName').textContent=equipped.name;
- $('equippedCostumeDesc').textContent=equipped.desc+' スキル「'+equipped.skill.name+'」：'+equipped.skill.desc+'（Lv.'+costumeLevel(equipped.id)+'）';
- $('costumeOwnedCount').textContent=state.costumeOwned.length+'着';$('costumeFeature').className='costume-feature rarity-'+equipped.rarity.toLowerCase();
- const sort=$('costumeSort')?$('costumeSort').value:'rarity',rarityOrder={SSR:0,SR:1,R:2,N:3},owned=state.costumeOwned.map(id=>costumeById(id));
- owned.sort((a,b)=>sort==='name'?a.name.localeCompare(b.name,'ja'):sort==='level'?costumeLevel(b.id)-costumeLevel(a.id)||rarityOrder[a.rarity]-rarityOrder[b.rarity]:rarityOrder[a.rarity]-rarityOrder[b.rarity]||a.name.localeCompare(b.name,'ja'));
- $('costumeGrid').innerHTML=owned.map(c=>{const isEquipped=c.id===state.equippedCostume,lv=costumeLevel(c.id),cost=lv*100,skill=effectiveCostumeSkill(c);return '<article class="costume-card rarity-'+c.rarity.toLowerCase()+' '+(isEquipped?'is-equipped':'')+'"><div class="costume-card-art">'+c.icon+'</div><span class="costume-rarity">'+c.label+'</span><strong>'+c.name+'</strong><span class="costume-level-badge">COSTUME Lv.'+lv+'</span><p>'+c.desc+'</p><div class="costume-skill-mini">✦ '+c.skill.name+'<small>'+c.skill.desc+' · 現在効果 '+skill.amount+(c.skill.kind==='stat'||c.skill.kind==='all'||c.skill.kind==='final'?'%':'pt')+'</small></div><div class="costume-card-actions"><button class="'+(isEquipped?'secondary':'primary')+'" data-equip-costume="'+c.id+'" '+(isEquipped?'disabled':'')+'>'+(isEquipped?'着用中':'着替える')+'</button><button class="secondary levelup-costume" data-level-costume="'+c.id+'">Lv.UP 💎'+cost+' +✨1</button></div></article>'}).join('');
- document.querySelectorAll('[data-equip-costume]').forEach(b=>b.addEventListener('click',()=>{state.equippedCostume=b.dataset.equipCostume;save();renderCostumes();renderAuditionSkill();toast(costumeById(state.equippedCostume).name+'に着替えたよ！')}));
- document.querySelectorAll('[data-level-costume]').forEach(b=>b.addEventListener('click',()=>levelUpCostume(b.dataset.levelCostume)));
- renderAuditionSkill();
+const eventPool = [
+ {icon:'📱',title:'謎の匿名メッセージ',body:'「フェスのセンターは、あなたじゃない方がいい」知らないアカウントから届いた。どうする？',choices:[['仲間に相談する','bond',3,'ひとりで抱えないことにした。仲間との信頼が深まった。'],['練習で見返す','vocal',3,'悔しさを練習にぶつけた。歌唱力が伸びた。'],['送り主を探る','charm',2,'冷静に情報を集めた。表現力が磨かれた。']]},
+ {icon:'🎤',title:'突然の代役オファー',body:'先輩が体調不良で、校内ステージの代役が必要らしい。準備時間はほとんどない。',choices:[['勇気を出して引き受ける','fans',12,'急きょステージに立った。新しいファンが増えた！'],['仲間と一緒なら、と提案','bond',4,'仲間と一緒に挑戦することに。絆が強まった。'],['今回は見送って練習する','dance',3,'基礎を固める時間にした。ダンスが上達。']]},
+ {icon:'☕',title:'ライバルの意外な一面',body:'ライバルの凛音が、誰もいない練習室で何度も同じ振りを練習していた。声をかける？',choices:[['アドバイスを交換する','bond',3,'互いの努力を認め合った。絆が少し深まった。'],['勝負を申し込む','fans',8,'次のステージで勝負する約束をした。気合が入る！'],['静かに自分の練習へ','charm',2,'相手の努力に刺激を受けた。表現力が上がった。']]},
+ {icon:'🌧️',title:'雨の日の帰り道',body:'練習帰り、落ち込んでいる後輩を見かけた。予定より帰りが遅くなりそう。',choices:[['話を聞いてあげる','bond',4,'誰かを支えることも、アイドルの大切な仕事。絆が深まった。'],['一緒にダンスを練習','dance',3,'雨音に合わせてステップを踏んだ。ダンスが上達！'],['励ましの歌を贈る','vocal',3,'歌に気持ちを込めた。歌唱力が上がった。']]},
+ {icon:'📸',title:'バズるチャンス！',body:'あなたの練習動画が少し話題に。今なら発信次第で注目を集められそう。',choices:[['歌のワンフレーズを投稿','fans',15,'動画が広がり、ファンが増えた！'],['仲間との裏側を投稿','bond',3,'飾らない姿が好評。仲間との絆も深まった。'],['次の完成度を優先する','charm',3,'焦らず作品を磨くことにした。表現力が上がった。']]},
+ {icon:'🧁',title:'差し入れ争奪戦',body:'練習室に限定スイーツが届いた。最後のひとつをめぐって仲間と目が合う。',choices:[['半分こしよう','bond',4,'分け合ったおいしさで、場が和んだ。絆が深まった。'],['早食い勝負をする','fans',5,'なぜか見ていた後輩にウケた。ファンが少し増えた。'],['糖分を補給して練習','vocal',2,'元気を取り戻した。歌唱力が上がった。']]},
+ {icon:'📰',title:'根も葉もないうわさ',body:'校内掲示板に、あなたについての妙なうわさが書かれている。',choices:[['事実を落ち着いて説明','charm',3,'誠実な対応で誤解が解けた。表現力が上がった。'],['仲間に支えてもらう','bond',4,'味方がいると実感できた。絆が深まった。'],['ステージで実力を示す','fans',10,'パフォーマンスで空気を変えた。ファンが増えた！']]}
+];
+let state;
+let pendingEvent = null;
+let battle = null;
+let toastTimer;
+function freshState(name='ひかり', idol='mirai') {
+ const stats={vocal:12,dance:12,charm:12,bond:10};
+ stats[idols[idol].special]+=7;
+ return {name:name||'ひかり',idol,day:1,stats,fans:0,jewels:100,actions:2,doneActions:[],sessionStarted:false,storyIndex:0,storySeen:[],logs:[],eventDays:[],closet:['uniform'],equipped:'uniform',ending:false,won:false,liveAttempted:false,liveScore:0,sfx:localStorage.getItem(SOUND_KEY)!=='off'};
 }
-function pullCostume(times){
- times=times===10?10:1;
- if(state.costumeTickets<times){toast('チケットが足りないよ！ 今日のプロデュースを終えてチケットをもらおう');return}
- state.costumeTickets-=times;
- const results=[];
- for(let i=0;i<times;i++){
-  const roll=Math.random()*100;
-  const rarity=roll<3?'SSR':roll<15?'SR':roll<45?'R':'N';
-  const pool=costumeCatalog.filter(c=>c.rarity===rarity);
-  const item=pool[Math.floor(Math.random()*pool.length)];
-  if(state.costumeOwned.includes(item.id)){const medals=({N:1,R:2,SR:4,SSR:8}[item.rarity]||1);state.costumeMedals=(Number(state.costumeMedals)||0)+medals;results.push({item,duplicate:true,medals})}
-  else{state.costumeOwned.push(item.id);results.push({item,duplicate:false})}
- }
- save();renderCostumes();
- $('costumePullResult').innerHTML='<h3>ガチャ結果 ✨</h3><div class="costume-result-grid">'+results.map(r=>'<div class="costume-result-item rarity-'+r.item.rarity.toLowerCase()+'"><span>'+r.item.icon+'</span><small>'+r.item.rarity+' · '+r.item.label+'</small><strong>'+r.item.name+'</strong><em>'+(r.duplicate?'所持済み → 衣装メダル +'+r.medals:'NEW！衣装を獲得')+'</em></div>').join('')+'</div><p class="notice">所持衣装 '+state.costumeOwned.length+'着 ／ 衣装メダル '+(state.costumeMedals||0)+'枚</p>';
- playSfx(results.some(r=>r.item.rarity==='SSR')?'rare':'gacha');
- toast('衣装ガチャを引いたよ！');
+function loadState(){try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return null;const s=JSON.parse(raw);if(!s||!s.stats||!idols[s.idol]||!Number.isFinite(s.day))return null;return s;}catch(e){return null;}}
+function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));}catch(e){}}
+function clamp(v,min=0,max=100){return Math.max(min,Math.min(max,Number(v)||0));}
+function statName(key){return ({vocal:'歌唱力',dance:'ダンス',charm:'表現力',bond:'絆'})[key]||key;}
+function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2400);}
+let audioCtx=null;
+function sfx(kind='tap'){if(!state?.sfx)return;try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;audioCtx=audioCtx||new C();if(audioCtx.state==='suspended')audioCtx.resume();const now=audioCtx.currentTime;const seq=kind==='win'?[660,830,990]:kind==='event'?[440,660]:kind==='live'?[523,659,784]:[kind==='rare'?880:kind==='card'?590:440];seq.forEach((hz,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=kind==='rare'?'triangle':'sine';o.frequency.setValueAtTime(hz,now+i*.1);g.gain.setValueAtTime(.0001,now+i*.1);g.gain.exponentialRampToValueAtTime(.09,now+i*.1+.015);g.gain.exponentialRampToValueAtTime(.0001,now+i*.1+.16);o.connect(g);g.connect(audioCtx.destination);o.start(now+i*.1);o.stop(now+i*.1+.17);});}catch(e){}}
+function updateSoundButton(){$('soundToggle').textContent=state?.sfx?'🔊 SE ON':'🔇 SE OFF';$('soundToggle').setAttribute('aria-pressed',String(!!state?.sfx));}
+function showScreen(screen){document.querySelectorAll('.screen').forEach(el=>el.classList.toggle('active',el.id==='screen-'+screen));document.querySelectorAll('.nav[data-screen]').forEach(el=>el.classList.toggle('active',el.dataset.screen===screen));if(screen==='home')renderHome();if(screen==='plan')renderPlan();if(screen==='story')renderStory();if(screen==='live')renderLive();if(screen==='closet')renderCloset();window.scrollTo({top:0,behavior:'smooth'});}
+function statusCard(key,icon){const v=state.stats[key];return '<div class="stat-card"><div class="stat-top">'+statName(key)+'<span class="stat-icon">'+icon+'</span></div><div class="stat-number">'+v+'<small> / 100</small></div><div class="meter"><span style="width:'+v+'%"></span></div></div>';}
+function nextStoryText(){const s=state.storyIndex;const char=idols[state.idol].name;const lines=[
+ {label:'EPISODE 01 · THE FIRST STEP',title:'「センターに立ちたい」',body:'入学して初めての朝。掲示板に貼られた学園フェスのポスターを見て、あなたは思わず足を止めた。\n\n7日後、学園でいちばん大きなステージが開かれる。けれど、同じ夢を追うライバル・凛音は、すでに完成されたスターだった。\n\n'+char+'「ねえ。簡単じゃないのはわかってる。でも……本気で目指してみない？」',choices:[['「絶対にセンターを取ろう！」','bold'],['「まずは自分たちらしいステージを作ろう」','kind'],['「仲間を集めて作戦会議しよう」','team']]},
+ {label:'EPISODE 02 · A RIVAL',title:'「勝ちたい理由」',body:'練習室の鏡越しに、凛音と目が合った。\n\n凛音「勝つって言うだけなら簡単。あなたは、何を見せてくれるの？」\n\n言い返したい。でも、彼女の言葉が胸に残る。',choices:[['正面から勝負を宣言する','bold'],['相手の実力を認め、学べるところを探す','kind'],['自分たちの強みを仲間と話し合う','team']]},
+ {label:'EPISODE 03 · THE CRACK',title:'「うまくいかない日」',body:'何度合わせても、振り付けがそろわない。焦りから言葉が強くなって、練習室に沈黙が落ちた。\n\n'+char+'「……このままじゃ、みんなバラバラになっちゃう」\n\nあなたは、どうする？',choices:[['いったん休憩して、全員の話を聞く','kind'],['目標を決め直して、もう一度合わせる','bold'],['それぞれの得意分野を活かす構成に変える','team']]},
+ {label:'EPISODE 04 · THE SECRET',title:'「ライバルの涙」',body:'夜の練習室。ひとりで残っていた凛音が、初めて弱音をこぼした。\n\n凛音「期待されるほど、失敗できなくなる。あなたたちがまぶしく見える日もあるんだ」\n\nライバルは、ただの敵じゃないのかもしれない。',choices:[['「私も怖いよ」と本音を話す','kind'],['「それでもステージでは全力で勝負しよう」','bold'],['一緒に練習しようと誘う','team']]},
+ {label:'EPISODE 05 · THE CHOICE',title:'「最後の作戦会議」',body:'フェスまであと少し。歌を磨くか、ダンスをそろえるか、それとも表現で勝負するか。全部を完璧にする時間はない。\n\n'+char+'「何を選んでも、私たちのステージ。最後まで信じてる」',choices:[['歌を主役にする','vocal'],['ダンスを主役にする','dance'],['表現と絆を主役にする','charm']]}
+];return lines[Math.min(s,lines.length-1)];}
+function renderHome(){
+ const idol=idols[state.idol];const day=Math.min(state.day,7);
+ $('dayBadge').textContent='SEASON 01 · DAY '+day+' / 7';$('jewelCount').textContent=state.jewels;$('fanCount').textContent=state.fans;
+ $('screen-home').innerHTML='<div class="eyebrow">ÉTOILE ACADEMY · YOUR STORY</div><h1>おかえり、'+esc(state.name)+'。<br><em>夢の続きはここから。</em></h1><p class="subcopy">学園フェスまであと'+Math.max(0,8-state.day)+'日。行動は1日2回。何を磨き、誰を信じるかで結末が変わる。</p><div class="hero"><div class="hero-copy"><span class="pill">DAY '+day+' · '+(state.ending?'FESTIVAL COMPLETE':'THE ROAD TO THE FESTIVAL')+'</span><h2>「私たちの光で、<br><em>会場を染めよう。</em>」</h2><p>'+esc(idol.voice)+'<br>'+esc(idol.role)+'</p><div class="hero-actions"><button class="primary" data-go="plan">'+(state.ending?'もう一度遊ぶ':'今日の行動を選ぶ')+'　→</button><button class="secondary" data-go="story">物語を読む　▤</button></div></div><div class="hero-art"><div class="orbit"></div><div class="hero-idol">'+idol.emoji+'</div><div class="hero-caption"><strong>'+esc(idol.name)+'</strong><small>YOUR PARTNER</small></div></div></div><div class="section-title"><h3>いまのステータス</h3><small>毎日の選択で変化する</small></div><div class="stats-grid">'+statusCard('vocal','♫')+statusCard('dance','♧')+statusCard('charm','✧')+statusCard('bond','♡')+'</div><div class="two-col"><div class="card"><div class="card-head"><h3>今日のタイムライン</h3><span class="tag">'+(state.ending?'完結':'DAY '+day)+'</span></div><div class="day-list">'+[['09:00','朝の選択','今日の方針を決める',state.doneActions.length>0],['14:00','予想外の出来事','選択でステータスや人間関係が変化',state.eventDays.includes(state.day)],['17:00','オーディション','3ターンの勝負でファンを獲得',state.liveAttempted]].map(r=>'<div class="day-row '+(r[3]?'done':'')+'"><span class="day-time">'+r[0]+'</span><span class="day-dot"></span><span><strong>'+r[1]+'</strong><small>'+r[2]+'</small></span><span class="day-state">'+(r[3]?'完了':'予定')+'</span></div>').join('')+'</div></div><div class="rival-card"><div class="eyebrow">YOUR RIVAL · RINNE</div><h3>天城 凛音</h3><p>完成度の高いパフォーマンスで注目を集める、学園のエース。最後のフェスであなたを待っている。</p><div class="rival-score"><span>あなたの総合力</span><b>'+totalPower()+'</b></div><div class="rival-meter"><span style="width:'+Math.min(100,totalPower())+'%"></span></div><div class="rival-score"><span>凛音の予想スコア</span><b>'+rivalPower()+'</b></div><div class="rival-meter"><span style="width:'+Math.min(100,rivalPower())+'%;background:linear-gradient(90deg,#efc982,#ef9fbc)"></span></div></div></div>';
 }
-function levelUpCostume(id){
- const item=costumeById(id),level=costumeLevel(id),cost=level*100;
- if(level>=10){toast('この衣装は最大レベルだよ！');return}
- if((Number(state.budget)||0)<cost){toast('ジュエルが足りないよ（必要：'+cost+'）');return}
- if((Number(state.skillMaterials)||0)<1){toast('スキル強化素材が足りないよ。メダル交換所で交換できるよ！');return}
- state.budget-=cost;state.skillMaterials-=1;state.costumeLevels[id]=level+1;
- save();renderCostumes();refresh();toast(item.name+'が Lv.'+(level+1)+'にアップ！ スキル効果も強化されたよ');
+function renderPlan(){
+ const disabled=state.ending||state.actions<=0;
+ const actions=[
+ {id:'vocal',icon:'🎤',name:'ボーカル特訓',desc:'歌唱力を伸ばす。ライブの歌唱ターンで有利。',gain:'歌唱力 +7',cost:'💎 10',key:'vocal'},
+ {id:'dance',icon:'💃',name:'ダンス練習',desc:'動きを磨いて、ライブのダンスターンを強化。',gain:'ダンス +7',cost:'💎 10',key:'dance'},
+ {id:'charm',icon:'✨',name:'表現レッスン',desc:'魅せ方を研究。観客の心をつかむ力が上がる。',gain:'表現力 +7',cost:'💎 10',key:'charm'},
+ {id:'bond',icon:'🫶',name:'相棒と作戦会議',desc:'本音を話すと、絆が深まってライブ連携が強くなる。',gain:'絆 +8',cost:'無料',key:'bond'}
+ ];
+ $('screen-plan').innerHTML='<div class="section-head"><div class="eyebrow">DAILY STRATEGY · DAY '+Math.min(state.day,7)+'</div><h2>今日は何をする？</h2><p>1日2回の行動を選ぼう。得意を伸ばすか、弱点を補うか。選んだ行動は取り消せないよ。</p></div><div class="section-title"><h3>残り行動：'+(state.ending?0:state.actions)+' / 2</h3><small>今のジュエル：💎 '+state.jewels+'</small></div><div class="action-grid">'+actions.map(a=>'<button class="action-card" data-action="'+a.id+'" '+(disabled||state.doneActions.includes(a.id)?'disabled':'')+'><span class="action-icon">'+a.icon+'</span><span class="action-copy"><strong>'+a.name+(state.doneActions.includes(a.id)?' ✓':'')+'</strong><p>'+a.desc+'</p><span class="action-meta"><span class="tag">'+a.gain+'</span><span class="tag">'+a.cost+'</span></span></span></button>').join('')+'</div><div class="notice">ヒント：得意な能力だけを伸ばすのもアリ。でも、フェスでは3つの能力すべてが試される。1日に同じ行動は1回まで。</div><div class="card"><div class="card-head"><h3>今日のログ</h3><span class="tag">'+state.logs.length+'件</span></div><div class="log-list">'+(state.logs.slice(-4).reverse().map(l=>'<div class="log-item"><span>'+l.icon+'</span><div>'+esc(l.text)+'</div></div>').join('')||'<div class="empty-state">まだ何も起きていない。<br>最初の一歩を選ぼう！</div>')+'</div></div>';
 }
-function exchangeCostume(kind){
- const costs={R:10,SR:30,SSR:80};
- if(kind==='tickets'){
-  if((Number(state.costumeMedals)||0)<8){toast('衣装メダルが足りないよ（必要：8枚）');return}
-  state.costumeMedals-=8;state.costumeTickets=(Number(state.costumeTickets)||0)+3;save();renderCostumes();toast('ガチャチケットを3枚交換したよ！');return;
- }
- if(kind==='material'){
-  if((Number(state.costumeMedals)||0)<5){toast('衣装メダルが足りないよ（必要：5枚）');return}
-  state.costumeMedals-=5;state.skillMaterials=(Number(state.skillMaterials)||0)+1;save();renderCostumes();toast('スキル強化素材 +1！ 所持数 '+state.skillMaterials);return;
- }
- const cost=costs[kind];if(!cost)return;
- if((Number(state.costumeMedals)||0)<cost){toast('衣装メダルが足りないよ（必要：'+cost+'枚）');return}
- const pool=costumeCatalog.filter(c=>c.rarity===kind&&!state.costumeOwned.includes(c.id));
- if(!pool.length){toast('このレアリティの未所持衣装はないよ！');return}
- const item=pool[Math.floor(Math.random()*pool.length)];state.costumeMedals-=cost;state.costumeOwned.push(item.id);save();renderCostumes();
- $('costumePullResult').innerHTML='<h3>メダル交換 ✨</h3><div class="costume-result-grid"><div class="costume-result-item rarity-'+item.rarity.toLowerCase()+'"><span>'+item.icon+'</span><small>'+item.rarity+' · '+item.label+'</small><strong>'+item.name+'</strong><em>交換で獲得！</em></div></div>';
- toast(item.name+'を交換したよ！');
+function renderStory(){
+ const s=nextStoryText();const already=state.storySeen.includes(state.storyIndex);
+ $('screen-story').innerHTML='<div class="section-head"><div class="eyebrow">STORY MODE · '+s.label+'</div><h2>学園フェスまでの7日間</h2><p>ストーリーの選択は、仲間との絆や能力に影響する。あなたの選択を記録していくよ。</p></div><div class="story-layout"><div class="story-stage"><div class="scene-label">'+s.label+'</div><h2>'+s.title+'</h2><p>'+esc(s.body)+'</p>'+(already?'<div class="notice">このエピソードは読了済み。選択は記録されているよ。</div>':'<div class="choice-stack">'+s.choices.map((c,i)=>'<button class="choice-btn" data-story-choice="'+i+'">'+['A','B','C'][i]+'　'+c[0]+'</button>').join('')+'</div>')+'</div><aside class="story-side"><div class="cast-big">'+idols[state.idol].emoji+'</div><strong>'+esc(idols[state.idol].name)+'</strong><p>'+esc(idols[state.idol].role)+'</p><div class="eyebrow">YOUR CHOICES</div><div class="log-list">'+(state.storySeen.length?state.storySeen.map(i=>'<div class="log-item"><span>✦</span><div>エピソード '+(i+1)+' をクリア</div></div>').join(''):'<div class="empty-state">まだ選択していないよ。</div>')+'</div>'+(state.storyIndex<4?'<button class="secondary wide" data-next-story>次のエピソードへ →</button>':'<div class="notice">フェス本番が近い。最後の準備をしよう。</div>')+'</aside></div>';
 }
-document.querySelectorAll('[data-costume-exchange]').forEach(b=>b.addEventListener('click',()=>exchangeCostume(b.dataset.costumeExchange)));
-if($('costumeSort'))$('costumeSort').addEventListener('change',renderCostumes);
-$('pullCostume').addEventListener('click',()=>pullCostume(1));
-$('pullCostumeTen').addEventListener('click',()=>pullCostume(10));
-renderCostumes();
-
-function save(){try{localStorage.setItem(KEY,JSON.stringify(state));$('saveStatus').textContent='PROGRESS AUTO-SAVED'}catch(e){$('saveStatus').textContent='SAVE UNAVAILABLE'}}
-function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),2400)}
-function refresh(){
- $('topName').textContent=state.name||'見習いプロデューサー';$('dayLabel').textContent=state.day+'日目';
- if($('budgetValue'))$('budgetValue').textContent=(Number(state.budget)||0).toLocaleString();if($('fansValue'))$('fansValue').textContent=(Number(state.fans)||0).toLocaleString();
- const idolLabel=state.name||({mirai:'星降 未来',reika:'如月 麗華',komugi:'日高 こむぎ'}[state.chosenIdol]||'見習いアイドル');
- if($('homeGreetingName'))$('homeGreetingName').textContent=idolLabel;
- if($('homeIdolName'))$('homeIdolName').textContent=idolLabel;
- const sessionNote=$('homeSessionNote');if(sessionNote){sessionNote.querySelector('span:last-child').textContent=state.sessionActive?'今日のプロデュース進行中 · 残り '+state.actionsLeft+' 行動': '今日のプロデュースはまだ始まっていません';sessionNote.classList.toggle('is-active',!!state.sessionActive);}
- document.querySelectorAll('[data-start-produce]').forEach(b=>{b.textContent=state.sessionActive?'今日の活動をつづける　→':'プロデュース画面へ　→';});
-
- ['vocal','dance','charm','bond'].forEach(k=>{ $(k).textContent=state[k];$('bar-'+k).style.width=state[k]+'%'});
- ['lesson','story','live'].forEach(k=>{$('task-'+k).classList.toggle('done',!!state[k+'Done'])});
-
-
-
- const title=state.name?state.name+'の FIRST LIGHT':'FIRST LIGHT';if($('stageName')) $('stageName').textContent=title; // optional legacy element; current home layout no longer includes it
- save();
-}
-const prologues={"mirai":["星降 未来","ナレーション「放課後。入学式の緊張が少しだけほどけて、未来は校舎の出口で立ち止まった。」\n\n未来「ねえ、妖精さん。今日、友達を誘って寄り道してみてもいいかな？」\n\nあなた「もちろん。未来が一緒にいたいって思う人に、声をかけてみようよ。」\n\n未来「うん……ちょっとドキドキするけど、行ってくる！」\n\nナレーション「未来は同じクラスの子に駆け寄り、勇気を出して声をかけた。」\n\n未来「ねえ、よかったら一緒に帰らない？ 途中でお茶もしようよ！」\n\nナレーション「相手は笑顔でうなずいた。未来の表情がぱっと明るくなる。」\n\n未来「やった！ 明日も学校で会おうね。約束だよ！」\n\nあなた「よかったね。最初の一歩、ちゃんと踏み出せたね。」\n\n未来「えへへ。明日からも、いろんな人と仲良くなりたいな！」\n\nナレーション「小さな約束を胸に、未来の学園生活が始まった。」"],"reika":["如月 麗華","ナレーション「放課後。麗華は本を閉じ、静かな廊下をゆっくり歩いていた。」\n\n麗華「……せっかくだし、誰かと帰ってみようかな。」\n\nあなた「気になる人がいるの？」\n\n麗華「同じクラスの子。話してみたいとは思ってたけど、きっかけがなくて。」\n\nあなた「それなら、今がちょうどいいかも。」\n\nナレーション「麗華は少し考えてから、相手のそばへ歩いていった。」\n\n麗華「ねえ、もしよかったら一緒に帰らない？ 急いでなければ、お茶でも。」\n\nナレーション「相手はうれしそうにうなずいた。麗華はほっとしたように微笑む。」\n\n麗華「……誘ってみてよかった。こういうのも、悪くないね。」\n\nあなた「明日も会う約束、してみたら？」\n\n麗華「そうね。……明日も一緒に帰ろうって、約束。」\n\nナレーション「自分のペースで踏み出した一歩が、麗華の新しい毎日につながった。」"],"komugi":["日高 こむぎ","ナレーション「放課後。こむぎは元気いっぱいに廊下を走りかけて、あわてて立ち止まった。」\n\nこむぎ「そうだ！ めるちゃんを誘って、一緒に帰ろう！」\n\nあなた「いいね。でも、廊下は歩こうね。」\n\nこむぎ「はーい！ うち、ちゃんと歩いて誘ってくる！」\n\nナレーション「こむぎはめるを見つけると、にこにこしながら駆け寄った。」\n\nこむぎ「めるちゃん！ よかったら一緒に帰らない？ クレープ食べていこうよ！」\n\nめる「べ、別にいいけど！ ちょうど寄り道したかっただけだからね！」\n\nナレーション「二人は顔を見合わせて笑い、並んで校門へ向かった。」\n\nこむぎ「明日も一緒に帰ろうね！ 約束だよ！」\n\nめる「はいはい、約束。……楽しみにしてるから。」\n\nあなた「素敵な放課後になったね。」\n\nこむぎ「うん！ 明日も楽しみだなー！」\n\nナレーション「新しい友達との小さな約束が、こむぎの胸をいっぱいにした。」"]};
-let selectedStartIdol='mirai';
-document.querySelectorAll('[data-idol]').forEach(b=>b.addEventListener('click',()=>{selectedStartIdol=b.dataset.idol;document.querySelectorAll('[data-idol]').forEach(x=>x.classList.toggle('selected',x.dataset.idol===selectedStartIdol));}));
-function showPrologue(){
- const p=prologues[state.chosenIdol]||prologues.mirai;
- const pages=p[1].replaceAll('＋FAIRY＋',state.fairyName).split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);
- let pageIndex=0;
- $('setupOverlay').classList.remove('show');
- $('storyScreen').classList.add('show');
- $('storyScreen').setAttribute('aria-hidden','false');
- $('storyScreen').innerHTML='<header class="story-topbar"><div class="story-brand"><span class="story-brandmark">✧</span><span>Étoile Academy<small>EPISODE 01</small></span></div><div class="story-chapter">EPISODE 01 · 放課後の約束</div><button class="story-skip" id="storySkip">スキップ ×</button></header><main class="story-stage"><div class="story-bg-orb"></div><div class="story-bg-stars">✦ <span>✧</span> ✦ <span>·</span> ✧</div><div class="story-scene-label">MEMORIES · '+p[0]+'</div><div class="story-scene-space"><div class="story-emblem">✧</div><div class="story-scene-name">'+p[0]+'</div><div class="story-scene-note">あなたとアイドルの物語</div></div><section class="story-dialogue" aria-live="polite"><div class="story-dialogue-inner"><div class="story-speaker" id="vnSpeaker">ナレーション</div><div class="story-text" id="vnText"></div></div><div class="story-bottom"><span id="vnCount"></span><span class="story-track"><i id="vnTrackFill"></i></span><button class="story-prev" id="vnPrev">← 前へ</button><button class="story-next" id="vnNext">次へ　→</button></div></section></main>';
- const finish=()=>{state.prologueSeen=true;save();$('storyScreen').classList.remove('show');$('storyScreen').setAttribute('aria-hidden','true');$('appShell').classList.add('game-ready');showView('home');toast(p[0]+'との学園生活が始まったよ');};
- function renderPage(){
-  const raw=pages[pageIndex]||'';
-  const speakerMatch=raw.match(/^([^「\n]+)「([\s\S]*)」$/);
-  const speaker=$('vnSpeaker'), body=$('vnText');
-  if(raw.startsWith('＊')){
-   speaker.textContent='— 時が流れて —';body.textContent='✦　✦　✦';body.classList.add('story-divider');
-  }else if(speakerMatch){
-   speaker.textContent=speakerMatch[1].trim();body.classList.remove('story-divider');body.textContent=speakerMatch[2].trim();
-  }else{
-   speaker.textContent='ナレーション';body.classList.remove('story-divider');body.textContent=raw;
-  }
-  $('vnCount').textContent=String(pageIndex+1).padStart(2,'0')+' / '+String(pages.length).padStart(2,'0');
-  $('vnTrackFill').style.width=((pageIndex+1)/pages.length*100)+'%';
-  $('vnPrev').disabled=pageIndex===0;
-  $('vnNext').textContent=pageIndex===pages.length-1?'学園生活を始める　→':'次へ　→';
- }
- $('vnPrev').addEventListener('click',()=>{if(pageIndex>0){pageIndex--;renderPage()}});
- $('vnNext').addEventListener('click',()=>{if(pageIndex<pages.length-1){pageIndex++;renderPage()}else finish()});
- $('storySkip').addEventListener('click',finish);
- renderPage();
-}
-$('beginPrologue').addEventListener('click',()=>{const fairy=$('fairyName').value.trim();if(!fairy){$('setupError').textContent='妖精の名前を入力してね。';$('setupError').classList.add('show');return;}state.fairyName=fairy;state.name=prologues[selectedStartIdol][0];state.chosenIdol=selectedStartIdol;updateFriendRoster();state.setupDone=true;state.prologueSeen=false;state.vocal=12;state.dance=10;state.charm=14;state.bond=5;save();refresh();showPrologue();});
-
-function showView(name){
- if(!state.prologueSeen){
-  if(state.setupDone){showPrologue();}
-  else {$('setupOverlay').classList.add('show');}
+function renderLive(){
+ const live=$('screen-live');
+ if(battle&&!battle.finished){
+  live.innerHTML='<div class="section-head"><div class="eyebrow">AUDITION BATTLE · TURN '+(battle.turn+1)+' / 3</div><h2>カードを選んで、ステージを制せ！</h2><p>ターンごとに得意分野を活かそう。能力値に加えて、同じタイプを連続で出すとコンボボーナス！</p></div><div class="live-stage"><div class="eyebrow">LIVE BATTLE · VS RINNE</div><h2>スポットライトは、誰のもの？</h2><p>3ターンの合計スコアで勝負。衣装ボーナスも発動するよ。</p><div class="live-metrics"><div class="live-metric"><small>あなた</small><strong>'+battle.player+'</strong></div><div class="live-metric"><small>凛音</small><strong>'+battle.rival+'</strong></div><div class="live-metric"><small>コンボ</small><strong>'+battle.combo+'x</strong></div></div><div class="performance-options">'+battle.hand.map((c,i)=>'<button class="performance-card" data-play-card="'+i+'"><span class="picon">'+c.icon+'</span><strong>'+c.name+'</strong><small>'+c.typeName+' · 基礎 '+c.base+'pt<br>'+c.desc+'</small></button>').join('')+'</div><div class="live-log" id="battleLog">'+esc(battle.log||'手札から1枚選ぼう。')+'</div>'+(battle.waiting?'<button class="primary wide" data-next-turn>次のターンへ →</button>':'')+'</div>';
   return;
  }
- if(name==='live'&&!state.sessionActive){
-  toast('オーディションに参加するには、先にプロデュースを開始してね');
-  name='produce';
+ if(battle&&battle.finished){
+  live.innerHTML='<div class="section-head"><div class="eyebrow">AUDITION RESULT</div><h2>ステージの結果</h2></div><div class="ending-card"><div class="end-icon">'+(battle.won?'🏆':'✨')+'</div><h2>'+(battle.won?'勝利！あなたたちのステージ！':'惜敗。でも、ここから強くなる。')+'</h2><p>最終スコア '+battle.player+' 対 '+battle.rival+'<br>ファン +'+battle.rewardFans+' · ジュエル +'+battle.rewardJewels+(battle.won?' · 絆 +3':' · 絆 +1')+'</p><button class="primary" data-go="home">ホームへ戻る →</button> <button class="secondary" data-go="plan">今日の行動へ</button></div>';
+  return;
  }
- if(document.getElementById('appShell'))document.getElementById('appShell').classList.toggle('produce-mode',(name==='produce'||name==='live')&&!!state.sessionActive);
- const target=$('view-'+name);if(!target)return;
- document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v===target));
- document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('active',b.dataset.view===name));
- const main=document.querySelector('main.main');if(main)main.scrollTop=0;
+ live.innerHTML='<div class="section-head"><div class="eyebrow">AUDITION BATTLE · LIVE PERFORMANCE</div><h2>'+(state.ending?'学園フェスの結果':'オーディションに挑戦')+'</h2><p>能力と選択がスコアに反映される、3ターンの戦略バトル。勝てばファンとジュエルを獲得できる。</p></div><div class="live-stage"><div class="eyebrow">LIVE BATTLE · VS RINNE</div><h2>'+(state.day>=7?'学園フェス本番！':'校内オーディション')+'</h2><p>'+(state.day>=7?'7日間の努力を、最後のステージにぶつけよう。':'本番に向けて今の実力を試そう。')+' ライブ参加は1日1回。参加費は💎20。</p><div class="live-metrics"><div class="live-metric"><small>歌唱力</small><strong>'+state.stats.vocal+'</strong></div><div class="live-metric"><small>ダンス</small><strong>'+state.stats.dance+'</strong></div><div class="live-metric"><small>表現力</small><strong>'+state.stats.charm+'</strong></div></div><div class="live-log">相棒：'+esc(idols[state.idol].name)+' · 衣装：'+esc(costumes.find(c=>c.id===state.equipped)?.name||'はじまりの制服')+'<br>得意タイプのカードを選ぶと、スコアが大きく伸びる。</div><button class="primary wide" data-start-live '+(state.liveAttempted||state.jewels<20?'disabled':'')+'>'+(state.liveAttempted?'今日は挑戦済み':'ライブを始める　💎20 →')+'</button>'+(state.jewels<20?'<p class="notice">ジュエルが足りないよ。行動やイベントで獲得しよう。</p>':'')+'</div>';
 }
-document.querySelectorAll('.nav').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
-document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.goto)));
-document.querySelectorAll('[data-train]').forEach(b=>b.addEventListener('click',()=>{
- if(!state.sessionActive){showView('produce');toast('まず「プロデュースを開始する」を押してね');return}
- const k=b.dataset.train;const trainingCost=20;if((Number(state.budget)||0)<trainingCost){toast('ジュエルが足りないよ（レッスン費用：20）');return}state.budget-=trainingCost;const before=state[k];state[k]=Math.min(100,state[k]+5);state.bond=Math.min(100,state.bond+2);state.lessonDone=true;
- const msg=names[k]+'が '+(state[k]-before)+' アップ！ 親愛度 +2。行動を1回使ったよ。';
- $('lessonResult').textContent=msg;$('lessonResult').classList.add('show');$('produceResult').textContent=msg;$('produceResult').classList.add('show');spendAction(msg);
-}));
-document.querySelectorAll('[data-choice]').forEach(b=>b.addEventListener('click',()=>{
- if(state.storyDone){toast('このエピソードはクリア済みだよ');return}
- const choice=b.dataset.choice;state.storyChoice=choice;state.storyDone=true;state.bond=Math.min(100,state.bond+8);
- const texts={kind:'「うん……！ ひとりじゃないって思ったら、少し勇気が出てきた」彼女はほっとしたように笑った。一歩ずつでいい。その約束が、ふたりの最初の絆になった。',bold:'「信じてくれるの？ ……じゃあ、私も自分を信じてみたい」彼女の瞳に、小さな光がともる。期待に応えたいという気持ちが、新しい力に変わっていく。',honest:'「ほんとはね、失敗するのが怖いんだ」彼女は胸の内を少しずつ話し始めた。弱さを見せても大丈夫。安心できる場所が、夢への最初の一歩になった。'};
- $('storyText').textContent=texts[choice];$('storyTitle').textContent='小さな勇気、大きな一歩';$('storyResult').textContent='エピソードクリア！ 親愛度 +8。彼女との距離が少し近づいた。';$('storyResult').classList.add('show');$('nextStory').style.display='inline-block';refresh();toast('エピソードクリア！ 親愛度 +8');
-}));
-$('nextStory').addEventListener('click',()=>{showView('home');toast('次のエピソードもお楽しみに')});
-// --- Three-turn strategic card audition ---
-let battle=null;
+function renderCloset(){
+ $('screen-closet').innerHTML='<div class="section-head"><div class="eyebrow">COSTUME COLLECTION</div><h2>衣装ルーム</h2><p>衣装ごとにライブのスコアボーナスが変わる。ガチャは運試し、交換は確実な選択。</p></div><div class="card" style="margin-bottom:18px"><div class="card-head"><h3>衣装チケット</h3><span class="tag">所持 '+(state.tickets||0)+'枚</span></div><p class="subcopy">1回ガチャで新しい衣装を狙おう。かぶった衣装はジュエルに変換される。</p><button class="primary" data-gacha '+((state.tickets||0)<1?'disabled':'')+'>衣装ガチャを引く　🎟️ ×1</button> <button class="secondary" data-buy-ticket '+(state.jewels<35?'disabled':'')+'>チケット交換　💎35</button><div id="gachaResult" class="notice" style="display:none"></div></div><div class="closet-grid">'+costumes.filter(c=>state.closet.includes(c.id)).map(c=>'<div class="costume-card '+(state.equipped===c.id?'equipped':'')+'"><div class="costume-art">'+c.emoji+'</div><span class="rarity">'+c.rarity+' · BONUS +'+c.bonus+'</span><h3>'+c.name+'</h3><p>'+c.desc+'</p><button class="'+(state.equipped===c.id?'secondary':'primary')+'" data-equip="'+c.id+'">'+(state.equipped===c.id?'✓ 着用中':'この衣装を着る')+'</button></div>').join('')+'</div><div class="notice">レア度は N → R → SR → SSR。衣装ボーナスはライブの全ターンに加算されるよ。</div>';
+}
+function totalPower(){return Math.round((state.stats.vocal+state.stats.dance+state.stats.charm)/3+state.stats.bond*.18);}
+function rivalPower(){return 25+Math.min(45,state.day*5);}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function addLog(icon,text){state.logs.push({icon,text});if(state.logs.length>30)state.logs.shift();}
+function applyChoice(key,amount,text){if(key==='fans')state.fans+=amount;else if(key==='jewels')state.jewels+=amount;else state.stats[key]=clamp(state.stats[key]+amount);addLog(key==='fans'?'💗':key==='bond'?'♡':'✦',text);save();}
+function beginDay(){state.actions=2;state.doneActions=[];state.sessionStarted=true;state.liveAttempted=false;state.liveScore=0;state.eventDays=state.eventDays||[];save();showScreen('home');if(state.day<7&&!state.eventDays.includes(state.day)){state.eventDays.push(state.day);const ev=eventPool[Math.floor(Math.random()*eventPool.length)];pendingEvent=ev;showEvent(ev);}else{toast('DAY '+state.day+' 開始！今日の作戦を決めよう。');}}
+function showEvent(ev){$('eventKicker').textContent='UNEXPECTED EVENT · DAY '+state.day;$('eventIcon').textContent=ev.icon;$('eventTitle').textContent=ev.title;$('eventBody').textContent=ev.body;$('eventChoices').innerHTML=ev.choices.map((c,i)=>'<button class="choice-btn" data-event-choice="'+i+'">'+['A','B','C'][i]+'　'+c[0]+'</button>').join('');$('eventOverlay').classList.add('show');sfx('event');}
+function chooseEvent(i){if(!pendingEvent)return;const c=pendingEvent.choices[i];applyChoice(c[1],c[2],c[3]);$('eventOverlay').classList.remove('show');pendingEvent=null;renderHome();toast('イベント結果：ステータスが変化した！');}
+function useAction(id){if(state.ending){toast('フェスは終了したよ。最初からやり直して別の未来を見よう！');return;}if(state.actions<=0){toast('今日の行動はもう使い切った！');return;}if(state.doneActions.includes(id)){toast('同じ行動は1日1回までだよ。');return;}if(['vocal','dance','charm'].includes(id)){if(state.jewels<10){toast('ジュエルが足りないよ。イベントやライブで集めよう。');return;}state.jewels-=10;state.stats[id]=clamp(state.stats[id]+7);addLog('✦',statName(id)+'の特訓！ '+statName(id)+' +7、ジュエル -10。');}else{state.stats.bond=clamp(state.stats.bond+8);state.stats.vocal=clamp(state.stats.vocal+2);addLog('♡','相棒と作戦会議。絆 +8、歌唱力 +2。');}
+ state.doneActions.push(id);state.actions--;sfx('card');save();renderPlan();renderHome();toast('行動完了！ 残り '+state.actions+' 回');if(state.actions===0){setTimeout(()=>offerDayEnd(),450);}}
+function offerDayEnd(){if(state.ending)return;const existing=document.querySelector('#dayEndModal');if(existing)return;const modal=document.createElement('div');modal.id='dayEndModal';modal.className='overlay show';modal.innerHTML='<div class="modal event-modal"><div class="eyebrow">DAY '+state.day+' COMPLETE</div><div class="big-star">🌙</div><h2>今日の活動、おつかれさま！</h2><p class="modal-lead">今日の行動は終了。明日に進む前に、ライブに挑戦してもいいし、このまま休んでもいい。</p><div class="choice-stack"><button class="primary" data-day-live>オーディションに挑戦する →</button><button class="secondary" data-next-day>休んで次の日へ →</button></div></div>';document.body.appendChild(modal);}
+function nextDay(){const m=$('dayEndModal');if(m)m.remove();if(state.day>=7){state.ending=true;save();showFestivalEnding();return;}state.day++;beginDay();}
+function showFestivalEnding(){state.ending=true;const score=totalPower()+((state.fans/10)|0)+(state.liveScore||0);const rival=70+Math.floor(Math.random()*12);state.won=score>=rival;save();$('screen-home').innerHTML='<div class="eyebrow">FINAL CHAPTER · SCHOOL FESTIVAL</div><div class="ending-card"><div class="end-icon">'+(state.won?'🏆':'🌠')+'</div><h2>'+(state.won?'あなたたちが、学園の星になった！':'悔しさは、次のステージへの光。')+'</h2><p>7日間の努力、選んだ物語、仲間との絆。すべてを込めたステージの結果は……<br><strong>'+score+' pt vs '+rival+' pt</strong><br>'+(state.won?'観客の歓声が響き渡る。凛音は悔しそうに笑って、あなたに手を差し出した。「次は絶対に負けないから」':'凛音のステージには届かなかった。でも、相棒はあなたの手をぎゅっと握った。「ここで終わりじゃない。もう一度、挑戦しよう」')+'</p><div class="stats-grid">'+statusCard('vocal','♫')+statusCard('dance','♧')+statusCard('charm','✧')+statusCard('bond','♡')+'</div><button class="primary" data-restart>別の未来で、もう一度。 ↺</button></div>';document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));$('screen-home').classList.add('active');document.querySelectorAll('.nav').forEach(el=>el.classList.remove('active'));toast(state.won?'フェス優勝！ おめでとう！':'フェス終了。次は別の選択を試してみよう。');sfx(state.won?'win':'event');}
 const cardPool=[
- {name:'サビで勝負！',type:'vocal',icon:'♫',base:12,desc:'歌唱力を活かす'},
- {name:'キレキレターン',type:'dance',icon:'♧',base:12,desc:'ダンスで魅せる'},
- {name:'視線を独り占め',type:'charm',icon:'✧',base:12,desc:'表現力で惹きつける'},
- {name:'ハーモニー',type:'vocal',icon:'♪',base:9,desc:'安定した歌声'},
+ {name:'サビで勝負！',type:'vocal',icon:'🎤',base:12,desc:'歌唱力で観客をつかむ'},
+ {name:'キレキレターン',type:'dance',icon:'💃',base:12,desc:'ダンスで魅せる'},
+ {name:'視線を独り占め',type:'charm',icon:'✨',base:12,desc:'表現力で惹きつける'},
+ {name:'ハーモニー',type:'vocal',icon:'♫',base:9,desc:'安定した歌声'},
  {name:'フォーメーション',type:'dance',icon:'❖',base:9,desc:'息の合った動き'},
  {name:'ファンサービス',type:'charm',icon:'♡',base:9,desc:'観客の心をつかむ'}
 ];
-const typeName={vocal:'ボーカル',dance:'ダンス',charm:'表現'};
-function drawHand(){return Array.from({length:3},()=>cardPool[Math.floor(Math.random()*cardPool.length)])}
-function renderBattle(){
- $('playerScore').textContent=battle.player;$('rivalScore').textContent=battle.rival;
- $('battleTurn').textContent=battle.done?'FINAL':('TURN '+(battle.turn+1)+' / 3');
- $('battleHeading').textContent=battle.done?'オーディション結果':('第'+(battle.turn+1)+'ターン：カードを選ぼう');
- $('battleHand').innerHTML=battle.done?'':battle.hand.map((c,i)=>'<button class="lesson" data-battle-card="'+i+'" style="display:block;text-align:left;min-height:125px;border:1px solid #e6dcf4;padding:13px"><span style="font-size:24px">'+c.icon+'</span><strong style="display:block;margin:8px 0;font-size:12px">'+c.name+'</strong><small style="color:#827d9a;line-height:1.6">'+typeName[c.type]+' / '+c.desc+'</small><b style="display:block;color:#8e80df;margin-top:8px">基礎 '+(c.base+Math.floor(state[c.type]*.35))+' pt</b></button>').join('');
- document.querySelectorAll('[data-battle-card]').forEach(b=>b.addEventListener('click',()=>playBattleCard(Number(b.dataset.battleCard))));
- $('startLive').style.display=battle&&!battle.done?'none':'inline-block';
- $('startLive').textContent=battle&&battle.done?'もう一度挑戦':'オーディション開始　→';
- $('battleNext').style.display=battle&&!battle.done&&battle.waiting?'inline-block':'none';
+function drawHand(){return Array.from({length:3},()=>({...cardPool[Math.floor(Math.random()*cardPool.length)]}));}
+function startLive(){if(state.ending){toast('フェス本番はホームから確認できるよ。');return;}if(state.liveAttempted){toast('今日はもうライブに挑戦したよ。');return;}if(state.jewels<20){toast('ジュエルが足りないよ。');return;}state.jewels-=20;state.liveAttempted=true;battle={turn:0,player:0,rival:0,combo:0,lastType:null,hand:drawHand(),waiting:false,finished:false,won:false,log:'3枚のカードから1枚選ぼう。'};save();sfx('live');renderLive();}
+function playCard(i){if(!battle||battle.finished||battle.waiting)return;const c=battle.hand[i];if(!c)return;const stat=state.stats[c.type]||0;let points=c.base+Math.floor(stat*.42)+Math.floor(state.stats.bond*.12);const costume=costumes.find(x=>x.id===state.equipped);points+=costume?.bonus||0;let comboText='';if(battle.lastType===c.type){const bonus=5+battle.combo*3;points+=bonus;battle.combo++;comboText=' コンボ +'+bonus+'pt！';}else if(battle.lastType){battle.combo=0;}battle.lastType=c.type;battle.player+=points;const rival=8+Math.floor(Math.random()*8)+Math.floor((state.stats.vocal+state.stats.dance+state.stats.charm)/35);battle.rival+=rival;battle.turn++;battle.waiting=battle.turn<3;battle.hand=battle.waiting?drawHand():[];battle.log=c.name+'！ '+points+'pt獲得。ライバル +'+rival+'pt。'+comboText;
+ if(battle.turn>=3){battle.finished=true;battle.won=battle.player>=battle.rival;const fans=battle.won?25:10;const jewels=battle.won?35:12;state.fans+=fans;state.jewels+=jewels;state.stats.bond=clamp(state.stats.bond+(battle.won?3:1));state.liveScore=battle.player;battle.rewardFans=fans;battle.rewardJewels=jewels;addLog(battle.won?'🏆':'♫','ライブ結果：'+(battle.won?'勝利':'惜敗')+'。ファン +'+fans+'、ジュエル +'+jewels+'。');save();sfx(battle.won?'win':'event');}else{sfx('card');}
+ battle.waiting=battle.turn<3;save();renderLive();$('jewelCount').textContent=state.jewels;$('fanCount').textContent=state.fans;}
+function finishCardTurn(){if(!battle||!battle.waiting)return;battle.waiting=false;renderLive();}
+function pullGacha(){if(!state.tickets)state.tickets=0;if(state.tickets<1){toast('チケットがないよ。ジュエルで交換できるよ。');return;}state.tickets--;const pool=costumes.filter(c=>c.id!=='uniform');const c=pool[Math.floor(Math.random()*pool.length)];const res=$('gachaResult');res.style.display='block';if(state.closet.includes(c.id)){const reward=c.rarity==='SSR'?30:c.rarity==='SR'?18:8;state.jewels+=reward;res.textContent='かぶり：'+c.emoji+' '+c.name+'。ジュエル +'+reward+'に変換！';}else{state.closet.push(c.id);res.textContent='新衣装GET！ '+c.emoji+' '+c.name+'（'+c.rarity+'）';sfx(c.rarity==='SSR'?'rare':'win');}save();renderCloset();$('jewelCount').textContent=state.jewels;toast(res.textContent);}
+function bindDynamic(){
+ $('gameMain').querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.go)));
+ $('gameMain').querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>useAction(b.dataset.action)));
+ $('gameMain').querySelectorAll('[data-story-choice]').forEach(b=>b.addEventListener('click',()=>chooseStory(Number(b.dataset.storyChoice))));
+ $('gameMain').querySelectorAll('[data-next-story]').forEach(b=>b.addEventListener('click',()=>{if(state.storyIndex<4){state.storyIndex++;save();renderStory();$('storyDot').classList.add('show');}}));
+ $('gameMain').querySelectorAll('[data-start-live]').forEach(b=>b.addEventListener('click',startLive));
+ $('gameMain').querySelectorAll('[data-play-card]').forEach(b=>b.addEventListener('click',()=>playCard(Number(b.dataset.playCard))));
+ $('gameMain').querySelectorAll('[data-next-turn]').forEach(b=>b.addEventListener('click',finishCardTurn));
+ $('gameMain').querySelectorAll('[data-equip]').forEach(b=>b.addEventListener('click',()=>{state.equipped=b.dataset.equip;save();renderCloset();toast('衣装を変更したよ！');}));
+ $('gameMain').querySelectorAll('[data-gacha]').forEach(b=>b.addEventListener('click',pullGacha));
+ $('gameMain').querySelectorAll('[data-buy-ticket]').forEach(b=>b.addEventListener('click',()=>{if(state.jewels<35)return;state.jewels-=35;state.tickets=(state.tickets||0)+1;save();renderCloset();$('jewelCount').textContent=state.jewels;toast('チケットを1枚交換したよ！');}));
+ $('gameMain').querySelectorAll('[data-restart]').forEach(b=>b.addEventListener('click',resetToSetup));
 }
-function playBattleCard(i){
- if(!battle||battle.done||battle.waiting)return;
- const c=battle.hand[i];if(!c)return;
- const stat=state[c.type]||0;let points=c.base+Math.floor(stat*.35);
- const activeCostume=costumeById(state.equippedCostume||'school'),skill=effectiveCostumeSkill(activeCostume);
- if(skill.kind==='all'||(skill.kind==='stat'&&skill.stat===c.type))points+=Math.floor(points*skill.amount/100);
- if(skill.kind==='flat')points+=skill.amount;
- if(skill.kind==='final'&&battle.turn===2)points+=Math.floor(points*skill.amount/100);
- let combo='';
- if(battle.lastType===c.type){const comboBonus=8+battle.combo*3+(skill.kind==='combo'?skill.amount:0);points+=comboBonus;battle.combo++;combo=' 同タイプ連続！コンボ +'+comboBonus+'pt！';}
- else if(battle.lastType){points+=5;battle.combo=0;combo=' タイプチェンジ・ブレイク +5pt！';}
- battle.lastType=c.type;battle.player+=points;
- const rival=10+Math.floor(Math.random()*12)+Math.floor((state.vocal+state.dance+state.charm)/30);
- battle.rival+=rival;battle.turn++;battle.waiting=true;battle.hand=[];
- $('battleLog').textContent=c.name+'！ '+points+'pt獲得。ライバルは '+rival+'pt。'+combo;
- if(battle.turn>=3){battle.done=true;battle.waiting=false;const win=battle.player>=battle.rival;const reward=win?30:12;state.fans=(state.fans||0)+reward;const budgetReward=win?150:40;state.budget=(Number(state.budget)||0)+budgetReward;state.bond=Math.min(100,state.bond+(win?5:2));$('liveResult').innerHTML=(win?'🏆 合格！':'✦ 惜しい結果…')+'<br>最終スコア '+battle.player+' 対 '+battle.rival+'<br>ファン +'+reward+' / ジュエル +'+budgetReward+' / 親愛度 +'+(win?5:2);state.liveDone=true;refresh();spendAction((win?'オーディション合格！':'オーディション終了。')+' ファン +'+reward);}
- else {battle.waiting=true;$('battleNext').style.display='inline-block';$('battleNext').textContent='次のターンへ　→';}
- renderBattle();
+function chooseStory(i){const s=nextStoryText();if(state.storySeen.includes(state.storyIndex))return;const c=s.choices[i];if(!c)return;const key=c[1];if(key==='bold'){state.stats.vocal=clamp(state.stats.vocal+3);state.stats.charm=clamp(state.stats.charm+2);addLog('🔥','物語で強気な選択。歌唱力 +3、表現力 +2。');}else if(key==='kind'){state.stats.bond=clamp(state.stats.bond+4);state.stats.charm=clamp(state.stats.charm+2);addLog('♡','物語で思いやりを選んだ。絆 +4、表現力 +2。');}else if(key==='team'){state.stats.bond=clamp(state.stats.bond+3);state.jewels+=5;addLog('✦','仲間と作戦を立てた。絆 +3、ジュエル +5。');}else if(['vocal','dance','charm'].includes(key)){state.stats[key]=clamp(state.stats[key]+5);addLog('✦','フェスの作戦を決めた。'+statName(key)+' +5。');}state.storySeen.push(state.storyIndex);save();renderStory();renderHome();toast('選択を記録したよ。結果はステータスに反映！');sfx('card');}
+function resetToSetup(){if(!confirm('セーブデータを消して最初から始める？'))return;localStorage.removeItem(SAVE_KEY);state=null;battle=null;pendingEvent=null;document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));$('setupOverlay').classList.add('show');$('playerName').value='ひかり';document.querySelectorAll('.idol-pick').forEach(b=>b.classList.toggle('selected',b.dataset.idol==='mirai'));}
+document.querySelectorAll('.nav[data-screen]').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.screen)));
+document.querySelectorAll('.idol-pick').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.idol-pick').forEach(x=>x.classList.toggle('selected',x===b));}));
+$('beginGame').addEventListener('click',()=>{const name=$('playerName').value.trim().slice(0,12)||'ひかり';const idol=document.querySelector('.idol-pick.selected')?.dataset.idol||'mirai';state=freshState(name,idol);state.tickets=1;state.logs=[];save();$('setupOverlay').classList.remove('show');showScreen('home');renderStory();toast('ようこそ、Étoile Academyへ！');sfx('win');});
+$('resetGame').addEventListener('click',resetToSetup);
+$('soundToggle').addEventListener('click',()=>{if(!state){state={sfx:localStorage.getItem(SOUND_KEY)!=='off'};}state.sfx=!state.sfx;localStorage.setItem(SOUND_KEY,state.sfx?'on':'off');updateSoundButton();if(state.sfx)sfx('tap');save();});
+$('eventChoices').addEventListener('click',e=>{const b=e.target.closest('[data-event-choice]');if(b)chooseEvent(Number(b.dataset.eventChoice));});
+document.body.addEventListener('click',e=>{const b=e.target.closest('[data-day-live],[data-next-day]');if(!b)return;const m=$('dayEndModal');if(m)m.remove();if(b.hasAttribute('data-day-live')){showScreen('live');renderLive();}else nextDay();});
+function boot(){
+ state=loadState();
+ if(state){state.sfx=localStorage.getItem(SOUND_KEY)!=='off';$('setupOverlay').classList.remove('show');if(state.ending)showFestivalEnding();else{showScreen('home');if(state.sessionStarted&&state.actions===0){}if(!state.eventDays)state.eventDays=[];}}
+ else{state={sfx:localStorage.getItem(SOUND_KEY)!=='off'};updateSoundButton();}
+ updateSoundButton();
+ if(state&&state.stats){renderHome();renderPlan();renderStory();renderLive();renderCloset();bindDynamic();}
 }
-$('backToProduce').addEventListener('click',()=>showView('produce'));
-$('goAudition').addEventListener('click',()=>{if(!state.sessionActive){toast('先に今日のプロデュースを開始してね');return}showView('live')});
-$('startLive').addEventListener('click',()=>{
- if(!state.sessionActive){toast('まず今日のプロデュースを開始してね');showView('produce');return}
- const auditionCost=50;if((Number(state.budget)||0)<auditionCost){toast('オーディション参加費が足りないよ（50）');return}state.budget-=auditionCost;
- const liveCostume=costumeById(state.equippedCostume||'school'),liveSkill=effectiveCostumeSkill(liveCostume);
- const startBonus=liveSkill.kind==='start'?liveSkill.amount:0;
- battle={turn:0,player:startBonus,rival:0,lastType:null,combo:0,hand:drawHand(),done:false,waiting:false};
- $('liveResult').textContent='';$('battleLog').textContent='手札が配られた！ 着用スキル「'+liveSkill.name+'」Lv.'+liveSkill.level+'発動！'+(startBonus?' 開始ボーナス +'+startBonus+'pt。':'')+' 3ターンでライバルを上回ろう。';renderBattle();
-});
-$('battleNext').addEventListener('click',()=>{if(!battle||battle.done)return;battle.hand=drawHand();battle.waiting=false;$('battleNext').style.display='none';renderBattle()});
-
-
-// --- Daily produce session: 3 actions, explicitly started by the player ---
-function renderProduce(){
- const active=!!state.sessionActive;
- $('produceHeading').textContent=active?'今日の活動、あと少し！':(state.actionsLeft===0&&state.day>1?'今日の活動は終了しました':'まだ今日の活動を始めていません');
- $('actionsLeft').textContent='行動 '+(active?state.actionsLeft:3)+' / 3';
- $('produceDescription').textContent=active?'何をするか選ぼう。行動回数を使い切ると今日の活動は終了。':(state.actionsLeft===0&&state.day>1?'今日の活動はおしまい。休んで、次の日にまた始めよう。':'開始ボタンを押すまでは、レッスンや会話で行動回数は消費されません。');
- $('startProduce').style.display=active?'none':'inline-block';
- $('goAudition').style.display=active?'inline-block':'none';
- $('produceActions').style.display=active?'grid':'none';
- $('finishProduce').style.display=active?'inline-block':'none';
-}
-function endProduce(message){
- state.sessionActive=false;state.actionsLeft=0;state.day+=1;state.costumeTickets=(Number(state.costumeTickets)||0)+1;
- $('appShell').classList.remove('produce-mode');
- $('produceResult').textContent=message||'今日の活動は終了！ 頑張った自分をほめてあげよう。';
- $('produceResult').classList.add('show');renderProduce();refresh();showView('home');toast('今日のプロデュースが終了！ 衣装ガチャチケット +1');
-}
-function spendAction(message){
- if(!state.sessionActive)return;
- state.actionsLeft=Math.max(0,state.actionsLeft-1);
- $('produceResult').textContent=message+' 残り行動：'+state.actionsLeft;
- $('produceResult').classList.add('show');
- if(state.actionsLeft===0){endProduce('今日の行動をすべて使い切ったよ！ 今日の頑張りはきっと明日の自信になる。');}
- else{renderProduce();refresh();}
-}
-$('startProduce').addEventListener('click',()=>{
- if(state.sessionActive){toast('今日のプロデュースは始まっているよ');return}
- state.sessionActive=true;state.actionsLeft=3;state.lessonDone=false;state.liveDone=false;
- $('appShell').classList.add('produce-mode');showView('produce');
- $('produceResult').classList.remove('show');renderProduce();refresh();toast('今日のプロデュース開始！ 行動は3回までだよ');
-});
-$('finishProduce').addEventListener('click',()=>{if(state.sessionActive)endProduce('今日はここまで！ 使わなかった時間も大切な休息。');});
-document.querySelectorAll('[data-start-produce]').forEach(b=>b.addEventListener('click',()=>{showView('produce');if(!state.sessionActive)toast('「プロデュースを開始する」で今日の活動を始めよう');}));
-document.querySelectorAll('[data-friend-talk]').forEach(b=>b.addEventListener('click',()=>{
- if(!state.sessionActive){showView('produce');toast('まずプロデュースを開始してね');return}
- state.bond=Math.min(100,state.bond+5);state.friendBond=Math.min(100,(state.friendBond||0)+8);state.friendTalks=(state.friendTalks||0)+1;
- $('friendResult').textContent='みんな「話せてよかった！ また一緒に過ごそうね」 親愛度 +5。';$('friendResult').classList.add('show');
- $('friendText').textContent='相手はうれしそうに笑った。「アイドルのあなたも好きだけど、普通に話してるあなたも大好きだよ」';
- spendAction('仲間とおしゃべりした。友情が深まった！');
-}));
-let activeFriend='meru';
-const castTalk={
- meru:{name:'夢見 める',tag:'DREAM-KAKE ROSETTA',title:'「ねえ、放課後ちょっと付き合ってよ」',intro:'めるは少し照れたように、あなたの顔をのぞき込んだ。',answers:{cafe:['「べ、別にあなたと寄り道したいわけじゃないけど！」めるは頬を赤くしながら歩き出した。','めると放課後の寄り道をすることになった。'],practice:['「いいよ。ちゃんと見ててあげる！」めるは得意げに胸を張った。','めるがレッスンを見守ってくれることになった。'],talk:['「なによ、改まっちゃって。……ちゃんと聞くから話してみなよ」めるはまっすぐこちらを見た。','めるに悩みを聞いてもらった。']}},
- tsukiyo:{name:'願掛 月夜',tag:'DREAM-KAKE ROSETTA',title:'「少し、お話ししてもよろしいですか」',intro:'月夜は静かに会釈して、あなたが話し始めるのを待っている。',answers:{cafe:['「では、カフェテリアで温かいお茶でもいただきましょう」月夜は穏やかに微笑んだ。','月夜とお茶を飲む約束をした。'],practice:['「努力する姿は素敵ですね。私も見学させてください」月夜はうなずいた。','月夜がレッスンを見に来てくれることになった。'],talk:['「急がなくても大丈夫です。あなたの言葉で聞かせてください」月夜は静かに寄り添った。','月夜に話を聞いてもらった。']}},
- arashi:{name:'朝比奈 嵐',tag:'AMORPHOUS',title:'「おい、今日は何に挑戦するんだ？」',intro:'嵐は自信たっぷりに笑い、あなたの返事を待っている。',answers:{cafe:['「よし、腹ごしらえも大事だな！行こう！」嵐は元気よく歩き出した。','嵐とカフェテリアへ向かった。'],practice:['「いい心がけだ！オレも付き合うぞ！」嵐は気合十分だ。','嵐と練習する約束をした。'],talk:['「悩みがあるなら話してみろ。仲間だろ！」嵐は真剣にうなずいた。','嵐に相談して、気持ちが少し軽くなった。']}},
- setsuna:{name:'夜永 セツナ',tag:'AMORPHOUS',title:'「……なんだよ。話なら聞くけど」',intro:'セツナはそっぽを向いているが、ちゃんとこちらの話を待っている。',answers:{cafe:['「別に暇だっただけだ。……ほら、行くぞ」セツナは少しだけ歩調を合わせた。','セツナと寄り道をすることになった。'],practice:['「仕方ねえな。少しだけ付き合ってやるよ」セツナは腕を組んだ。','セツナが練習に付き合ってくれることになった。'],talk:['「……言ってみろよ。茶化したりしねえから」セツナは小さく息をついた。','セツナに悩みを聞いてもらった。']}},
- reika:{name:'如月 麗華',tag:'TRICOLORE PALETTE',title:'「少し休憩しない？」',intro:'麗華は本を閉じて、あなたにゆっくりと微笑みかけた。',answers:{cafe:['「甘いものでも食べようか。たまには休むのも大事だよ」麗華は立ち上がった。','麗華と休憩することにした。'],practice:['「頑張りすぎないようにね。私も見ているから」麗華は優しくうなずいた。','麗華がレッスンを見守ってくれることになった。'],talk:['「うん、聞くよ。無理に答えを出さなくてもいいからね」麗華は静かに話を聞いた。','麗華に相談した。']}},
- mirai:{name:'星降 未来',tag:'TRICOLORE PALETTE',title:'「ねえねえ、一緒に頑張ろう！」',intro:'未来はぱっと笑顔になって、あなたの手を取った。',answers:{cafe:['「やったー！放課後の寄り道ってわくわくするね！」未来は笑顔で歩き出した。','未来と寄り道をする約束をした。'],practice:['「もちろん！あたしももっと上手になりたいんだ！」未来はやる気いっぱいだ。','未来と一緒に練習することになった。'],talk:['「うん、何でも言って！一緒に考えよう！」未来は真剣にうなずいた。','未来に相談して、前向きな気持ちになった。']}},
- komugi:{name:'日高 こむぎ',tag:'TRICOLORE PALETTE',title:'「ねえねえ、放課後クレープ食べに行こ！」',intro:'こむぎは楽しそうにぴょんぴょん跳ねながら誘ってきた。',answers:{cafe:['「やったあ！どの味にする？こむぎ、いちご！」こむぎはうれしそうにはしゃいだ。','こむぎとクレープを食べに行く約束をした。'],practice:['「じゃあ練習のあとね！こむぎ、待ってる！」こむぎは大きくうなずいた。','こむぎが練習後に待っていてくれることになった。'],talk:['「もちろん！こむぎでよければ、なんでも聞くよ！」こむぎはやさしく笑った。','こむぎに話を聞いてもらった。']}}
-};
-function selectFriend(id){activeFriend=id;const c=castTalk[id];$('friendTag').textContent=c.tag+' · AFTER SCHOOL';$('friendTitle').textContent=c.title;$('friendText').textContent=c.intro;$('friendResult').textContent='';$('friendResult').classList.remove('show');document.querySelectorAll('[data-character-chat]').forEach(b=>b.classList.toggle('selected',b.dataset.characterChat===id));}
-function updateFriendRoster(){const ownIdol=state.chosenIdol;document.querySelectorAll('[data-character-chat]').forEach(b=>{b.hidden=b.dataset.characterChat===ownIdol;});if(activeFriend===ownIdol){const next=document.querySelector('[data-character-chat]:not([hidden])');if(next)selectFriend(next.dataset.characterChat);}}
-document.querySelectorAll('[data-character-chat]').forEach(b=>b.addEventListener('click',()=>selectFriend(b.dataset.characterChat)));
-updateFriendRoster();
-document.querySelectorAll('[data-friend-choice]').forEach(b=>b.addEventListener('click',()=>{
- const c=castTalk[activeFriend],a=c.answers[b.dataset.friendChoice];$('friendText').textContent=a[0];$('friendResult').textContent=a[1];$('friendResult').classList.add('show');
- if(state.sessionActive){state.friendBond=Math.min(100,(state.friendBond||0)+3);state.bond=Math.min(100,state.bond+3);spendAction(c.name+'と会話した。親愛度 +3。');}
- else{toast('会話を楽しめるよ。親愛度アップはプロデュース中だけ！');}
- refresh();
-}));
-const roam={x:48,y:57,dx:0,dy:0,moving:false,last:0,near:null};
-const mapCast=[
- {id:'mapMeru',x:61,y:45,name:'夢見 める',key:'meru',line:'める「ちょっと、そんなに見ないでよ！……せっかく会ったんだから、少しぐらい話していきなさいよね」'},
- {id:'mapArashi',x:31,y:58,name:'朝比奈 嵐',key:'arashi',line:'嵐「おっ、来たな！今日も全力でいこうじゃないか！」'},
- {id:'mapSetsuna',x:72,y:70,name:'夜永 セツナ',key:'setsuna',line:'セツナ「なんだよ。……まあ、少しなら付き合ってやる」'},
- {id:'mapTsukiyo',x:23,y:34,name:'願掛 月夜',key:'tsukiyo',line:'月夜「こんにちは。学園の中でお困りのことはありませんか？」'}
-];
-function renderMap(){const p=$('mapPlayer');p.style.left=roam.x+'%';p.style.top=roam.y+'%';$('mapPlayerName').textContent=state.name||'あなた';let best=null,bd=999;mapCast.forEach(n=>{const d=Math.hypot((roam.x-n.x)*.8,roam.y-n.y);$(n.id).classList.toggle('nearby',d<12);if(d<12&&d<bd){best=n;bd=d}});roam.near=best;$('mapInteract').style.opacity=best?'1':'.55';$('mapInteract').textContent=best?best.name+'と話す':'近くの人と話す';$('mapLocation').textContent=roam.y<37?(roam.x<38?'教室前':'レッスン室前'):roam.y>68?(roam.x<38?'カフェテリア前':'中庭'):'中央通路'}
-function mapFrame(t){if(roam.moving){let dt=Math.min(32,t-(roam.last||t));roam.x=Math.max(5,Math.min(95,roam.x+roam.dx*dt*.035));roam.y=Math.max(6,Math.min(93,roam.y+roam.dy*dt*.035));renderMap()}roam.last=t;requestAnimationFrame(mapFrame)}requestAnimationFrame(mapFrame);const joy=$('joyBase'),knob=$('joyKnob');function joyMove(e){const r=joy.getBoundingClientRect();let x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2,max=r.width*.31,len=Math.hypot(x,y);if(len>max){x=x/len*max;y=y/len*max}knob.style.transform='translate('+x+'px,'+y+'px)';roam.dx=x/max;roam.dy=y/max;roam.moving=true;e.preventDefault()}function joyStop(){roam.moving=false;roam.dx=roam.dy=0;knob.style.transform='translate(0,0)'}joy.addEventListener('pointerdown',e=>{joy.setPointerCapture(e.pointerId);joyMove(e)});joy.addEventListener('pointermove',e=>{if(e.buttons||e.pressure>0)joyMove(e)});joy.addEventListener('pointerup',joyStop);joy.addEventListener('pointercancel',joyStop);document.addEventListener('keydown',e=>{let k=e.key.toLowerCase();if(!['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(k))return;roam.moving=true;roam.dx=k==='a'||k==='arrowleft'?-1:k==='d'||k==='arrowright'?1:0;roam.dy=k==='w'||k==='arrowup'?-1:k==='s'||k==='arrowdown'?1:0});document.addEventListener('keyup',e=>{if(['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(e.key.toLowerCase()))joyStop()});$('mapInteract').addEventListener('click',()=>{if(!roam.near){toast('人の近くまで歩いてみてね');return}const n=roam.near;$('mapDialogTitle').textContent=n.name;$('mapDialogText').textContent=n.line;$('mapDialog').classList.add('show');if(state.sessionActive){state.bond=Math.min(100,state.bond+2);refresh()}});
-$('mapDialogClose').addEventListener('click',()=>$('mapDialog').classList.remove('show'));renderMap();
-const originalRefresh=refresh;
-refresh=function(){originalRefresh();renderProduce();renderCostumes();$('topName').textContent=state.name||'学園生活 '+state.day+'日目';};
-
-refresh();
-if(!state.setupDone){$('setupOverlay').classList.add('show');}else if(!state.prologueSeen){$('setupOverlay').classList.add('show');showPrologue();}else{$('appShell').classList.add('game-ready');if(state.sessionActive){$('appShell').classList.add('produce-mode');showView('produce');}else{showView('home');}}
+boot();
+})();
