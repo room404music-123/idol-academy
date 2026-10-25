@@ -29,12 +29,12 @@ let state;
 let pendingEvent = null;
 let battle = null;
 let toastTimer;
-function freshState(name='ひかり', idol='mirai') {
+function freshState(name='ルミ', idol='mirai') {
  const stats={vocal:12,dance:12,charm:12,bond:10};
  stats[idols[idol].special]+=7;
- return {name:name||'ひかり',idol,fairyName:'',prologueSeen:false,day:1,stats,fans:0,jewels:100,money:500,tickets:1,lessonLevels:{vocal:1,dance:1,charm:1},costumeLevels:{uniform:0},runCount:0,actions:2,doneActions:[],sessionStarted:false,storyIndex:0,storySeen:[],logs:[],eventDays:[],closet:['uniform'],equipped:'uniform',ending:false,won:false,liveAttempted:false,liveScore:0,sfx:localStorage.getItem(SOUND_KEY)!=='off'};
+ return {name:name||'ルミ',idol,fairyName:name||'ルミ',prologueSeen:false,day:1,stats,fans:0,jewels:100,money:500,tickets:1,lessonLevels:{vocal:1,dance:1,charm:1},costumeLevels:{uniform:0},runCount:0,actions:2,doneActions:[],sessionStarted:false,storyIndex:0,storySeen:[],logs:[],eventDays:[],closet:['uniform'],equipped:'uniform',ending:false,won:false,liveAttempted:false,liveScore:0,sfx:localStorage.getItem(SOUND_KEY)!=='off'};
 }
-function loadState(){try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return null;const s=JSON.parse(raw);if(!s||!s.stats||!Number.isFinite(s.day))return null;if(s.idol==='meru')s.idol='reika';if(s.idol==='setsuna')s.idol='komugi';if(!idols[s.idol])s.idol='mirai';s.money=Number.isFinite(s.money)?s.money:500;s.tickets=Number.isFinite(s.tickets)?s.tickets:1;s.fairyName=typeof s.fairyName==='string'?s.fairyName:'';s.prologueSeen=!!s.prologueSeen;s.lessonLevels=s.lessonLevels||{vocal:1,dance:1,charm:1};s.costumeLevels=s.costumeLevels||{uniform:0};s.runCount=Number.isFinite(s.runCount)?s.runCount:0;s.lifetimeFans=Number.isFinite(s.lifetimeFans)?s.lifetimeFans:s.fans||0;return s;}catch(e){return null;}}
+function loadState(){try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return null;const s=JSON.parse(raw);if(!s||!s.stats||!Number.isFinite(s.day))return null;if(s.idol==='meru')s.idol='reika';if(s.idol==='setsuna')s.idol='komugi';if(!idols[s.idol])s.idol='mirai';s.money=Number.isFinite(s.money)?s.money:500;s.tickets=Number.isFinite(s.tickets)?s.tickets:1;s.fairyName=typeof s.fairyName==='string'&&s.fairyName?s.fairyName:(s.name||'ルミ');s.name=s.fairyName;s.prologueSeen=!!s.prologueSeen;s.lessonLevels=s.lessonLevels||{vocal:1,dance:1,charm:1};s.costumeLevels=s.costumeLevels||{uniform:0};s.runCount=Number.isFinite(s.runCount)?s.runCount:0;s.lifetimeFans=Number.isFinite(s.lifetimeFans)?s.lifetimeFans:s.fans||0;return s;}catch(e){return null;}}
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));}catch(e){}}
 
 const prologuePages = {
@@ -73,18 +73,18 @@ const prologuePages = {
  ]
 };
 function showPrologue(){
- const idol=state.idol||'mirai', pages=prologuePages[state.idol]||prologuePages.mirai, char=idols[idol].name;
+ const idol=state.idol||'mirai', pages=prologuePages[state.idol]||prologuePages.mirai, char=idols[idol].name, fairyName=state.name||state.fairyName||'ルミ';
  let index=0;
  $('setupOverlay').classList.remove('show');
  const screen=$('storyScreen');screen.classList.add('show');screen.setAttribute('aria-hidden','false');
  screen.innerHTML='<header class="fairy-story-top"><div class="fairy-story-brand">✦ Étoile Academy <small>PROLOGUE · はじまりの約束</small></div><button id="prologueSkip" class="fairy-story-skip">スキップ ×</button></header><main class="fairy-story-main"><div class="fairy-story-stars">✧　✦　⋆　✦　✧</div><div class="fairy-story-chapter">PROLOGUE · '+esc(char)+' と妖精の物語</div><div class="fairy-story-art">'+idols[idol].emoji+'</div><div class="fairy-story-name">'+esc(char)+' ＆ '+esc(state.fairyName||'妖精')+'</div><div class="fairy-story-dialogue"><div id="prologueCount"></div><p id="prologueText"></p></div><div class="fairy-story-controls"><button id="prologuePrev" class="secondary">← 前へ</button><button id="prologueNext" class="primary">次へ　→</button></div></main>';
  const finish=()=>{state.prologueSeen=true;save();screen.classList.remove('show');screen.setAttribute('aria-hidden','true');if(state.ending){showFestivalEnding();return;}renderHome();renderPlan();renderStory();renderLive();renderCloset();showScreen('home');toast('妖精との約束を胸に、学園生活が始まったよ！');};
- const render=()=>{$('prologueCount').textContent='PAGE '+String(index+1).padStart(2,'0')+' / '+String(pages.length).padStart(2,'0');$('prologueText').textContent=pages[index].replace(/^妖精「/, (state.fairyName||'妖精')+'「').replaceAll('妖精さん',(state.fairyName||'妖精')+'さん');$('prologuePrev').disabled=index===0;$('prologueNext').textContent=index===pages.length-1?'学園生活へ　✦':'次へ　→';};
+ const render=()=>{$('prologueCount').textContent='PAGE '+String(index+1).padStart(2,'0')+' / '+String(pages.length).padStart(2,'0');$('prologueText').textContent=pages[index].replace(/^妖精「/, fairyName+'（妖精）「').replaceAll('妖精さん','あなた').replaceAll('妖精は','あなたは').replaceAll('妖精が','あなたが').replaceAll('妖精の','あなたの');$('prologuePrev').disabled=index===0;$('prologueNext').textContent=index===pages.length-1?'学園生活へ　✦':'次へ　→';};
  $('prologuePrev').addEventListener('click',()=>{if(index>0){index--;render();}});$('prologueNext').addEventListener('click',()=>{if(index<pages.length-1){index++;render();}else finish();});$('prologueSkip').addEventListener('click',finish);render();
 }
 function prepareIntro(){
  const saved=state&&state.stats;if(!saved)state={sfx:localStorage.getItem(SOUND_KEY)!=='off'};
- $('playerName').value=saved?(state.name||'ひかり'):'ひかり';$('fairyName').value=saved?(state.fairyName||''):'ルミ';
+ $('playerName').value=saved?(state.fairyName||state.name||'ルミ'):'ルミ';
  document.querySelectorAll('.idol-pick').forEach(b=>b.classList.toggle('selected',b.dataset.idol===(saved?state.idol:'mirai')));
  $('setupError').textContent='';$('setupOverlay').classList.add('show');
 }
@@ -194,7 +194,7 @@ function chooseStory(i){const s=nextStoryText();if(state.storySeen.includes(stat
 function resetToSetup(){if(state&&state.ending){const old=state;const next=freshState(old.name,old.idol);next.money=old.money||0;next.tickets=Math.max(1,old.tickets||0);next.jewels=old.jewels||0;next.closet=[...new Set(old.closet||['uniform'])];next.equipped=old.equipped||'uniform';next.costumeLevels={...(old.costumeLevels||{})};next.lessonLevels={...(old.lessonLevels||{vocal:1,dance:1,charm:1})};next.runCount=(old.runCount||0)+1;next.lifetimeFans=(old.lifetimeFans||0)+(old.fans||0);next.logs=[{icon:'↻',text:'周回 '+next.runCount+' 開始！育成・衣装・所持品を引き継いだ。'}];state=next;battle=null;pendingEvent=null;save();document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));$('setupOverlay').classList.remove('show');renderHome();renderPlan();renderStory();renderLive();renderCloset();showScreen('home');toast('育成を引き継いで周回 '+state.runCount+' 開始！');return;}if(!confirm('セーブデータを消して最初から始める？'))return;localStorage.removeItem(SAVE_KEY);state=null;battle=null;pendingEvent=null;document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));$('setupOverlay').classList.add('show');$('playerName').value='ひかり';document.querySelectorAll('.idol-pick').forEach(b=>b.classList.toggle('selected',b.dataset.idol==='mirai'));}
 document.querySelectorAll('.nav[data-screen]').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.screen)));
 document.querySelectorAll('.idol-pick').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.idol-pick').forEach(x=>x.classList.toggle('selected',x===b));}));
-$('beginGame').addEventListener('click',()=>{const name=$('playerName').value.trim().slice(0,12)||'ひかり',fairy=$('fairyName').value.trim().slice(0,12);if(!fairy){$('setupError').textContent='妖精の名前を入力してね。';return;}const selectedIdol=document.querySelector('.idol-pick.selected')?.dataset.idol||'mirai';if(!state||!state.stats){state=freshState(name,selectedIdol);state.tickets=1;state.logs=[];}else{state.name=name;state.idol=selectedIdol;}state.fairyName=fairy;state.prologueSeen=false;save();updateSoundButton();showPrologue();sfx('win');});
+$('beginGame').addEventListener('click',()=>{const name=$('playerName').value.trim().slice(0,12)||'ルミ';const selectedIdol=document.querySelector('.idol-pick.selected')?.dataset.idol||'mirai';if(!state||!state.stats){state=freshState(name,selectedIdol);state.tickets=1;state.logs=[];}else{state.name=name;state.fairyName=name;state.idol=selectedIdol;}state.fairyName=name;state.prologueSeen=false;save();updateSoundButton();showPrologue();sfx('win');});
 $('resetGame').addEventListener('click',resetToSetup);
 $('soundToggle').addEventListener('click',()=>{if(!state){state={sfx:localStorage.getItem(SOUND_KEY)!=='off'};}state.sfx=!state.sfx;localStorage.setItem(SOUND_KEY,state.sfx?'on':'off');updateSoundButton();if(state.sfx)sfx('tap');save();});
 $('eventChoices').addEventListener('click',e=>{const b=e.target.closest('[data-event-choice]');if(b)chooseEvent(Number(b.dataset.eventChoice));});
