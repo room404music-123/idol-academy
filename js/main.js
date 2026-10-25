@@ -30,14 +30,30 @@ const names={vocal:'歌唱力',dance:'ダンス',charm:'表現力'};
 
 // --- Costume gacha and wardrobe ---
 const costumeCatalog=[
- {id:'school',name:'スクール制服',rarity:'N',label:'ノーマル',icon:'🎀',desc:'学園生活の定番。初めての一着。'},
- {id:'pastel',name:'パステルステージ',rarity:'R',label:'レア',icon:'🩰',desc:'淡いピンクとリボンがかわいいステージ衣装。'},
- {id:'starry',name:'星降るナイトドレス',rarity:'SR',label:'スーパーレア',icon:'🌙',desc:'星の刺繍がきらめく夜空のドレス。'},
- {id:'sakura',name:'桜色プリンセス',rarity:'SR',label:'スーパーレア',icon:'🌸',desc:'春の花びらをまとった華やかな衣装。'},
- {id:'marine',name:'マリン・シンフォニー',rarity:'R',label:'レア',icon:'🫧',desc:'爽やかなブルーのマリンステージ衣装。'},
- {id:'royal',name:'ロイヤル・パープル',rarity:'SSR',label:'スーパースペシャルレア',icon:'👑',desc:'紫と金の装飾が輝く特別なドレス。'},
- {id:'moon',name:'ムーンライト・ベル',rarity:'SSR',label:'スーパースペシャルレア',icon:'✨',desc:'月明かりを閉じ込めた幻想的な衣装。'},
- {id:'lemon',name:'レモンソーダポップ',rarity:'R',label:'レア',icon:'🍋',desc:'明るい黄色が弾けるポップな衣装。'}
+ {id:'school',name:'スクール制服',rarity:'N',label:'ノーマル',icon:'🎀',desc:'学園生活の定番。初めての一着。',skill:{name:'はじめの一歩',desc:'ライブ開始時にスコア +8pt',kind:'start',amount:8}},
+ {id:'after',name:'放課後カジュアル',rarity:'N',label:'ノーマル',icon:'🧥',desc:'放課後のお出かけにぴったり。',skill:{name:'リラックス',desc:'毎ターン +2pt',kind:'flat',amount:2}},
+ {id:'sporty',name:'スポーティーウェア',rarity:'N',label:'ノーマル',icon:'👟',desc:'動きやすさ抜群のレッスンウェア。',skill:{name:'レッスンの成果',desc:'ダンスカードのスコア +5%',kind:'stat',stat:'dance',amount:5}},
+ {id:'classic',name:'クラシックワンピース',rarity:'N',label:'ノーマル',icon:'👗',desc:'上品で落ち着いたクラシカルな一着。',skill:{name:'クラシカルスマイル',desc:'表現カードのスコア +5%',kind:'stat',stat:'charm',amount:5}},
+ {id:'summer',name:'サマーカジュアル',rarity:'N',label:'ノーマル',icon:'🌻',desc:'夏の日差しに似合う爽やかな装い。',skill:{name:'サマーブリーズ',desc:'毎ターン +2pt',kind:'flat',amount:2}},
+ {id:'winter',name:'ウィンターニット',rarity:'N',label:'ノーマル',icon:'🧶',desc:'あたたかいニットで冬も元気に。',skill:{name:'ぬくもり',desc:'ライブ開始時にスコア +8pt',kind:'start',amount:8}},
+ {id:'pastel',name:'パステルステージ',rarity:'R',label:'レア',icon:'🩰',desc:'淡いピンクとリボンがかわいいステージ衣装。',skill:{name:'スイートスマイル',desc:'表現カードのスコア +8%',kind:'stat',stat:'charm',amount:8}},
+ {id:'marine',name:'マリン・シンフォニー',rarity:'R',label:'レア',icon:'🫧',desc:'爽やかなブルーのマリンステージ衣装。',skill:{name:'ブルーウェーブ',desc:'ボーカルカードのスコア +8%',kind:'stat',stat:'vocal',amount:8}},
+ {id:'lemon',name:'レモンソーダポップ',rarity:'R',label:'レア',icon:'🍋',desc:'明るい黄色が弾けるポップな衣装。',skill:{name:'ポップフィーバー',desc:'毎ターン +3pt',kind:'flat',amount:3}},
+ {id:'berry',name:'スイート・ベリー',rarity:'R',label:'レア',icon:'🍓',desc:'ベリーカラーが甘くきらめく衣装。',skill:{name:'ベリーキュート',desc:'表現カードのスコア +8%',kind:'stat',stat:'charm',amount:8}},
+ {id:'mint',name:'ミント・フロート',rarity:'R',label:'レア',icon:'🍈',desc:'ミントグリーンの軽やかなステージ衣装。',skill:{name:'ミントステップ',desc:'ダンスカードのスコア +8%',kind:'stat',stat:'dance',amount:8}},
+ {id:'cherry',name:'チェリーブロッサム',rarity:'R',label:'レア',icon:'🌺',desc:'鮮やかな花色がステージに映える。',skill:{name:'花咲くコンボ',desc:'コンボボーナス +4pt',kind:'combo',amount:4}},
+ {id:'midnight',name:'ミッドナイト・ジャズ',rarity:'R',label:'レア',icon:'🎷',desc:'夜のステージを彩る大人っぽい装い。',skill:{name:'リズムに乗って',desc:'コンボボーナス +8pt',kind:'combo',amount:8}},
+ {id:'snowdrop',name:'スノードロップ',rarity:'R',label:'レア',icon:'❄️',desc:'雪の結晶を思わせる透明感のある衣装。',skill:{name:'スノーグレイス',desc:'ライブ開始時にスコア +12pt',kind:'start',amount:12}},
+ {id:'starry',name:'星降るナイトドレス',rarity:'SR',label:'スーパーレア',icon:'🌙',desc:'星の刺繍がきらめく夜空のドレス。',skill:{name:'スターダスト',desc:'ライブ開始時にスコア +20pt',kind:'start',amount:20}},
+ {id:'sakura',name:'桜色プリンセス',rarity:'SR',label:'スーパーレア',icon:'🌸',desc:'春の花びらをまとった華やかな衣装。',skill:{name:'花びらの祝福',desc:'表現カードのスコア +12%',kind:'stat',stat:'charm',amount:12}},
+ {id:'crystal',name:'クリスタル・セレナーデ',rarity:'SR',label:'スーパーレア',icon:'💎',desc:'クリスタルの輝きをまとった舞台衣装。',skill:{name:'クリスタルボイス',desc:'ボーカルカードのスコア +12%',kind:'stat',stat:'vocal',amount:12}},
+ {id:'angel',name:'エンジェル・ウィング',rarity:'SR',label:'スーパーレア',icon:'🪽',desc:'羽のように軽やかな天使のドレス。',skill:{name:'エンジェルコール',desc:'3ターン目のスコア +15%',kind:'final',amount:15}},
+ {id:'rose',name:'ローズ・ノクターン',rarity:'SR',label:'スーパーレア',icon:'🥀',desc:'深紅の薔薇が印象的な夜会の衣装。',skill:{name:'ローズノクターン',desc:'毎ターン +5pt',kind:'flat',amount:5}},
+ {id:'stardust',name:'スターダスト・パレード',rarity:'SR',label:'スーパーレア',icon:'🎆',desc:'星屑が舞う華やかなパレード衣装。',skill:{name:'スターダストパレード',desc:'コンボボーナス +10pt',kind:'combo',amount:10}},
+ {id:'royal',name:'ロイヤル・パープル',rarity:'SSR',label:'スーパースペシャルレア',icon:'👑',desc:'紫と金の装飾が輝く特別なドレス。',skill:{name:'ロイヤルステージ',desc:'全カードのスコア +8%',kind:'all',amount:8}},
+ {id:'moon',name:'ムーンライト・ベル',rarity:'SSR',label:'スーパースペシャルレア',icon:'✨',desc:'月明かりを閉じ込めた幻想的な衣装。',skill:{name:'月光の奇跡',desc:'3ターン目のスコア +20%',kind:'final',amount:20}},
+ {id:'eternal',name:'エターナル・スター',rarity:'SSR',label:'スーパースペシャルレア',icon:'🌟',desc:'永遠の星をイメージした究極のステージ衣装。',skill:{name:'永遠の輝き',desc:'コンボボーナス +15pt',kind:'combo',amount:15}},
+ {id:'prism',name:'プリズム・レガリア',rarity:'SSR',label:'スーパースペシャルレア',icon:'🌈',desc:'七色の光が集まる最上級の衣装。',skill:{name:'プリズムフィーバー',desc:'全カードのスコア +10%',kind:'all',amount:10}}
 ];
 function costumeById(id){return costumeCatalog.find(c=>c.id===id)||costumeCatalog[0]}
 function renderCostumes(){
@@ -48,9 +64,11 @@ function renderCostumes(){
  if(!state.costumeOwned.includes(state.equippedCostume))state.equippedCostume='school';
  const equipped=costumeById(state.equippedCostume);
  $('costumeTickets').textContent=state.costumeTickets;
+ $('costumeMedals').textContent=Number(state.costumeMedals)||0;
+ if($('skillMaterials'))$('skillMaterials').textContent=Number(state.skillMaterials)||0;
  $('equippedCostumeArt').textContent=equipped.icon;
  $('equippedCostumeName').textContent=equipped.name;
- $('equippedCostumeDesc').textContent=equipped.desc;
+ $('equippedCostumeDesc').textContent=equipped.desc+' スキル「'+equipped.skill.name+'」：'+equipped.skill.desc;
  $('costumeOwnedCount').textContent=state.costumeOwned.length+'着';
  $('costumeFeature').className='costume-feature rarity-'+equipped.rarity.toLowerCase();
  $('costumeGrid').innerHTML=state.costumeOwned.map(id=>{const c=costumeById(id),isEquipped=id===state.equippedCostume;return '<article class="costume-card rarity-'+c.rarity.toLowerCase()+'"><div class="costume-card-art">'+c.icon+'</div><span class="costume-rarity">'+c.label+'</span><strong>'+c.name+'</strong><p>'+c.desc+'</p><button class="'+(isEquipped?'secondary':'primary')+'" data-equip-costume="'+c.id+'" '+(isEquipped?'disabled':'')+'>'+(isEquipped?'着用中':'この衣装に着替える')+'</button></article>'}).join('');
@@ -66,13 +84,32 @@ function pullCostume(times){
   const rarity=roll<3?'SSR':roll<15?'SR':roll<45?'R':'N';
   const pool=costumeCatalog.filter(c=>c.rarity===rarity);
   const item=pool[Math.floor(Math.random()*pool.length)];
-  if(state.costumeOwned.includes(item.id)){state.costumeMedals=(Number(state.costumeMedals)||0)+1;results.push({item,duplicate:true})}
+  if(state.costumeOwned.includes(item.id)){const medals=({N:1,R:2,SR:4,SSR:8}[item.rarity]||1);state.costumeMedals=(Number(state.costumeMedals)||0)+medals;results.push({item,duplicate:true,medals})}
   else{state.costumeOwned.push(item.id);results.push({item,duplicate:false})}
  }
  save();renderCostumes();
- $('costumePullResult').innerHTML='<h3>ガチャ結果 ✨</h3><div class="costume-result-grid">'+results.map(r=>'<div class="costume-result-item rarity-'+r.item.rarity.toLowerCase()+'"><span>'+r.item.icon+'</span><small>'+r.item.rarity+' · '+r.item.label+'</small><strong>'+r.item.name+'</strong><em>'+(r.duplicate?'所持済み → 衣装メダル +1':'NEW！衣装を獲得')+'</em></div>').join('')+'</div><p class="notice">所持衣装 '+state.costumeOwned.length+'着 ／ 衣装メダル '+(state.costumeMedals||0)+'枚</p>';
+ $('costumePullResult').innerHTML='<h3>ガチャ結果 ✨</h3><div class="costume-result-grid">'+results.map(r=>'<div class="costume-result-item rarity-'+r.item.rarity.toLowerCase()+'"><span>'+r.item.icon+'</span><small>'+r.item.rarity+' · '+r.item.label+'</small><strong>'+r.item.name+'</strong><em>'+(r.duplicate?'所持済み → 衣装メダル +'+r.medals:'NEW！衣装を獲得')+'</em></div>').join('')+'</div><p class="notice">所持衣装 '+state.costumeOwned.length+'着 ／ 衣装メダル '+(state.costumeMedals||0)+'枚</p>';
  toast('衣装ガチャを引いたよ！');
 }
+function exchangeCostume(kind){
+ const costs={R:10,SR:30,SSR:80};
+ if(kind==='tickets'){
+  if((Number(state.costumeMedals)||0)<8){toast('衣装メダルが足りないよ（必要：8枚）');return}
+  state.costumeMedals-=8;state.costumeTickets=(Number(state.costumeTickets)||0)+3;save();renderCostumes();toast('ガチャチケットを3枚交換したよ！');return;
+ }
+ if(kind==='material'){
+  if((Number(state.costumeMedals)||0)<5){toast('衣装メダルが足りないよ（必要：5枚）');return}
+  state.costumeMedals-=5;state.skillMaterials=(Number(state.skillMaterials)||0)+1;save();renderCostumes();toast('スキル強化素材 +1！ 所持数 '+state.skillMaterials);return;
+ }
+ const cost=costs[kind];if(!cost)return;
+ if((Number(state.costumeMedals)||0)<cost){toast('衣装メダルが足りないよ（必要：'+cost+'枚）');return}
+ const pool=costumeCatalog.filter(c=>c.rarity===kind&&!state.costumeOwned.includes(c.id));
+ if(!pool.length){toast('このレアリティの未所持衣装はないよ！');return}
+ const item=pool[Math.floor(Math.random()*pool.length)];state.costumeMedals-=cost;state.costumeOwned.push(item.id);save();renderCostumes();
+ $('costumePullResult').innerHTML='<h3>メダル交換 ✨</h3><div class="costume-result-grid"><div class="costume-result-item rarity-'+item.rarity.toLowerCase()+'"><span>'+item.icon+'</span><small>'+item.rarity+' · '+item.label+'</small><strong>'+item.name+'</strong><em>交換で獲得！</em></div></div>';
+ toast(item.name+'を交換したよ！');
+}
+document.querySelectorAll('[data-costume-exchange]').forEach(b=>b.addEventListener('click',()=>exchangeCostume(b.dataset.costumeExchange)));
 $('pullCostume').addEventListener('click',()=>pullCostume(1));
 $('pullCostumeTen').addEventListener('click',()=>pullCostume(10));
 renderCostumes();
@@ -187,8 +224,12 @@ function playBattleCard(i){
  if(!battle||battle.done||battle.waiting)return;
  const c=battle.hand[i];if(!c)return;
  const stat=state[c.type]||0;let points=c.base+Math.floor(stat*.35);
+ const activeCostume=costumeById(state.equippedCostume||'school'),skill=activeCostume.skill;
+ if(skill.kind==='all'||(skill.kind==='stat'&&skill.stat===c.type))points+=Math.floor(points*skill.amount/100);
+ if(skill.kind==='flat')points+=skill.amount;
+ if(skill.kind==='final'&&battle.turn===2)points+=Math.floor(points*skill.amount/100);
  let combo='';
- if(battle.lastType===c.type){points+=8+battle.combo*3;battle.combo++;combo=' 同タイプ連続！コンボ +'+(8+(battle.combo-1)*3)+'pt！';}
+ if(battle.lastType===c.type){const comboBonus=8+battle.combo*3+(skill.kind==='combo'?skill.amount:0);points+=comboBonus;battle.combo++;combo=' 同タイプ連続！コンボ +'+comboBonus+'pt！';}
  else if(battle.lastType){points+=5;battle.combo=0;combo=' タイプチェンジ・ブレイク +5pt！';}
  battle.lastType=c.type;battle.player+=points;
  const rival=10+Math.floor(Math.random()*12)+Math.floor((state.vocal+state.dance+state.charm)/30);
@@ -202,8 +243,10 @@ $('backToProduce').addEventListener('click',()=>showView('produce'));
 $('goAudition').addEventListener('click',()=>{if(!state.sessionActive){toast('先に今日のプロデュースを開始してね');return}showView('live')});
 $('startLive').addEventListener('click',()=>{
  if(!state.sessionActive){toast('まず今日のプロデュースを開始してね');showView('produce');return}
- battle={turn:0,player:0,rival:0,lastType:null,combo:0,hand:drawHand(),done:false,waiting:false};
- $('liveResult').textContent='';$('battleLog').textContent='手札が配られた！ 3ターンでライバルを上回ろう。';renderBattle();
+ const liveCostume=costumeById(state.equippedCostume||'school');
+ const startBonus=liveCostume.skill.kind==='start'?liveCostume.skill.amount:0;
+ battle={turn:0,player:startBonus,rival:0,lastType:null,combo:0,hand:drawHand(),done:false,waiting:false};
+ $('liveResult').textContent='';$('battleLog').textContent='手札が配られた！ 着用スキル「'+liveCostume.skill.name+'」発動！'+(startBonus?' 開始ボーナス +'+startBonus+'pt。':'')+' 3ターンでライバルを上回ろう。';renderBattle();
 });
 $('battleNext').addEventListener('click',()=>{if(!battle||battle.done)return;battle.hand=drawHand();battle.waiting=false;$('battleNext').style.display='none';renderBattle()});
 
