@@ -103,7 +103,7 @@
  </div>
  <div class="home-columns">
   <div class="home-card schedule-card"><div class="home-card-head"><div><div class="eyebrow">A DAY AT A GLANCE</div><h3>今日のスケジュール</h3></div><span class="home-card-mark">☼</span></div><div class="home-timeline"><div class="home-time-row" id="task-lesson"><span class="home-time">10:00</span><span class="home-time-dot"></span><span class="home-time-copy"><strong>基礎レッスン</strong><small>自分のペースで実力を磨こう</small></span><span class="home-time-state">予定</span></div><div class="home-time-row" id="task-story"><span class="home-time">14:00</span><span class="home-time-dot"></span><span class="home-time-copy"><strong>放課後の約束</strong><small>友達と過ごす大切な時間</small></span><span class="home-time-state">予定</span></div><div class="home-time-row" id="task-live"><span class="home-time">17:00</span><span class="home-time-dot"></span><span class="home-time-copy"><strong>ミニステージ</strong><small>今日の成長を確かめよう</small></span><span class="home-time-state">予定</span></div></div><button class="home-card-footer" data-goto="produce">今日の活動を確認する　→</button></div>
-  <div class="home-card"><div class="home-card-head"><div><div class="eyebrow">CAMPUS GUIDE</div><h3>どこへ行く？</h3></div><span class="home-card-mark">✧</span></div><div class="home-destinations"><button class="home-destination" data-goto="produce"><span class="destination-icon dest-pink">✦</span><span><strong>プロデュース</strong><small>レッスン・今日の行動</small></span><b>→</b></button><button class="home-destination" data-goto="friends"><span class="destination-icon dest-blue">♡</span><span><strong>友達に会う</strong><small>月島仲間とおしゃべり</small></span><b>→</b></button><button class="home-destination" data-goto="story"><span class="destination-icon dest-gold">▤</span><span><strong>ストーリー</strong><small>学園で起こる物語を読む</small></span><b>→</b></button><button class="home-destination" data-goto="profile"><span class="destination-icon dest-lilac">✧</span><span><strong>アイドル設定</strong><small>名前やプロフィールを整える</small></span><b>→</b></button></div></div>
+  <div class="home-card"><div class="home-card-head"><div><div class="eyebrow">CAMPUS GUIDE</div><h3>どこへ行く？</h3></div><span class="home-card-mark">✧</span></div><div class="home-destinations"><button class="home-destination" data-goto="produce"><span class="destination-icon dest-pink">✦</span><span><strong>プロデュース</strong><small>レッスン・今日の行動</small></span><b>→</b></button><button class="home-destination" data-goto="friends"><span class="destination-icon dest-blue">♡</span><span><strong>友達に会う</strong><small>仲間とおしゃべり</small></span><b>→</b></button><button class="home-destination" data-goto="story"><span class="destination-icon dest-gold">▤</span><span><strong>ストーリー</strong><small>学園で起こる物語を読む</small></span><b>→</b></button><button class="home-destination" data-goto="profile"><span class="destination-icon dest-lilac">✧</span><span><strong>アイドル設定</strong><small>名前やプロフィールを整える</small></span><b>→</b></button></div></div>
  </div>
  <div class="home-bottom-banner"><span class="banner-star">✦</span><div><strong>あせらなくて大丈夫。</strong><p>あなたの輝き方は、あなたが決めていい。</p></div><span class="banner-flower">✿</span></div>
  <div id="lessonResult" class="result" style="display:none"></div>
@@ -279,9 +279,9 @@ document.querySelectorAll('[data-start-produce]').forEach(b=>b.addEventListener(
 document.querySelectorAll('[data-friend-talk]').forEach(b=>b.addEventListener('click',()=>{
  if(!state.sessionActive){showView('produce');toast('まずプロデュースを開始してね');return}
  state.bond=Math.min(100,state.bond+5);state.friendBond=Math.min(100,(state.friendBond||0)+8);state.friendTalks=(state.friendTalks||0)+1;
- $('friendResult').textContent='美月「えへへ、話せてよかった！ また一緒に帰ろうね」 親愛度 +5。';$('friendResult').classList.add('show');
- $('friendText').textContent='美月はうれしそうに笑った。「アイドルのあなたも好きだけど、普通に話してるあなたも大好きだよ」';
- spendAction('美月とおしゃべりした。友情が深まった！');
+ $('friendResult').textContent='みんな「話せてよかった！ また一緒に過ごそうね」 親愛度 +5。';$('friendResult').classList.add('show');
+ $('friendText').textContent='相手はうれしそうに笑った。「アイドルのあなたも好きだけど、普通に話してるあなたも大好きだよ」';
+ spendAction('仲間とおしゃべりした。友情が深まった！');
 }));
 let activeFriend='meru';
 const castTalk={
