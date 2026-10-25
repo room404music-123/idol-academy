@@ -4,9 +4,9 @@ const $ = id => document.getElementById(id);
 const SAVE_KEY = 'etoile-academy-rebuild-save-v1';
 const SOUND_KEY = 'etoile-academy-sfx';
 const idols = {
- mirai:{name:'星降 未来',emoji:'🌟',role:'歌で心を動かす、まっすぐな努力家。',special:'vocal',voice:'「失敗したって、次はもっと輝けるよ！」'},
- meru:{name:'夢見 める',emoji:'🎀',role:'表情と演技が得意な、負けず嫌い。',special:'charm',voice:'「べ、別に負けるつもりなんてないんだから！」'},
- setsuna:{name:'夜永 セツナ',emoji:'🌙',role:'キレのあるダンスが武器のクールな実力派。',special:'dance',voice:'「結果で見せる。それだけだろ。」'}
+ mirai:{name:'星降 未来',emoji:'🌟',role:'歌が大好きで、まっすぐ夢を追いかける努力家。',special:'vocal',voice:'「失敗したって、次はもっと輝けるよ！」'},
+ reika:{name:'如月 麗華',emoji:'🌹',role:'気品あふれる表現力を持つ、芯の強いアイドル。',special:'charm',voice:'「私らしい輝きで、必ず認めさせてみせるわ。」'},
+ komugi:{name:'日高 こむぎ',emoji:'🍀',role:'明るさとキレのあるダンスで、みんなを笑顔にする。',special:'dance',voice:'「いっくよー！ みんなで最高のステージにしよう！」'}
 };
 const costumes = [
  {id:'uniform',name:'はじまりの制服',emoji:'🎀',rarity:'N',desc:'基本の衣装。どんな一日にも似合う。',bonus:0},
@@ -34,7 +34,7 @@ function freshState(name='ひかり', idol='mirai') {
  stats[idols[idol].special]+=7;
  return {name:name||'ひかり',idol,day:1,stats,fans:0,jewels:100,actions:2,doneActions:[],sessionStarted:false,storyIndex:0,storySeen:[],logs:[],eventDays:[],closet:['uniform'],equipped:'uniform',ending:false,won:false,liveAttempted:false,liveScore:0,sfx:localStorage.getItem(SOUND_KEY)!=='off'};
 }
-function loadState(){try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return null;const s=JSON.parse(raw);if(!s||!s.stats||!idols[s.idol]||!Number.isFinite(s.day))return null;return s;}catch(e){return null;}}
+function loadState(){try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return null;const s=JSON.parse(raw);if(!s||!s.stats||!Number.isFinite(s.day))return null;if(s.idol==='meru')s.idol='reika';if(s.idol==='setsuna')s.idol='komugi';if(!idols[s.idol])s.idol='mirai';return s;}catch(e){return null;}}
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));}catch(e){}}
 function clamp(v,min=0,max=100){return Math.max(min,Math.min(max,Number(v)||0));}
 function statName(key){return ({vocal:'歌唱力',dance:'ダンス',charm:'表現力',bond:'絆'})[key]||key;}
