@@ -151,3 +151,21 @@ body{height:100dvh;overflow:hidden}
 .costume-card button{font-size:10px;padding:10px 12px;width:100%;margin-top:4px}.costume-card button:disabled{opacity:.8;cursor:default}
 .rarity-ssr{border-color:#e5c875!important;background:linear-gradient(145deg,#fffdf2,#fff8e6)!important}.rarity-sr{border-color:#d6b9f2!important}.rarity-r{border-color:#c9dff8!important}
 @media(max-width:700px){.costume-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.costume-feature{gap:13px;padding:15px}.costume-feature-art{width:78px;height:90px;font-size:42px}.costume-feature h3{font-size:16px}.costume-top{align-items:flex-start}.costume-ticket{padding:8px;font-size:10px}.costume-ticket strong{font-size:16px}}
+
+/* Costume medal exchange and 24-outfit collection */
+.costume-currencies{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.medal-ticket{background:#f4efff;border-color:#e0d3fa;color:#7554a3}
+.costume-feature{align-items:flex-start}
+.costume-feature>div:last-child{min-width:0}
+.costume-shop{margin:28px 0 24px;padding:20px;border:1px solid #e9dff4;border-radius:18px;background:linear-gradient(140deg,#fffafd,#f8f5ff)}
+.costume-shop-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.costume-shop-head h3{margin:5px 0;font-size:17px}
+.costume-shop-head>span{font-size:10px;color:var(--muted)}
+.costume-shop-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}
+.costume-shop-item{display:flex;flex-direction:column;align-items:center;gap:7px;min-width:0;padding:13px 8px;border:1px solid #e8def3;border-radius:13px;background:#fff;color:var(--ink);cursor:pointer;transition:transform .15s,border-color .15s}
+.costume-shop-item:hover{transform:translateY(-2px);border-color:#c9a8e9}
+.costume-shop-item>span{font-size:27px}.costume-shop-item strong{font-size:11px;text-align:center;line-height:1.5}.costume-shop-item small{font-size:10px;color:#8e70b0;text-align:center}
+.collection-sub{font-size:10px;color:var(--muted);font-weight:500;margin-left:5px}
+.costume-card{min-height:255px}
+@media(max-width:900px){.costume-shop-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){.costume-shop{padding:13px}.costume-shop-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.costume-shop-head{align-items:flex-start;flex-direction:column}.costume-currencies{justify-content:flex-start}.costume-card{min-height:0}}
