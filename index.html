@@ -19,8 +19,7 @@
  <button class="nav active" data-view="home"><span class="ico">⌂</span>ホーム</button>
  <button class="nav" data-view="produce"><span class="ico">✦</span>プロデュース</button><button class="nav" data-view="map"><span class="ico">⌖</span>学園を歩く</button>
  <button class="nav" data-view="friends"><span class="ico">♡</span>友達</button>
- <button class="nav" data-view="profile"><span class="ico">✧</span>アイドル設定</button>
- <button class="nav" data-view="story"><span class="ico">▤</span>ストーリー</button>
+  <button class="nav" data-view="story"><span class="ico">▤</span>ストーリー</button>
  <button class="nav" data-view="live"><span class="ico">☆</span>ライブステージ</button>
  <div class="sidecard"><strong>YOUR STORY STARTS HERE</strong><p>小さな一歩が、いつか大きな星になる。あなただけの輝きを見つけよう。</p></div>
 </aside>
@@ -70,12 +69,7 @@
  </div>
  <div class="panel cast-chat-panel"><div class="eventtag" id="friendTag">DREAM-KAKE ROSETTA · AFTER SCHOOL</div><h3 id="friendTitle" style="margin:10px 0">「ねえ、放課後ちょっと付き合ってよ」</h3><p id="friendText" style="color:var(--muted);font-size:12px;line-height:1.9">めるが少し照れたように、あなたの顔をのぞき込んだ。</p><div class="storychoices" id="friendChoices"><button class="secondary" data-friend-choice="cafe">「一緒に寄り道しよう！」</button><button class="secondary" data-friend-choice="practice">「レッスンを見ていてくれる？」</button><button class="secondary" data-friend-choice="talk">「少し相談してもいい？」</button></div><div class="result" id="friendResult"></div><p class="notice">プロデュース中に会話すると、行動を1回使って親愛度を上げられるよ。</p><button class="primary" data-goto="produce">プロデュース画面へ　→</button></div>
 </section>
-<section class="view" id="view-profile">
- <div class="subhero"><div class="eyebrow">YOUR IDOL, YOUR STORY</div><h2>アイドルプロフィール</h2><p>ここから始まる、あなただけの成長物語。名前とイメージを決めてみよう。いつでも変更できるよ。</p></div>
- <div class="panel"><div class="eyebrow">01 / NAME</div><h3>あなたのアイドル名</h3><div class="formrow"><input class="textinput" id="idolName" maxlength="16" placeholder="例：星野 ひかり"><button class="primary" id="saveName">名前を決める</button></div><p class="notice">ここで設定する名前は、あなた自身のアイドル名として会話やライブに反映されるよ。</p>
- <div class="eyebrow" style="margin-top:26px">02 / IMAGE COLOR</div><h3>イメージカラー</h3><div class="choices" id="colorChoices"><button class="choice selected" data-color="pink">Sakura Pink</button><button class="choice" data-color="blue">Sky Blue</button><button class="choice" data-color="purple">Lavender</button><button class="choice" data-color="gold">Starlight Gold</button></div>
- <div class="eyebrow" style="margin-top:24px">03 / FIRST IMPRESSION</div><h3>最初の一歩</h3><div class="choices" id="typeChoices"><button class="choice selected" data-type="努力家">コツコツ努力家</button><button class="choice" data-type="天真爛漫">天真爛漫</button><button class="choice" data-type="ミステリアス">ミステリアス</button></div><button class="primary" id="saveProfile">プロフィールを保存　→</button><div class="result" id="profileResult"></div></div>
-</section>
+
 <section class="view" id="view-lesson">
  <div class="subhero"><div class="eyebrow">PRACTICE MAKES A STAR</div><h2>レッスンルーム</h2><p>レッスンは「プロデュースを開始する」から始めよう。1日の行動回数には限りがあるので、今日は何を伸ばすか考えてみて。</p><button class="primary" data-goto="produce" style="margin-top:15px">プロデュースへ　→</button></div>
  <div class="panel"><div class="lessonlist">
