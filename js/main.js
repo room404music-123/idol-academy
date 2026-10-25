@@ -1,8 +1,25 @@
 
 // Runtime guard: surface unexpected errors so a broken interaction is diagnosable.
 window.addEventListener('error', function(event){
-  try { const t=document.getElementById('toast'); if(t){t.textContent='動作エラーが発生しました。ページを再読み込みしてください。';t.classList.add('show');} } catch(_) {}
-  console.error('Étoile Academy runtime error:', event.error || event.message);
+  try {
+    const t=document.getElementById('toast');
+    if(t){
+      const detail=(event.message||'不明なエラー')+(event.lineno?' ('+event.lineno+'行目)':'');
+      t.textContent='動作エラー：'+detail;
+      t.classList.add('show');
+      t.style.zIndex='999999';
+      t.style.maxWidth='min(92vw,700px)';
+      t.style.whiteSpace='normal';
+    }
+  } catch(_) {}
+  console.error('Étoile Academy runtime error:', event.error || event.message, event.filename, event.lineno);
+});
+window.addEventListener('unhandledrejection', function(event){
+  try {
+    const t=document.getElementById('toast');
+    if(t){t.textContent='動作エラー：'+String(event.reason&&event.reason.message||event.reason||'非同期処理に失敗');t.classList.add('show');t.style.zIndex='999999';}
+  } catch(_) {}
+  console.error('Étoile Academy unhandled rejection:',event.reason);
 });
 const KEY='etoile-academy-save-v2';
 const initial={name:'',fairyName:'',chosenIdol:'mirai',setupDone:false,prologueSeen:false,color:'pink',type:'努力家',vocal:12,dance:10,charm:14,bond:5,day:1,lessonDone:false,storyDone:false,liveDone:false,storyChoice:'',sessionActive:false,actionsLeft:0,friendBond:0,friendTalks:0};
