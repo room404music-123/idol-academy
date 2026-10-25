@@ -22,9 +22,9 @@ function refresh(){
 
  ['vocal','dance','charm','bond'].forEach(k=>{ $(k).textContent=state[k];$('bar-'+k).style.width=state[k]+'%'});
  ['lesson','story','live'].forEach(k=>{$('task-'+k).classList.toggle('done',!!state[k+'Done'])});
- if(state.name)$('idolName').value=state.name;
- document.querySelectorAll('[data-color]').forEach(b=>b.classList.toggle('selected',b.dataset.color===state.color));
- document.querySelectorAll('[data-type]').forEach(b=>b.classList.toggle('selected',b.dataset.type===state.type));
+
+
+
  const title=state.name?state.name+'の FIRST LIGHT':'FIRST LIGHT';if($('stageName')) $('stageName').textContent=title; // optional legacy element; current home layout no longer includes it
  save();
 }
@@ -69,6 +69,10 @@ function showView(name){
   else {$('setupOverlay').classList.add('show');}
   return;
  }
+ if(name==='live'&&!state.sessionActive){
+  toast('オーディションに参加するには、先にプロデュースを開始してね');
+  name='produce';
+ }
  const target=$('view-'+name);if(!target)return;
  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v===target));
  document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('active',b.dataset.view===name));
@@ -82,10 +86,6 @@ document.querySelectorAll('[data-train]').forEach(b=>b.addEventListener('click',
  const msg=names[k]+'が '+(state[k]-before)+' アップ！ 親愛度 +2。行動を1回使ったよ。';
  $('lessonResult').textContent=msg;$('lessonResult').classList.add('show');$('produceResult').textContent=msg;$('produceResult').classList.add('show');spendAction(msg);
 }));
-$('saveName').addEventListener('click',()=>{const value=$('idolName').value.trim();if(!value){toast('アイドルの名前を入力してね');return}state.name=value;refresh();toast('「'+value+'」の名前を登録したよ')});
-document.querySelectorAll('[data-color]').forEach(b=>b.addEventListener('click',()=>{state.color=b.dataset.color;refresh()}));
-document.querySelectorAll('[data-type]').forEach(b=>b.addEventListener('click',()=>{state.type=b.dataset.type;refresh()}));
-$('saveProfile').addEventListener('click',()=>{if(!$('idolName').value.trim()&&!state.name){$('profileResult').textContent='まずはアイドルの名前を入力してね。';$('profileResult').classList.add('show');return}state.name=$('idolName').value.trim()||state.name;save();refresh();$('profileResult').textContent=state.name+'、プロフィール登録完了！ '+state.type+'なアイドルとして、'+({pink:'桜色',blue:'空色',purple:'ラベンダー',gold:'星明かり'}[state.color])+'の輝きをまとって歩き出そう。';$('profileResult').classList.add('show');toast('プロフィールを保存したよ')});
 document.querySelectorAll('[data-choice]').forEach(b=>b.addEventListener('click',()=>{
  if(state.storyDone){toast('このエピソードはクリア済みだよ');return}
  const choice=b.dataset.choice;state.storyChoice=choice;state.storyDone=true;state.bond=Math.min(100,state.bond+8);
