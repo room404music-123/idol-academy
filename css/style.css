@@ -195,6 +195,31 @@ body{height:100dvh;overflow:hidden}
 @media(max-width:700px){.economy-pill{padding:5px 7px;font-size:9px}.topright{flex-wrap:wrap;justify-content:flex-end}.costume-card-actions{grid-template-columns:1fr}.collection-tools{gap:8px}}
 @media(prefers-reduced-motion:reduce){.rarity-ssr:before,.rarity-ssr .costume-card-art,.rarity-ssr .costume-feature-art{animation:none!important}}
 
-/* Jewel currency presentation */
-.jewel-pill{border-color:rgba(255,220,135,.38);background:linear-gradient(120deg,rgba(255,224,145,.18),rgba(213,183,255,.16));color:#ffe9a8;text-shadow:0 0 10px rgba(255,215,110,.22)}
-.jewel-pill b{color:#fff3c7}
+
+/* High-contrast currency HUD */
+.topright .economy-pill{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:8px 13px;border-radius:13px;
+  font-size:12px;font-weight:800;white-space:nowrap;
+  text-shadow:none;box-shadow:0 3px 10px rgba(20,12,42,.12);
+}
+.topright .jewel-pill{
+  color:#65430c!important;
+  background:linear-gradient(135deg,#fff7ce 0%,#ffe39a 52%,#fff0bd 100%)!important;
+  border:1px solid #e6bd55!important;
+}
+.topright .fans-pill{
+  color:#812d59!important;
+  background:linear-gradient(135deg,#fff0f7 0%,#ffd9e9 55%,#ffeaf4 100%)!important;
+  border:1px solid #efa6c8!important;
+}
+.currency-icon{font-size:16px;line-height:1}
+.currency-label{font-size:11px;letter-spacing:.02em}
+.topright .economy-pill b{font-size:16px;font-weight:900;font-variant-numeric:tabular-nums;color:inherit}
+.currency-unit{font-size:10px;font-weight:700;opacity:.85}
+@media(max-width:700px){
+  .topright .economy-pill{padding:6px 9px;gap:5px;border-radius:11px;font-size:10px}
+  .currency-icon{font-size:14px}
+  .currency-label{font-size:10px}
+  .topright .economy-pill b{font-size:14px}
+}
