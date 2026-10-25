@@ -169,3 +169,28 @@ body{height:100dvh;overflow:hidden}
 .costume-card{min-height:255px}
 @media(max-width:900px){.costume-shop-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:700px){.costume-shop{padding:13px}.costume-shop-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.costume-shop-head{align-items:flex-start;flex-direction:column}.costume-currencies{justify-content:flex-start}.costume-card{min-height:0}}
+
+/* Rarity sparkle, economy HUD, sortable wardrobe and level-ups */
+.economy-pill{display:inline-flex;align-items:center;gap:5px;padding:7px 10px;border:1px solid rgba(255,255,255,.13);border-radius:999px;background:rgba(255,255,255,.07);color:#fff;font-size:11px;white-space:nowrap}
+.economy-pill b{font-variant-numeric:tabular-nums}.fans-pill{color:#ffd8e9}
+.rarity-ssr{position:relative;isolation:isolate;overflow:hidden;border:1px solid #e5c45c!important;background:linear-gradient(135deg,#fffbe8,#f8e7ff 38%,#e5f5ff 68%,#fff5dc)!important;box-shadow:0 0 0 1px rgba(255,211,89,.3),0 7px 24px rgba(177,122,231,.2)}
+.rarity-ssr:before{content:"";position:absolute;inset:-60% -80%;z-index:-1;background:linear-gradient(110deg,transparent 38%,rgba(255,255,255,.85) 48%,rgba(255,231,150,.42) 52%,transparent 62%);transform:translateX(-70%) rotate(10deg);animation:ssrShimmer 4s ease-in-out infinite;pointer-events:none}
+.rarity-ssr .costume-card-art,.rarity-ssr .costume-feature-art,.rarity-ssr .costume-result-item>span{filter:drop-shadow(0 0 8px rgba(255,190,65,.7));animation:ssrFloat 3s ease-in-out infinite}
+.rarity-sr{border:1px solid #d4a7ff!important;background:linear-gradient(145deg,#fffaff,#f3e8ff 48%,#e9f4ff)!important;box-shadow:0 0 0 1px rgba(195,145,255,.22),0 5px 17px rgba(166,119,231,.12)}
+.rarity-sr .costume-card-art,.rarity-sr .costume-feature-art{filter:drop-shadow(0 0 6px rgba(192,137,255,.55))}
+.rarity-r{box-shadow:0 3px 12px rgba(113,170,235,.1)}
+@keyframes ssrShimmer{0%,18%{transform:translateX(-70%) rotate(10deg)}65%,100%{transform:translateX(70%) rotate(10deg)}}
+@keyframes ssrFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.045)}}
+.costume-card.is-equipped{outline:2px solid #c29be9;outline-offset:2px}
+.collection-tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.collection-tools label{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:7px}
+#costumeSort{padding:8px 10px;border:1px solid #e3d5f0;border-radius:10px;background:#fff;color:var(--ink);font:inherit;font-size:11px}
+.costume-level-badge{display:inline-block;margin-top:5px;padding:4px 7px;border-radius:999px;background:#f1e8ff;color:#865bb5;font-size:9px;font-weight:800;letter-spacing:.04em}
+.costume-skill-mini{width:100%;margin:6px 0;padding:9px;border-radius:10px;background:rgba(255,255,255,.72);font-size:10px;font-weight:800;color:#75529b;line-height:1.5}
+.costume-skill-mini small{display:block;margin-top:4px;color:#827d9a;font-size:9px;font-weight:500}
+.costume-card-actions{display:grid;grid-template-columns:1fr;gap:6px;width:100%;margin-top:auto}.costume-card-actions button{width:100%;padding:9px 5px;font-size:10px}
+.levelup-costume{border-color:#e5c987!important;background:#fff9e9!important;color:#8b6719!important}
+.audition-skill-panel{margin:12px 0 16px;padding:17px;border:1px solid #dbc7f5;border-radius:16px;background:linear-gradient(120deg,#fff9ff,#f2edff 55%,#edf8ff);box-shadow:0 5px 18px rgba(131,95,184,.1)}
+.audition-skill-panel h4{margin:5px 0;font-size:16px;color:#7950a7}.audition-skill-panel p{margin:6px 0;font-size:12px}.audition-skill-panel>small{display:block;margin-top:7px;color:#75529b;font-weight:700}
+.audition-fee{margin-top:10px;padding-top:10px;border-top:1px solid #e3d6f1;color:#756b88;font-size:10px;line-height:1.8}
+@media(max-width:700px){.economy-pill{padding:5px 7px;font-size:9px}.topright{flex-wrap:wrap;justify-content:flex-end}.costume-card-actions{grid-template-columns:1fr}.collection-tools{gap:8px}}
+@media(prefers-reduced-motion:reduce){.rarity-ssr:before,.rarity-ssr .costume-card-art,.rarity-ssr .costume-feature-art{animation:none!important}}
