@@ -8,8 +8,12 @@ const idols = {
  reika:{name:'如月 麗華',emoji:'🦋',role:'気品あふれる表現力を持つ、芯の強いアイドル。',special:'charm',voice:'「私らしい輝きで、必ず認めさせてみせるわ。」'},
  komugi:{name:'日高 こむぎ',emoji:'🌻',role:'明るさとキレのあるダンスで、みんなを笑顔にする。',special:'dance',voice:'「いっくよー！ みんなで最高のステージにしよう！」'}
 };
+const initialCostumeByIdol = {mirai:'starter-mirai',reika:'starter-reika',komugi:'starter-komugi'};
 const costumes = [
  {id:'uniform',name:'はじまりの制服',emoji:'🎀',rarity:'N',desc:'基本の衣装。どんな一日にも似合う。',bonus:0},
+ {id:'starter-mirai',name:'淡恋チェリー',emoji:'🍒',rarity:'SSR',desc:'星降 未来の初期固有衣装。衣装のみで、スキルカードは付属しない。',bonus:7,owner:'mirai'},
+ {id:'starter-reika',name:'蝶の舞',emoji:'🦋',rarity:'SSR',desc:'如月 麗華の初期固有衣装。衣装のみで、スキルカードは付属しない。',bonus:7,owner:'reika'},
+ {id:'starter-komugi',name:'輝く向日葵ワンピース',emoji:'🌻',rarity:'SSR',desc:'日高 こむぎの初期固有衣装。衣装のみで、スキルカードは付属しない。',bonus:7,owner:'komugi'},
  {id:'starlight',name:'スターライト',emoji:'🌟',rarity:'R',desc:'歌の評価が少し上がるステージ衣装。',bonus:2},
  {id:'moon',name:'ムーンリット',emoji:'🌙',rarity:'SR',desc:'集中力が増す夜色の衣装。',bonus:4},
  {id:'crown',name:'プリズムクラウン',emoji:'👑',rarity:'SSR',desc:'大舞台で伝説を作る特別な衣装。',bonus:7},
@@ -32,9 +36,10 @@ let toastTimer;
 function freshState(name='ルミ', idol='mirai') {
  const stats={vocal:12,dance:12,charm:12,bond:10};
  stats[idols[idol].special]+=7;
- return {name:name||'ルミ',idol,fairyName:name||'ルミ',prologueSeen:false,day:1,stats,fans:0,jewels:100,money:500,tickets:1,lessonLevels:{vocal:1,dance:1,charm:1},costumeLevels:{uniform:0},runCount:0,actions:2,doneActions:[],sessionStarted:false,storyIndex:0,storySeen:[],logs:[],eventDays:[],closet:['uniform'],equipped:'uniform',ending:false,won:false,liveAttempted:false,liveScore:0,sfx:localStorage.getItem(SOUND_KEY)!=='off'};
+ const starter=initialCostumeByIdol[idol]||'starter-mirai';
+ return {name:name||'ルミ',idol,fairyName:name||'ルミ',prologueSeen:false,day:1,stats,fans:0,jewels:100,money:500,tickets:1,lessonLevels:{vocal:1,dance:1,charm:1},costumeLevels:{uniform:0,[starter]:0},runCount:0,actions:2,doneActions:[],sessionStarted:false,storyIndex:0,storySeen:[],logs:[],eventDays:[],closet:['uniform',starter],equipped:starter,ending:false,won:false,liveAttempted:false,liveScore:0,sfx:localStorage.getItem(SOUND_KEY)!=='off'};
 }
-function loadState(){try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return null;const s=JSON.parse(raw);if(!s||!s.stats||!Number.isFinite(s.day))return null;if(s.idol==='meru')s.idol='reika';if(s.idol==='setsuna')s.idol='komugi';if(!idols[s.idol])s.idol='mirai';s.money=Number.isFinite(s.money)?s.money:500;s.tickets=Number.isFinite(s.tickets)?s.tickets:1;s.fairyName=typeof s.fairyName==='string'&&s.fairyName?s.fairyName:(s.name||'ルミ');s.name=s.fairyName;s.prologueSeen=!!s.prologueSeen;s.lessonLevels=s.lessonLevels||{vocal:1,dance:1,charm:1};s.costumeLevels=s.costumeLevels||{uniform:0};s.runCount=Number.isFinite(s.runCount)?s.runCount:0;s.lifetimeFans=Number.isFinite(s.lifetimeFans)?s.lifetimeFans:s.fans||0;return s;}catch(e){return null;}}
+function loadState(){try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return null;const s=JSON.parse(raw);if(!s||!s.stats||!Number.isFinite(s.day))return null;if(s.idol==='meru')s.idol='reika';if(s.idol==='setsuna')s.idol='komugi';if(!idols[s.idol])s.idol='mirai';s.closet=Array.isArray(s.closet)?s.closet:['uniform'];const starter=initialCostumeByIdol[s.idol]||'starter-mirai';if(!s.closet.includes(starter))s.closet.push(starter);if(!s.equipped||s.equipped==='uniform')s.equipped=starter;s.costumeLevels=s.costumeLevels||{uniform:0};if(!(starter in s.costumeLevels))s.costumeLevels[starter]=0;s.money=Number.isFinite(s.money)?s.money:500;s.tickets=Number.isFinite(s.tickets)?s.tickets:1;s.fairyName=typeof s.fairyName==='string'&&s.fairyName?s.fairyName:(s.name||'ルミ');s.name=s.fairyName;s.prologueSeen=!!s.prologueSeen;s.lessonLevels=s.lessonLevels||{vocal:1,dance:1,charm:1};s.costumeLevels=s.costumeLevels||{uniform:0};s.runCount=Number.isFinite(s.runCount)?s.runCount:0;s.lifetimeFans=Number.isFinite(s.lifetimeFans)?s.lifetimeFans:s.fans||0;return s;}catch(e){return null;}}
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));}catch(e){}}
 
 const prologuePages = {
