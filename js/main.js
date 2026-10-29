@@ -78,7 +78,15 @@ function showPrologue(returnTo='home'){
 }
 function prepareIntro(){
  const saved=state&&state.stats;
- $('playerName').value=saved?(state.fairyName||state.name||'ルミ'):(localStorage.getItem(SAVE_KEY+'-fairy-name')||'ルミ');
+ const storedName=localStorage.getItem(SAVE_KEY+'-fairy-name');
+ const nameLabel=document.querySelector('label[for="playerName"]');
+ const nameInput=$('playerName');
+ const nameNote=nameInput.nextElementSibling;
+ const showName=!storedName;
+ if(nameLabel)nameLabel.hidden=!showName;
+ nameInput.hidden=!showName;
+ if(nameNote&&nameNote.classList.contains('tiny-note'))nameNote.hidden=!showName;
+ nameInput.value=saved?(state.fairyName||state.name||storedName||'ルミ'):(storedName||'ルミ');
  document.querySelectorAll('.idol-pick').forEach(b=>b.classList.toggle('selected',b.dataset.idol===(saved?state.idol:(localStorage.getItem(ACTIVE_IDOL_KEY)||'mirai'))));renderCostumeChoices();$('beginGame').textContent='育成を始める →';
  $('setupError').textContent='';$('setupOverlay').classList.add('show');
 }
