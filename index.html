@@ -5,16 +5,17 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#17142d">
 <title>Étoile Academy — 星を育てる学園</title>
-<link rel="stylesheet" href="css/style.css?v=20261026-missions1">
+<link rel="stylesheet" href="css/style.css?v=20261030-home-hub1">
 </head>
 <body>
 <div class="app">
 <header class="topbar"><a class="brand" href="#" aria-label="ホーム"><span class="brandmark">✦</span><span>Étoile Academy<small>星を育てる学園</small></span></a><div class="topstats"><span id="dayBadge">SEASON 01 · DAY 1</span><span>💎 <b id="jewelCount">100</b></span><span>♡ <b id="fanCount">0</b></span><button id="soundToggle" class="sound-toggle" aria-pressed="true">🔊 SE ON</button></div></header>
 <div class="shell">
-<aside class="sidebar"><div class="side-label">YOUR JOURNEY</div><button class="nav active" data-screen="home">⌂ <span>ホーム</span></button><button class="nav" data-screen="plan">✦ <span>今日の行動</span></button><button class="nav" data-screen="story">▤ <span>ストーリー</span><i id="storyDot"></i></button><button class="nav" data-screen="live">♫ <span>オーディション</span></button><button class="nav" data-screen="closet">♔ <span>衣装ルーム</span></button><button class="nav" data-screen="upgrade">⬆ <span>育成強化</span></button><div class="sidebar-note"><span>✧ YOUR GOAL</span><p>7日後の学園フェスで、ライバルを超えろ。</p><small>選択ひとつで未来が変わる。</small></div><button id="resetGame" class="reset-link">最初からやり直す ↺</button></aside>
+<aside class="sidebar"><div class="side-label">YOUR JOURNEY</div><button class="nav active" data-screen="home">⌂ <span>ホーム</span></button><button class="nav" data-screen="plan">✦ <span>育成</span></button><button class="nav" data-screen="gacha">✧ <span>ガチャ</span></button><button class="nav" data-screen="story">▤ <span>ストーリー</span><i id="storyDot"></i></button><button class="nav" data-screen="live">♫ <span>オーディション</span></button><button class="nav" data-screen="closet">♔ <span>衣装ルーム</span></button><button class="nav" data-screen="upgrade">⬆ <span>育成強化</span></button><div class="sidebar-note"><span>✧ YOUR GOAL</span><p>7日後の学園フェスで、ライバルを超えろ。</p><small>選択ひとつで未来が変わる。</small></div><button id="resetGame" class="reset-link">最初からやり直す ↺</button></aside>
 <main id="gameMain" class="main">
 <section class="screen active" id="screen-home"></section>
 <section class="screen" id="screen-plan"></section>
+<section class="screen" id="screen-gacha"></section>
 <section class="screen" id="screen-story"></section>
 <section class="screen" id="screen-live"></section>
 <section class="screen" id="screen-closet"></section><section class="screen" id="screen-upgrade"></section>
@@ -25,6 +26,6 @@
 <div id="storyScreen" class="fairy-story-screen" aria-hidden="true"></div>
 <div id="eventOverlay" class="overlay"><div class="modal event-modal"><div id="eventKicker" class="eyebrow">UNEXPECTED EVENT</div><div id="eventIcon" class="big-star">⚡</div><h2 id="eventTitle"></h2><p id="eventBody" class="modal-lead"></p><div id="eventChoices" class="choice-stack"></div></div></div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script src="js/main.js?v=20261029-training-flow1"></script>
+<script src="js/main.js?v=20261030-home-hub1"></script>
 </body>
 </html>
