@@ -286,22 +286,25 @@ function bindDynamic(){
  if(dynamicDelegateBound)return;dynamicDelegateBound=true;
  const nav=document.querySelector('.bottom-nav');
  if(nav)nav.addEventListener('click',e=>{
-  const button=e.target instanceof Element?e.target.closest('button[data-screen]'):null;
+  const path=typeof e.composedPath==='function'?e.composedPath():[];
+  const origin=e.target instanceof Element?e.target:null;
+  const button=path.find(node=>node instanceof HTMLButtonElement&&node.matches('button[data-screen]'))||(origin?origin.closest('button[data-screen]'):null);
   if(!button||!nav.contains(button))return;
   e.preventDefault();
-  if(button.disabled||button.hidden||button.hasAttribute('data-production-nav')&&!(state&&state.productionActive)){
+  e.stopPropagation();
+  if(button.disabled||button.hidden||(button.hasAttribute('data-production-nav')&&!(state&&state.productionActive))){
    syncProductionNavigation();
    return;
   }
   showScreen(button.dataset.screen);
- });
+ },true);
  document.addEventListener('click',e=>{
    const target=e.target instanceof Element?e.target:e.target?.parentElement;
    const b=target?.closest?.('button');
    if(!b)return;
    const main=$('gameMain');
    if(!main?.contains(b))return;
-   if(b.dataset.go){showScreen(b.dataset.go);return;}if(b.dataset.prepIdol||b.dataset.prepItem){}if(b.hasAttribute('data-start-production')){if(!state){toast('先に物語を始めてね。');return;}preparation={idol:state.idol||'mirai',item:'vocal',costume:state.equipped||'uniform'};startProduction();return;}if(b.dataset.homeIdol){localStorage.setItem(HOME_IDOL_KEY,b.dataset.homeIdol);state.homeLineIndex=0;renderHome();return;}if(b.hasAttribute('data-close-prep')){$('productionPrepOverlay').classList.remove('show');return;}if(b.hasAttribute('data-confirm-production')){startProduction();return;}if(b.hasAttribute('data-home-line')){state.homeLineIndex=((state.homeLineIndex||0)+1)%3;renderHome();return;}
+   if(b.dataset.go){showScreen(b.dataset.go);return;}if(b.dataset.prepIdol||b.dataset.prepItem){}if(b.hasAttribute('data-start-production')){if(!state||!state.idol||!idols[state.idol]){toast('先にアイドルとの物語を始めてね。');return;}preparation={idol:state.idol,item:'vocal',costume:state.equipped||'uniform'};syncProductionNavigation();startProduction();return;}if(b.dataset.homeIdol){localStorage.setItem(HOME_IDOL_KEY,b.dataset.homeIdol);state.homeLineIndex=0;renderHome();return;}if(b.hasAttribute('data-close-prep')){$('productionPrepOverlay').classList.remove('show');return;}if(b.hasAttribute('data-confirm-production')){startProduction();return;}if(b.hasAttribute('data-home-line')){state.homeLineIndex=((state.homeLineIndex||0)+1)%3;renderHome();return;}
   if(b.dataset.action){if(!state.productionActive){toast('プロデュース開始後にレッスンできるよ。');return;}useAction(b.dataset.action);return;}if(b.dataset.openUpgrade){const panel=$('screen-upgrade').querySelector('[data-upgrade-panel="'+b.dataset.openUpgrade+'"]');if(panel)panel.hidden=!panel.hidden;return;}if(b.dataset.upgradeLesson){const k=b.dataset.upgradeLesson;state.lessonLevels=state.lessonLevels||{vocal:1,dance:1,charm:1};const lv=state.lessonLevels[k]||1;const cost=100*lv;if(lv>=10||state.money<cost){toast('お金が足りないか、最大レベルだよ。');return;}state.money-=cost;state.lessonLevels[k]=lv+1;save();renderUpgrade();toast(statName(k)+'レッスン Lv.'+(lv+1)+'！');return;}if(b.hasAttribute('data-upgrade-costume')){state.costumeLevels=state.costumeLevels||{};const lv=state.costumeLevels[state.equipped]||0;const cost=150+50*lv;if(lv>=10||state.money<cost){toast('お金が足りないか、最大レベルだよ。');return;}state.money-=cost;state.costumeLevels[state.equipped]=lv+1;save();renderUpgrade();renderCloset();toast('衣装強化 Lv.'+(lv+1)+'！ ライブボーナス +2');return;}
   if(b.dataset.claimMission){claimMission(b.dataset.claimMission);return;}if(b.hasAttribute('data-claim-login')){claimLogin();return;}if(b.hasAttribute('data-read-prologue')){showPrologue('story');return;}
   if(b.dataset.readStory!==undefined){state.storyIndex=Number(b.dataset.readStory);save();renderStory();return;}
