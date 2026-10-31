@@ -272,17 +272,21 @@ function startProduction(){
 
 let dynamicDelegateBound=false;
 function bindDynamic(){
- if(dynamicDelegateBound)return;dynamicDelegateBound=true;
-  document.addEventListener('click',e=>{
+ const boundButtons=new WeakSet();
+ function bindButton(button){
+  if(!button||boundButtons.has(button))return;
+  boundButtons.add(button);
+  button.addEventListener('click',e=>{
    const target=e.target instanceof Element?e.target:e.target?.parentElement;
-   const nav=target?.closest?.('[data-screen]');
+   const nav=button.matches('[data-screen]')?button:null;
    if(nav){
     if(nav.hidden||nav.disabled||nav.hasAttribute('data-production-nav')&&!(typeof state !== 'undefined' && state && state.productionActive)){syncProductionNavigation();return;}
     e.preventDefault();
     showScreen(nav.dataset.screen);return;
    }
-   const b=target?.closest?.('button');
-   if(!b)return;
+   const b=button;
+   if(b.hasAttribute('data-day-live')||b.hasAttribute('data-next-day')){const m=$('dayEndModal');if(m)m.remove();if(b.hasAttribute('data-day-live')){showScreen('live');renderLive();}else nextDay();return;}
+   if(b.dataset.eventChoice!==undefined){chooseEvent(Number(b.dataset.eventChoice));return;}
    const main=$('gameMain');
    if(!main?.contains(b))return;
    if(b.dataset.go){showScreen(b.dataset.go);return;}if(b.dataset.prepIdol||b.dataset.prepItem){}if(b.hasAttribute('data-start-production')){preparation.idol=state.idol||'mirai';preparation.item='vocal';preparation.costume=state.equipped||'uniform';startProduction();return;}if(b.dataset.homeIdol){localStorage.setItem(HOME_IDOL_KEY,b.dataset.homeIdol);state.homeLineIndex=0;renderHome();return;}if(b.hasAttribute('data-close-prep')){$('productionPrepOverlay').classList.remove('show');return;}if(b.hasAttribute('data-confirm-production')){startProduction();return;}if(b.hasAttribute('data-home-line')){state.homeLineIndex=((state.homeLineIndex||0)+1)%3;renderHome();return;}
@@ -298,18 +302,23 @@ function bindDynamic(){
   if(b.hasAttribute('data-gacha')){pullGacha();return;}
   if(b.hasAttribute('data-buy-ticket')){if(state.jewels<35)return;state.jewels-=35;state.tickets=(state.tickets||0)+1;save();renderGacha();$('jewelCount').textContent=state.jewels;toast('チケットを1枚交換したよ！');return;}
   if(b.hasAttribute('data-restart')){resetToSetup();return;}
- },true);
- // Keep the bottom navigation independently wired as a fallback.
- // The document-level delegate may already have switched the screen;
- // in that case this handler deliberately does nothing.
- const bottomNav=document.querySelector('.bottom-nav');
- bottomNav?.addEventListener('click',e=>{
-  const b=e.target?.closest?.('button[data-screen]')||e.composedPath?.().find(node=>node instanceof Element&&node.matches?.('button[data-screen]'));
-  if(!b||b.hidden||b.disabled)return;
-  if(b.hasAttribute('data-production-nav')&&!(typeof state !== 'undefined' && state && state.productionActive))return;
-  const current=document.querySelector('#gameMain .screen.active');
-  if(current?.id!=='screen-'+b.dataset.screen)showScreen(b.dataset.screen);
- },true);
+  },false);
+ }
+ function bindButtons(root){
+  if(!root)return;
+  if(root.matches?.('button'))bindButton(root);
+  root.querySelectorAll?.('button').forEach(bindButton);
+ }
+ // Bind existing controls individually, then bind each newly-created button as it appears.
+ bindButtons(document);
+ if(typeof MutationObserver!=='undefined'&&document.body){
+  const observer=new MutationObserver(records=>{
+   records.forEach(record=>record.addedNodes.forEach(node=>{
+    if(node.nodeType===1)bindButtons(node);
+   }));
+  });
+  observer.observe(document.body,{childList:true,subtree:true});
+ }
 }
 function chooseStory(i){if(!state.productionActive){toast('プロデュース中にストーリーを進められるよ。');return;}const s=nextStoryText();if(state.storySeen.includes(state.storyIndex))return;const c=s.choices[i];if(!c)return;const key=c[1];if(key==='bold'){state.stats.vocal=clamp(state.stats.vocal+3);state.stats.charm=clamp(state.stats.charm+2);addLog('🔥','物語で強気な選択。歌唱力 +3、表現力 +2。');}else if(key==='kind'){state.stats.bond=clamp(state.stats.bond+4);state.stats.charm=clamp(state.stats.charm+2);addLog('♡','物語で思いやりを選んだ。絆 +4、表現力 +2。');}else if(key==='team'){state.stats.bond=clamp(state.stats.bond+3);state.jewels+=5;addLog('✦','仲間と作戦を立てた。絆 +3、ジュエル +5。');}else if(['vocal','dance','charm'].includes(key)){state.stats[key]=clamp(state.stats[key]+5);addLog('✦','フェスの作戦を決めた。'+statName(key)+' +5。');}state.storySeen.push(state.storyIndex);missionProgress('story');save();renderStory();renderHome();toast('選択を記録したよ。結果はステータスに反映！');sfx('card');}
 function resetToSetup(){if(state&&state.ending){const old=state;const next=freshState(old.name,old.idol);next.productionActive=false;next.money=old.money||0;next.tickets=Math.max(1,old.tickets||0);next.jewels=old.jewels||0;next.closet=[...new Set(old.closet||['uniform'])];next.equipped=old.equipped||'uniform';next.costumeLevels={...(old.costumeLevels||{})};next.lessonLevels={...(old.lessonLevels||{vocal:1,dance:1,charm:1})};next.runCount=(old.runCount||0)+1;next.lifetimeFans=(old.lifetimeFans||0)+(old.fans||0);next.logs=[{icon:'↻',text:'周回 '+next.runCount+' 開始！育成・衣装・所持品を引き継いだ。'}];state=next;battle=null;pendingEvent=null;save();document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));$('setupOverlay').classList.remove('show');renderHome();renderPlan();renderStory();renderLive();renderCloset();showScreen('home');toast('育成を引き継いで周回 '+state.runCount+' 開始！');return;}if(!confirm('セーブデータを消して最初から始める？'))return;localStorage.removeItem(SAVE_KEY);localStorage.removeItem(ACTIVE_IDOL_KEY);['mirai','reika','komugi'].forEach(id=>localStorage.removeItem(idolSaveKey(id)));localStorage.removeItem(SAVE_KEY+'-fairy-name');localStorage.removeItem(SAVE_KEY+'-first-idol');state=null;battle=null;pendingEvent=null;document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));$('setupOverlay').classList.add('show');$('playerName').value='ひかり';document.querySelectorAll('.idol-pick').forEach(b=>b.classList.toggle('selected',b.dataset.idol==='mirai'));}
@@ -323,7 +332,6 @@ if (resetButton) {
 }
 $('soundToggle')?.addEventListener('click',()=>{if(!state){state={sfx:localStorage.getItem(SOUND_KEY)!=='off'};}state.sfx=!state.sfx;localStorage.setItem(SOUND_KEY,state.sfx?'on':'off');updateSoundButton();if(state.sfx)sfx('tap');save();});
 $('eventChoices')?.addEventListener('click',e=>{const b=e.target.closest('[data-event-choice]');if(b)chooseEvent(Number(b.dataset.eventChoice));});
-document.body.addEventListener('click',e=>{const b=e.target.closest('[data-day-live],[data-next-day]');if(!b)return;const m=$('dayEndModal');if(m)m.remove();if(b.hasAttribute('data-day-live')){showScreen('live');renderLive();}else nextDay();});
 function boot(){
  state=loadState();if(state&&typeof state.productionActive!=='boolean'){state.productionActive=false;save();}updateSoundButton();syncProductionNavigation();bindDynamic();
  if(state&&state.stats){if(!state.eventDays)state.eventDays=[];if(!state.fairyName||!state.prologueSeen){prepareIntro();return;}$('setupOverlay').classList.remove('show');if(state.ending){showFestivalEnding();}else{renderHome();renderPlan();renderStory();renderLive();renderCloset();showScreen('home');}}
