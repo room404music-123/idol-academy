@@ -275,12 +275,14 @@ function bindDynamic(){
  if(dynamicDelegateBound)return;dynamicDelegateBound=true;
   document.addEventListener('click',e=>{
    const target=e.target instanceof Element?e.target:e.target?.parentElement;
+   const nav=target?.closest?.('[data-screen]');
+   if(nav){
+    if(nav.hidden||nav.disabled||nav.hasAttribute('data-production-nav')&&!state?.productionActive){syncProductionNavigation();return;}
+    e.preventDefault();
+    showScreen(nav.dataset.screen);return;
+   }
    const b=target?.closest?.('button');
    if(!b)return;
-   if(b.dataset.screen){
-    if(b.hidden||b.disabled||b.hasAttribute('data-production-nav')&&!state?.productionActive){syncProductionNavigation();return;}
-    showScreen(b.dataset.screen);return;
-   }
    const main=$('gameMain');
    if(!main?.contains(b))return;
    if(b.dataset.go){showScreen(b.dataset.go);return;}if(b.dataset.prepIdol||b.dataset.prepItem){}if(b.hasAttribute('data-start-production')){preparation.idol=state.idol||'mirai';preparation.item='vocal';preparation.costume=state.equipped||'uniform';startProduction();return;}if(b.dataset.homeIdol){localStorage.setItem(HOME_IDOL_KEY,b.dataset.homeIdol);state.homeLineIndex=0;renderHome();return;}if(b.hasAttribute('data-close-prep')){$('productionPrepOverlay').classList.remove('show');return;}if(b.hasAttribute('data-confirm-production')){startProduction();return;}if(b.hasAttribute('data-home-line')){state.homeLineIndex=((state.homeLineIndex||0)+1)%3;renderHome();return;}
