@@ -99,31 +99,40 @@ function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('sho
 let audioCtx=null;
 function sfx(kind='tap'){if(!state?.sfx)return;try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;audioCtx=audioCtx||new C();if(audioCtx.state==='suspended')audioCtx.resume();const now=audioCtx.currentTime;const seq=kind==='win'?[660,830,990]:kind==='event'?[440,660]:kind==='live'?[523,659,784]:[kind==='rare'?880:kind==='card'?590:440];seq.forEach((hz,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=kind==='rare'?'triangle':'sine';o.frequency.setValueAtTime(hz,now+i*.1);g.gain.setValueAtTime(.0001,now+i*.1);g.gain.exponentialRampToValueAtTime(.09,now+i*.1+.015);g.gain.exponentialRampToValueAtTime(.0001,now+i*.1+.16);o.connect(g);g.connect(audioCtx.destination);o.start(now+i*.1);o.stop(now+i*.1+.17);});}catch(e){}}
 function updateSoundButton(){$('soundToggle').textContent=state?.sfx?'🔊 SE ON':'🔇 SE OFF';$('soundToggle').setAttribute('aria-pressed',String(!!state?.sfx));}
+function syncProductionNavigation(){
+ const active=!!state?.productionActive;
+ document.querySelectorAll('[data-production-nav]').forEach(el=>{
+  el.hidden=!active;
+  el.setAttribute('aria-hidden',String(!active));
+  el.disabled=!active;
+ });
+}
 function showScreen(screen){
-  const allowedScreens=['home','plan','gacha','upgrade','story','live','closet'];
-  if(!allowedScreens.includes(screen))return;
-  const productionScreens=['plan','upgrade','live'];
-  if(productionScreens.includes(screen)&&!state?.productionActive){toast('育成を始めると利用できるよ。');return;}
-  document.querySelectorAll('#gameMain .screen').forEach(el=>{
-   const active=el.id==='screen-'+screen;
-   el.classList.toggle('active',active);
-   el.style.display=active?'block':'none';
-   el.setAttribute('aria-hidden',String(!active));
-  });
-  document.querySelectorAll('.nav[data-screen]').forEach(el=>{
-   const active=el.dataset.screen===screen;
-   el.classList.toggle('active',active);
-   el.setAttribute('aria-current',active?'page':'false');
-  });
-  document.querySelectorAll('[data-production-nav]').forEach(el=>el.hidden=!state?.productionActive);
-  if(screen==='home')renderHome();
-  else if(screen==='plan')renderPlan();
-  else if(screen==='gacha')renderGacha();
-  else if(screen==='upgrade')renderUpgrade();
-  else if(screen==='story')renderStory();
-  else if(screen==='live')renderLive();
-  else if(screen==='closet')renderCloset();
-  window.scrollTo({top:0,behavior:'smooth'});
+ const allowedScreens=['home','plan','gacha','upgrade','story','live','closet'];
+ if(!allowedScreens.includes(screen))return;
+ const productionScreens=['plan','upgrade','live'];
+ if(productionScreens.includes(screen)&&!state?.productionActive){syncProductionNavigation();showScreen('home');return;}
+ const screens=document.querySelectorAll('#gameMain .screen');
+ screens.forEach(el=>{
+  const active=el.id==='screen-'+screen;
+  el.classList.toggle('active',active);
+  el.style.display=active?'block':'none';
+  el.setAttribute('aria-hidden',String(!active));
+ });
+ document.querySelectorAll('[data-screen]').forEach(el=>{
+  const active=el.dataset.screen===screen;
+  el.classList.toggle('active',active);
+  if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');
+ });
+ syncProductionNavigation();
+ if(screen==='home')renderHome();
+ else if(screen==='plan')renderPlan();
+ else if(screen==='gacha')renderGacha();
+ else if(screen==='upgrade')renderUpgrade();
+ else if(screen==='story')renderStory();
+ else if(screen==='live')renderLive();
+ else if(screen==='closet')renderCloset();
+ window.scrollTo({top:0,behavior:'smooth'});
 }
 function statusCard(key,icon){const v=state.stats[key];return '<div class="stat-card"><div class="stat-top">'+statName(key)+'<span class="stat-icon">'+icon+'</span></div><div class="stat-number">'+v+'<small> / 100</small></div><div class="meter"><span style="width:'+v+'%"></span></div></div>';}
 function nextStoryText(){const s=state.storyIndex;const char=idols[state.idol].name;const lines=[
@@ -257,7 +266,7 @@ function startProduction(){
  next.actions=2;next.doneActions=[];next.day=1;next.eventDays=[];next.ending=false;next.won=false;next.liveAttempted=false;next.liveScore=0;
  state=next;localStorage.setItem(ACTIVE_IDOL_KEY,idol);save();battle=null;pendingEvent=null;
  $('productionPrepOverlay').classList.remove('show');
- document.querySelectorAll('[data-production-nav]').forEach(el=>el.hidden=false);
+ syncProductionNavigation();
  renderPlan();renderLive();showScreen('plan');toast('7日間のプロデュースが始まったよ！');
 }
 
@@ -265,11 +274,16 @@ let dynamicDelegateBound=false;
 function bindDynamic(){
  if(dynamicDelegateBound)return;dynamicDelegateBound=true;
   document.addEventListener('click',e=>{
-   const main=$('gameMain');
    const path=typeof e.composedPath==='function'?e.composedPath():[];
-   const b=path.find(node=>node instanceof HTMLButtonElement&&main?.contains(node))
+   const b=path.find(node=>node instanceof HTMLButtonElement)
     ||(e.target instanceof Element?e.target.closest('button'):e.target?.parentElement?.closest?.('button'));
-   if(!b||!main?.contains(b))return;
+   if(!b)return;
+   if(b.dataset.screen){
+    if(b.hidden||b.disabled||b.hasAttribute('data-production-nav')&&!state?.productionActive){syncProductionNavigation();return;}
+    showScreen(b.dataset.screen);return;
+   }
+   const main=$('gameMain');
+   if(!main?.contains(b))return;
    if(b.dataset.go){showScreen(b.dataset.go);return;}if(b.dataset.prepIdol||b.dataset.prepItem){}if(b.hasAttribute('data-start-production')){openProductionPreparation();return;}if(b.dataset.homeIdol){localStorage.setItem(HOME_IDOL_KEY,b.dataset.homeIdol);state.homeLineIndex=0;renderHome();return;}if(b.hasAttribute('data-close-prep')){$('productionPrepOverlay').classList.remove('show');return;}if(b.hasAttribute('data-confirm-production')){startProduction();return;}if(b.hasAttribute('data-home-line')){state.homeLineIndex=((state.homeLineIndex||0)+1)%3;renderHome();return;}
   if(b.dataset.action){if(!state.productionActive){toast('プロデュース開始後にレッスンできるよ。');return;}useAction(b.dataset.action);return;}if(b.dataset.openUpgrade){const panel=$('screen-upgrade').querySelector('[data-upgrade-panel="'+b.dataset.openUpgrade+'"]');if(panel)panel.hidden=!panel.hidden;return;}if(b.dataset.upgradeLesson){const k=b.dataset.upgradeLesson;state.lessonLevels=state.lessonLevels||{vocal:1,dance:1,charm:1};const lv=state.lessonLevels[k]||1;const cost=100*lv;if(lv>=10||state.money<cost){toast('お金が足りないか、最大レベルだよ。');return;}state.money-=cost;state.lessonLevels[k]=lv+1;save();renderUpgrade();toast(statName(k)+'レッスン Lv.'+(lv+1)+'！');return;}if(b.hasAttribute('data-upgrade-costume')){state.costumeLevels=state.costumeLevels||{};const lv=state.costumeLevels[state.equipped]||0;const cost=150+50*lv;if(lv>=10||state.money<cost){toast('お金が足りないか、最大レベルだよ。');return;}state.money-=cost;state.costumeLevels[state.equipped]=lv+1;save();renderUpgrade();renderCloset();toast('衣装強化 Lv.'+(lv+1)+'！ ライブボーナス +2');return;}
   if(b.dataset.claimMission){claimMission(b.dataset.claimMission);return;}if(b.hasAttribute('data-claim-login')){claimLogin();return;}if(b.hasAttribute('data-read-prologue')){showPrologue('story');return;}
@@ -296,7 +310,7 @@ $('soundToggle').addEventListener('click',()=>{if(!state){state={sfx:localStorag
 $('eventChoices').addEventListener('click',e=>{const b=e.target.closest('[data-event-choice]');if(b)chooseEvent(Number(b.dataset.eventChoice));});
 document.body.addEventListener('click',e=>{const b=e.target.closest('[data-day-live],[data-next-day]');if(!b)return;const m=$('dayEndModal');if(m)m.remove();if(b.hasAttribute('data-day-live')){showScreen('live');renderLive();}else nextDay();});
 function boot(){
- state=loadState();if(state&&typeof state.productionActive!=='boolean'){state.productionActive=false;save();}updateSoundButton();bindDynamic();
+ state=loadState();if(state&&typeof state.productionActive!=='boolean'){state.productionActive=false;save();}updateSoundButton();syncProductionNavigation();bindDynamic();
  if(state&&state.stats){if(!state.eventDays)state.eventDays=[];if(!state.fairyName||!state.prologueSeen){prepareIntro();return;}$('setupOverlay').classList.remove('show');if(state.ending){showFestivalEnding();}else{renderHome();renderPlan();renderStory();renderLive();renderCloset();showScreen('home');}}
  else{prepareIntro();}
 }
