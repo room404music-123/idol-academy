@@ -120,7 +120,7 @@ function showScreen(screen){
  screens.forEach(el=>{
   const active=el.id==='screen-'+screen;
   el.classList.toggle('active',active);
-  el.hidden=!active;
+  el.style.display=active?'block':'none';
   el.setAttribute('aria-hidden',active?'false':'true');
  });
  document.querySelectorAll('.bottom-nav [data-screen]').forEach(el=>{
