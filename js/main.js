@@ -111,7 +111,7 @@ function showScreen(screen){
  const allowedScreens=['home','plan','gacha','upgrade','story','live','closet'];
  if(!allowedScreens.includes(screen))return;
  const productionScreens=['plan','upgrade','live'];
- if(productionScreens.includes(screen)&&!state?.productionActive){syncProductionNavigation();showScreen('home');return;}
+ if(productionScreens.includes(screen)&&(!state || !state.productionActive)){syncProductionNavigation();showScreen('home');return;}
  const screens=document.querySelectorAll('#gameMain .screen');
  screens.forEach(el=>{
   const active=el.id==='screen-'+screen;
