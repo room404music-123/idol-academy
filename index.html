@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#17142d">
 <title>Étoile Academy — 星を育てる学園</title>
-<link rel="stylesheet" href="css/style.css?v=20261031-mypage1">
+<link rel="stylesheet" href="css/style.css?v=20261101-phase2">
 </head>
 <body>
 <div class="app">
 <header class="topbar"><a class="brand" href="#" aria-label="ホーム"><span class="brandmark">✦</span><span>Étoile Academy<small>星を育てる学園</small></span></a><div class="topstats"><span id="dayBadge">SEASON 01 · DAY 1</span><button id="soundToggle" class="sound-toggle" aria-pressed="true">🔊 SE ON</button></div></header>
 <div class="shell">
-<nav class="bottom-nav" aria-label="メインメニュー"><button class="nav active" data-screen="home">⌂ <span>ホーム</span></button><button class="nav" data-screen="plan">✦ <span>育成</span></button><button class="nav" data-screen="gacha">✧ <span>ガチャ</span></button><button class="nav" data-screen="closet">♔ <span>衣装</span></button><button class="nav" data-screen="story">▤ <span>ストーリー</span></button></nav>
+<nav class="bottom-nav" aria-label="メインメニュー"><button class="nav active" data-screen="home">⌂ <span>ホーム</span></button><button class="nav" data-screen="plan" data-production-nav hidden>✦ <span>プロデュース</span></button><button class="nav" data-screen="live" data-production-nav hidden>★ <span>オーディション</span></button><button class="nav" data-screen="gacha">✧ <span>ガチャ</span></button><button class="nav" data-screen="closet">♔ <span>衣装</span></button><button class="nav" data-screen="story">▤ <span>ストーリー</span></button></nav>
 <main id="gameMain" class="main">
 <section class="screen active" id="screen-home"></section>
 <section class="screen" id="screen-plan"></section>
@@ -23,9 +23,9 @@
 </div>
 </div>
 <div id="setupOverlay" class="overlay show"><div class="modal setup-modal"><div class="eyebrow">WELCOME TO ÉTOILE ACADEMY</div><div class="big-star">✦</div><h1>ここから、<em>運命を変えよう。</em></h1><p class="modal-lead">あなたは、まだ無名の新人アイドル。7日後の学園フェスまでに実力と仲間を育て、ライバルに勝とう。</p><label class="field-label" for="playerName">あなた（妖精）の名前</label><input id="playerName" maxlength="12" placeholder="妖精としての名前を入力" value="ルミ"><p class="tiny-note">あなた自身が妖精。名前を決めて、未来・麗華・こむぎと直接会話しながら夢を支えよう。</p><div class="field-label">あなたの相棒アイドルを選ぼう</div><div class="idol-picks"><button class="idol-pick selected" data-idol="mirai"><span class="idol-emoji pink">🍒</span><strong>星降 未来</strong><small>歌が得意 / 前向き</small></button><button class="idol-pick" data-idol="reika"><span class="idol-emoji purple">🦋</span><strong>如月 麗華</strong><small>表現が得意 / 気品と芯の強さ</small></button><button class="idol-pick" data-idol="komugi"><span class="idol-emoji blue">🌻</span><strong>日高 こむぎ</strong><small>ダンスが得意 / 明るく元気</small></button></div><div id="costumeChoices"></div><p id="setupError" class="tiny-note" role="alert"></p><button id="beginGame" class="primary wide">アイドルと物語を始める　→</button><p class="tiny-note">セーブはこのブラウザに保存されるよ。</p></div></div>
-<div id="storyScreen" class="fairy-story-screen" aria-hidden="true"></div>
+<div id="storyScreen" class="fairy-story-screen" aria-hidden="true"></div><div id="productionPrepOverlay" class="overlay"><div class="modal prep-modal"><div id="productionPrepContent"></div></div></div>
 <div id="eventOverlay" class="overlay"><div class="modal event-modal"><div id="eventKicker" class="eyebrow">UNEXPECTED EVENT</div><div id="eventIcon" class="big-star">⚡</div><h2 id="eventTitle"></h2><p id="eventBody" class="modal-lead"></p><div id="eventChoices" class="choice-stack"></div></div></div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script src="js/main.js?v=20261031-mypage1"></script>
+<script src="js/main.js?v=20261101-phase2"></script>
 </body>
 </html>
