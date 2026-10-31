@@ -283,41 +283,68 @@ function startProduction(){
 
 let dynamicDelegateBound=false;
 function bindDynamic(){
- if(dynamicDelegateBound)return;dynamicDelegateBound=true;
- const nav=document.querySelector('.bottom-nav');
- if(nav)nav.addEventListener('click',e=>{
-  const path=typeof e.composedPath==='function'?e.composedPath():[];
-  const origin=e.target instanceof Element?e.target:null;
-  const button=path.find(node=>node instanceof HTMLButtonElement&&node.matches('button[data-screen]'))||(origin?origin.closest('button[data-screen]'):null);
-  if(!button||!nav.contains(button))return;
-  e.preventDefault();
-  e.stopPropagation();
-  if(button.disabled||button.hidden||(button.hasAttribute('data-production-nav')&&!(state&&state.productionActive))){
-   syncProductionNavigation();
-   return;
-  }
-  showScreen(button.dataset.screen);
- },true);
+ if(dynamicDelegateBound)return;
+ dynamicDelegateBound=true;
+ const nav=document.querySelector('nav.bottom-nav');
+ if(nav){
+  nav.querySelectorAll('button[data-screen]').forEach(button=>{
+   button.addEventListener('click',event=>{
+    event.preventDefault();
+    const screen=button.getAttribute('data-screen');
+    if(button.hasAttribute('data-production-nav')&&!(state&&state.productionActive)){
+     syncProductionNavigation();
+     return;
+    }
+    showScreen(screen);
+   });
+  });
+ }
+ const main=$('gameMain');
+ if(main){
+  main.addEventListener('click',event=>{
+   const origin=event.target;
+   const button=origin instanceof Element?origin.closest('button[data-start-production],button[data-go]'):null;
+   if(!button||!main.contains(button))return;
+   if(button.dataset.go){
+    event.preventDefault();
+    showScreen(button.dataset.go);
+    return;
+   }
+   if(button.hasAttribute('data-start-production')){
+    event.preventDefault();
+    if(!state||!state.idol||!idols[state.idol]){
+     toast('先にアイドルとの物語を始めてね。');
+     return;
+    }
+    preparation={idol:state.idol,item:'vocal',costume:state.equipped||'uniform'};
+    startProduction();
+   }
+  });
+ }
  document.addEventListener('click',e=>{
-   const target=e.target instanceof Element?e.target:e.target?.parentElement;
-   const b=target?.closest?.('button');
-   if(!b)return;
-   const main=$('gameMain');
-   if(!main?.contains(b))return;
-   if(b.dataset.go){showScreen(b.dataset.go);return;}if(b.dataset.prepIdol||b.dataset.prepItem){}if(b.hasAttribute('data-start-production')){if(!state||!state.idol||!idols[state.idol]){toast('先にアイドルとの物語を始めてね。');return;}preparation={idol:state.idol,item:'vocal',costume:state.equipped||'uniform'};syncProductionNavigation();startProduction();return;}if(b.dataset.homeIdol){localStorage.setItem(HOME_IDOL_KEY,b.dataset.homeIdol);state.homeLineIndex=0;renderHome();return;}if(b.hasAttribute('data-close-prep')){$('productionPrepOverlay').classList.remove('show');return;}if(b.hasAttribute('data-confirm-production')){startProduction();return;}if(b.hasAttribute('data-home-line')){state.homeLineIndex=((state.homeLineIndex||0)+1)%3;renderHome();return;}
-  if(b.dataset.action){if(!state.productionActive){toast('プロデュース開始後にレッスンできるよ。');return;}useAction(b.dataset.action);return;}if(b.dataset.openUpgrade){const panel=$('screen-upgrade').querySelector('[data-upgrade-panel="'+b.dataset.openUpgrade+'"]');if(panel)panel.hidden=!panel.hidden;return;}if(b.dataset.upgradeLesson){const k=b.dataset.upgradeLesson;state.lessonLevels=state.lessonLevels||{vocal:1,dance:1,charm:1};const lv=state.lessonLevels[k]||1;const cost=100*lv;if(lv>=10||state.money<cost){toast('お金が足りないか、最大レベルだよ。');return;}state.money-=cost;state.lessonLevels[k]=lv+1;save();renderUpgrade();toast(statName(k)+'レッスン Lv.'+(lv+1)+'！');return;}if(b.hasAttribute('data-upgrade-costume')){state.costumeLevels=state.costumeLevels||{};const lv=state.costumeLevels[state.equipped]||0;const cost=150+50*lv;if(lv>=10||state.money<cost){toast('お金が足りないか、最大レベルだよ。');return;}state.money-=cost;state.costumeLevels[state.equipped]=lv+1;save();renderUpgrade();renderCloset();toast('衣装強化 Lv.'+(lv+1)+'！ ライブボーナス +2');return;}
-  if(b.dataset.claimMission){claimMission(b.dataset.claimMission);return;}if(b.hasAttribute('data-claim-login')){claimLogin();return;}if(b.hasAttribute('data-read-prologue')){showPrologue('story');return;}
+  const target=e.target instanceof Element?e.target:e.target?.parentElement;
+  const b=target?.closest?.('button');
+  if(!b)return;
+  if(main&&!main.contains(b))return;
+  if(b.dataset.prepIdol||b.dataset.prepItem){}
+  if(b.dataset.homeIdol){localStorage.setItem(HOME_IDOL_KEY,b.dataset.homeIdol);state.homeLineIndex=0;renderHome();return;}
+  if(b.hasAttribute('data-close-prep')){$('productionPrepOverlay').classList.remove('show');return;}
+  if(b.hasAttribute('data-confirm-production')){startProduction();return;}
+  if(b.hasAttribute('data-home-line')){state.homeLineIndex=((state.homeLineIndex||0)+1)%3;renderHome();return;}
+  if(b.dataset.action){if(!state.productionActive){toast('プロデュース開始後にレッスンできるよ。');return;}useAction(b.dataset.action);return;}
+  if(b.dataset.openUpgrade){const panel=$('screen-upgrade').querySelector('[data-upgrade-panel="'+b.dataset.openUpgrade+'"]');if(panel)panel.hidden=!panel.hidden;return;}
+  if(b.dataset.upgradeLesson){const k=b.dataset.upgradeLesson;state.lessonLevels=state.lessonLevels||{vocal:1,dance:1,charm:1};const lv=state.lessonLevels[k]||1;const cost=100*lv;if(lv>=10||state.money<cost){toast('お金が足りないか、最大レベルだよ。');return;}state.money-=cost;state.lessonLevels[k]=lv+1;save();renderUpgrade();toast(statName(k)+'レッスン Lv.'+(lv+1)+'！');return;}
+  if(b.hasAttribute('data-upgrade-costume')){state.costumeLevels=state.costumeLevels||{};const lv=state.costumeLevels[state.equipped]||0;const cost=150+50*lv;if(lv>=10||state.money<cost){toast('お金が足りないか、最大レベルだよ。');return;}state.money-=cost;state.costumeLevels[state.equipped]=lv+1;save();renderUpgrade();renderCloset();toast('衣装強化 Lv.'+(lv+1)+'！ ライブボーナス +2');return;}
+  if(b.dataset.claimMission){claimMission(b.dataset.claimMission);return;}
+  if(b.hasAttribute('data-claim-login')){claimLogin();return;}
+  if(b.hasAttribute('data-read-prologue')){showPrologue('story');return;}
   if(b.dataset.readStory!==undefined){state.storyIndex=Number(b.dataset.readStory);save();renderStory();return;}
-   if(b.dataset.storyChoice!==undefined){chooseStory(Number(b.dataset.storyChoice));return;}
+  if(b.dataset.storyChoice!==undefined){chooseStory(Number(b.dataset.storyChoice));return;}
   if(b.hasAttribute('data-next-story')){if(state.storyIndex<4){state.storyIndex++;save();renderStory();$('storyDot').classList.add('show');}return;}
-  if(b.hasAttribute('data-start-live')){if(!state.productionActive){toast('プロデュース開始後に挑戦できるよ。');return;}startLive();return;}if(b.hasAttribute('data-festival-ending')){if(!state.productionActive)return;state.ending=true;state.productionActive=false;save();showFestivalEnding();return;}
+  if(b.hasAttribute('data-start-live')){if(!state.productionActive){toast('プロデュース開始後に挑戦できるよ。');return;}startLive();return;}
+  if(b.hasAttribute('data-festival-ending')){if(!state.productionActive)return;state.ending=true;state.productionActive=false;save();showFestivalEnding();return;}
   if(b.dataset.playCard!==undefined){playCard(Number(b.dataset.playCard));return;}
-  if(b.hasAttribute('data-next-turn')){finishCardTurn();return;}
-  if(b.dataset.equip){state.equipped=b.dataset.equip;save();renderCloset();toast('衣装を変更したよ！');return;}
-  if(b.hasAttribute('data-gacha')){pullGacha();return;}
-  if(b.hasAttribute('data-buy-ticket')){if(state.jewels<35)return;state.jewels-=35;state.tickets=(state.tickets||0)+1;save();renderGacha();$('jewelCount').textContent=state.jewels;toast('チケットを1枚交換したよ！');return;}
-  if(b.hasAttribute('data-restart')){resetToSetup();return;}
- },true);
+ });
 }
 function chooseStory(i){if(!state.productionActive){toast('プロデュース中にストーリーを進められるよ。');return;}const s=nextStoryText();if(state.storySeen.includes(state.storyIndex))return;const c=s.choices[i];if(!c)return;const key=c[1];if(key==='bold'){state.stats.vocal=clamp(state.stats.vocal+3);state.stats.charm=clamp(state.stats.charm+2);addLog('🔥','物語で強気な選択。歌唱力 +3、表現力 +2。');}else if(key==='kind'){state.stats.bond=clamp(state.stats.bond+4);state.stats.charm=clamp(state.stats.charm+2);addLog('♡','物語で思いやりを選んだ。絆 +4、表現力 +2。');}else if(key==='team'){state.stats.bond=clamp(state.stats.bond+3);state.jewels+=5;addLog('✦','仲間と作戦を立てた。絆 +3、ジュエル +5。');}else if(['vocal','dance','charm'].includes(key)){state.stats[key]=clamp(state.stats[key]+5);addLog('✦','フェスの作戦を決めた。'+statName(key)+' +5。');}state.storySeen.push(state.storyIndex);missionProgress('story');save();renderStory();renderHome();toast('選択を記録したよ。結果はステータスに反映！');sfx('card');}
 function resetToSetup(){if(state&&state.ending){const old=state;const next=freshState(old.name,old.idol);next.productionActive=false;next.money=old.money||0;next.tickets=Math.max(1,old.tickets||0);next.jewels=old.jewels||0;next.closet=[...new Set(old.closet||['uniform'])];next.equipped=old.equipped||'uniform';next.costumeLevels={...(old.costumeLevels||{})};next.lessonLevels={...(old.lessonLevels||{vocal:1,dance:1,charm:1})};next.runCount=(old.runCount||0)+1;next.lifetimeFans=(old.lifetimeFans||0)+(old.fans||0);next.logs=[{icon:'↻',text:'周回 '+next.runCount+' 開始！育成・衣装・所持品を引き継いだ。'}];state=next;battle=null;pendingEvent=null;save();document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));$('setupOverlay').classList.remove('show');renderHome();renderPlan();renderStory();renderLive();renderCloset();showScreen('home');toast('育成を引き継いで周回 '+state.runCount+' 開始！');return;}if(!confirm('セーブデータを消して最初から始める？'))return;localStorage.removeItem(SAVE_KEY);localStorage.removeItem(ACTIVE_IDOL_KEY);['mirai','reika','komugi'].forEach(id=>localStorage.removeItem(idolSaveKey(id)));localStorage.removeItem(SAVE_KEY+'-fairy-name');localStorage.removeItem(SAVE_KEY+'-first-idol');state=null;battle=null;pendingEvent=null;document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));$('setupOverlay').classList.add('show');$('playerName').value='ひかり';document.querySelectorAll('.idol-pick').forEach(b=>b.classList.toggle('selected',b.dataset.idol==='mirai'));}
