@@ -76,7 +76,7 @@ function showPrologue(returnTo='home'){
  screen.innerHTML='<header class="fairy-story-top"><div class="fairy-story-brand">✦ Étoile Academy <small>PROLOGUE · はじまりの約束</small></div><button id="prologueSkip" class="fairy-story-skip">スキップ ×</button></header><main class="fairy-story-main"><div class="fairy-story-stars">✧　✦　⋆　✦　✧</div><div class="fairy-story-chapter">PROLOGUE · '+esc(char)+' とあなたの物語</div><div class="fairy-story-art">'+idols[idol].emoji+'</div><div class="fairy-story-name">'+esc(char)+' ＆ '+esc(state.name||state.fairyName||'ルミ')+'（あなた／妖精）</div><div class="fairy-story-dialogue"><div id="prologueCount"></div><p id="prologueText"></p></div><div class="fairy-story-controls"><button id="prologuePrev" class="secondary">← 前へ</button><button id="prologueNext" class="primary">次へ　→</button></div></main>';
  const finish=()=>{state.prologueSeen=true;save();screen.classList.remove('show');screen.setAttribute('aria-hidden','true');if(state.ending){showFestivalEnding();return;}renderHome();renderPlan();renderStory();renderLive();renderCloset();showScreen(returnTo==='story'?'story':'home');toast(returnTo==='story'?'プロローグを読み直したよ。':'アイドルとの約束を胸に、学園生活が始まったよ！');};
  const render=()=>{$('prologueCount').textContent='PAGE '+String(index+1).padStart(2,'0')+' / '+String(pages.length).padStart(2,'0');$('prologueText').textContent=pages[index].replaceAll('＋FAIRY＋',fairyName);$('prologuePrev').disabled=index===0;$('prologueNext').textContent=index===pages.length-1?'学園生活へ　✦':'次へ　→';};
- $('prologuePrev').addEventListener('click',()=>{if(index>0){index--;render();}});$('prologueNext').addEventListener('click',()=>{if(index<pages.length-1){index++;render();}else finish();});$('prologueSkip').addEventListener('click',finish);render();
+ $('prologuePrev')?.addEventListener('click',()=>{if(index>0){index--;render();}});$('prologueNext')?.addEventListener('click',()=>{if(index<pages.length-1){index++;render();}else finish();});$('prologueSkip')?.addEventListener('click',finish);render();
 }
 function prepareIntro(){
  const saved=state&&state.stats;
@@ -111,7 +111,7 @@ function showScreen(screen){
  const allowedScreens=['home','plan','gacha','upgrade','story','live','closet'];
  if(!allowedScreens.includes(screen))return;
  const productionScreens=['plan','upgrade','live'];
- if(productionScreens.includes(screen) && (typeof state === 'undefined' || !state || !state.productionActive)){syncProductionNavigation();showScreen('home');return;}
+ if(productionScreens.includes(screen) && !(typeof state !== 'undefined' && state && state.productionActive)){syncProductionNavigation();showScreen('home');return;}
  const screens=document.querySelectorAll('#gameMain .screen');
  screens.forEach(el=>{
   const active=el.id==='screen-'+screen;
@@ -247,11 +247,11 @@ function renderPreparation(){
  const owned=costumes.filter(x=>x.id==='uniform'||state.closet.includes(x.id)).filter(x=>!x.owner||x.owner===id);
  const costumeOptions=owned.map(x=>'<option value="'+x.id+'" '+(preparation.costume===x.id?'selected':'')+'>'+x.name+'（'+x.rarity+'）</option>').join('');
  $('productionPrepContent').innerHTML='<div class="eyebrow">PRODUCE PREPARATION</div><h2>プロデュースの準備</h2><p class="prep-lead">今回の7日間を一緒に歩むアイドルと、最初に持ち込むアイテムを選ぼう。</p><h3>1. プロデュースするアイドル</h3><div class="prep-idols">'+picks+'</div><h3>2. 着用する衣装</h3><select id="prepCostume" class="prep-select">'+costumeOptions+'</select><h3>3. 持ち込むサポートアイテム</h3><div class="prep-items"><button class="prep-item '+(preparation.item==='vocal'?'selected':'')+'" data-prep-item="vocal">🎤 <b>ボーカルノート</b><small>開始時に歌唱力 +5</small></button><button class="prep-item '+(preparation.item==='dance'?'selected':'')+'" data-prep-item="dance">✦ <b>ステップガイド</b><small>開始時にダンス +5</small></button><button class="prep-item '+(preparation.item==='charm'?'selected':'')+'" data-prep-item="charm">✧ <b>表現のミラー</b><small>開始時に表現力 +5</small></button></div><div class="prep-actions"><button class="secondary" data-close-prep>戻る</button><button class="primary" data-confirm-production>この内容で正式スタート！</button></div>';
- $('prepCostume').addEventListener('change',e=>preparation.costume=e.target.value);
+ $('prepCostume')?.addEventListener('change',e=>preparation.costume=e.target.value);
  $('productionPrepContent').querySelectorAll('[data-prep-idol]').forEach(b=>b.addEventListener('click',()=>{preparation.idol=b.dataset.prepIdol;preparation.costume='uniform';renderPreparation();}));
  $('productionPrepContent').querySelectorAll('[data-prep-item]').forEach(b=>b.addEventListener('click',()=>{preparation.item=b.dataset.prepItem;renderPreparation();}));
- $('productionPrepContent').querySelector('[data-close-prep]').addEventListener('click',()=>$('productionPrepOverlay').classList.remove('show'));
- $('productionPrepContent').querySelector('[data-confirm-production]').addEventListener('click',startProduction);
+ $('productionPrepContent')?.querySelector('[data-close-prep]')?.addEventListener('click',()=>$('productionPrepOverlay').classList.remove('show'));
+ $('productionPrepContent')?.querySelector('[data-confirm-production]')?.addEventListener('click',startProduction);
 }
 function startProduction(){
  const old=state, idol=preparation.idol, name=old.name||old.fairyName||'ルミ';
@@ -277,7 +277,7 @@ function bindDynamic(){
    const target=e.target instanceof Element?e.target:e.target?.parentElement;
    const nav=target?.closest?.('[data-screen]');
    if(nav){
-    if(nav.hidden||nav.disabled||nav.hasAttribute('data-production-nav')&&!state?.productionActive){syncProductionNavigation();return;}
+    if(nav.hidden||nav.disabled||nav.hasAttribute('data-production-nav')&&!(typeof state !== 'undefined' && state && state.productionActive)){syncProductionNavigation();return;}
     e.preventDefault();
     showScreen(nav.dataset.screen);return;
    }
@@ -306,7 +306,7 @@ function bindDynamic(){
  bottomNav?.addEventListener('click',e=>{
   const b=e.target?.closest?.('button[data-screen]')||e.composedPath?.().find(node=>node instanceof Element&&node.matches?.('button[data-screen]'));
   if(!b||b.hidden||b.disabled)return;
-  if(b.hasAttribute('data-production-nav')&&!state?.productionActive)return;
+  if(b.hasAttribute('data-production-nav')&&!(typeof state !== 'undefined' && state && state.productionActive))return;
   const current=document.querySelector('#gameMain .screen.active');
   if(current?.id!=='screen-'+b.dataset.screen)showScreen(b.dataset.screen);
  },true);
@@ -316,13 +316,13 @@ function resetToSetup(){if(state&&state.ending){const old=state;const next=fresh
 // Navigation is handled once by the delegated capture-phase listener in bindDynamic().
 document.querySelectorAll('.idol-pick').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.idol-pick').forEach(x=>x.classList.toggle('selected',x===b));renderCostumeChoices();}));
 function renderCostumeChoices(){const id=document.querySelector('.idol-pick.selected')?.dataset.idol||'mirai';const signature=initialCostumeByIdol[id];const firstIdol=localStorage.getItem(SAVE_KEY+'-first-idol');const area=$('costumeChoices');if(!area)return;let saved=null;try{saved=JSON.parse(localStorage.getItem(idolSaveKey(id))||'null')}catch(e){}const owned=saved&&Array.isArray(saved.closet)?saved.closet:['uniform'];const canGetSignature=(!firstIdol&& !state?.stats)||firstIdol===id;const options=costumes.filter(cost=>cost.id==='uniform'||(owned.includes(cost.id)&&(!cost.owner||cost.owner===id))||(cost.id===signature&&canGetSignature));area.innerHTML='<div class="field-label">育成するアイドルの衣装を選ぼう</div><div class="setup-costume-picks">'+options.map((cost,i)=>'<button type="button" class="setup-costume-pick '+(i===0?'selected':'')+'" data-setup-costume="'+cost.id+'"><span>'+cost.emoji+'</span><strong>'+esc(cost.name)+'</strong><small>'+cost.rarity+'</small></button>').join('')+'</div><p class="tiny-note">初期固有SSRは最初に選んだアイドルだけが獲得できるよ。</p>';area.querySelectorAll('[data-setup-costume]').forEach(b=>b.addEventListener('click',()=>{area.querySelectorAll('[data-setup-costume]').forEach(x=>x.classList.toggle('selected',x===b));}));}
-$('beginGame').addEventListener('click',()=>{const name=$('playerName').value.trim().slice(0,12)||'ルミ';const selectedIdol=document.querySelector('.idol-pick.selected')?.dataset.idol||'mirai';const selectedCostume=document.querySelector('[data-setup-costume].selected')?.dataset.setupCostume||'uniform';localStorage.setItem(SAVE_KEY+'-fairy-name',name);if(!localStorage.getItem(SAVE_KEY+'-first-idol'))localStorage.setItem(SAVE_KEY+'-first-idol',selectedIdol);const firstIdol=localStorage.getItem(SAVE_KEY+'-first-idol');let selectedSave=null;try{const raw=localStorage.getItem(idolSaveKey(selectedIdol));if(raw)selectedSave=JSON.parse(raw);}catch(e){}if(selectedSave&&selectedSave.stats){state=selectedSave;state.name=name;state.fairyName=name;}else{state=freshState(name,selectedIdol);state.tickets=1;state.logs=[];}state.idol=selectedIdol;state.name=name;state.fairyName=name;const allowedCostume=selectedCostume.startsWith('starter-')&&firstIdol!==selectedIdol?'uniform':selectedCostume;if(!state.closet.includes(allowedCostume))state.closet.push(allowedCostume);state.equipped=allowedCostume;state.costumeLevels=state.costumeLevels||{uniform:0};if(!(selectedCostume in state.costumeLevels))state.costumeLevels[selectedCostume]=0;state.prologueSeen=false;save();updateSoundButton();showPrologue();sfx('win');});
+$('beginGame')?.addEventListener('click',()=>{const name=$('playerName').value.trim().slice(0,12)||'ルミ';const selectedIdol=document.querySelector('.idol-pick.selected')?.dataset.idol||'mirai';const selectedCostume=document.querySelector('[data-setup-costume].selected')?.dataset.setupCostume||'uniform';localStorage.setItem(SAVE_KEY+'-fairy-name',name);if(!localStorage.getItem(SAVE_KEY+'-first-idol'))localStorage.setItem(SAVE_KEY+'-first-idol',selectedIdol);const firstIdol=localStorage.getItem(SAVE_KEY+'-first-idol');let selectedSave=null;try{const raw=localStorage.getItem(idolSaveKey(selectedIdol));if(raw)selectedSave=JSON.parse(raw);}catch(e){}if(selectedSave&&selectedSave.stats){state=selectedSave;state.name=name;state.fairyName=name;}else{state=freshState(name,selectedIdol);state.tickets=1;state.logs=[];}state.idol=selectedIdol;state.name=name;state.fairyName=name;const allowedCostume=selectedCostume.startsWith('starter-')&&firstIdol!==selectedIdol?'uniform':selectedCostume;if(!state.closet.includes(allowedCostume))state.closet.push(allowedCostume);state.equipped=allowedCostume;state.costumeLevels=state.costumeLevels||{uniform:0};if(!(selectedCostume in state.costumeLevels))state.costumeLevels[selectedCostume]=0;state.prologueSeen=false;save();updateSoundButton();showPrologue();sfx('win');});
 const resetButton = $('resetGame');
 if (resetButton) {
  resetButton.addEventListener('click',resetToSetup);
 }
-$('soundToggle').addEventListener('click',()=>{if(!state){state={sfx:localStorage.getItem(SOUND_KEY)!=='off'};}state.sfx=!state.sfx;localStorage.setItem(SOUND_KEY,state.sfx?'on':'off');updateSoundButton();if(state.sfx)sfx('tap');save();});
-$('eventChoices').addEventListener('click',e=>{const b=e.target.closest('[data-event-choice]');if(b)chooseEvent(Number(b.dataset.eventChoice));});
+$('soundToggle')?.addEventListener('click',()=>{if(!state){state={sfx:localStorage.getItem(SOUND_KEY)!=='off'};}state.sfx=!state.sfx;localStorage.setItem(SOUND_KEY,state.sfx?'on':'off');updateSoundButton();if(state.sfx)sfx('tap');save();});
+$('eventChoices')?.addEventListener('click',e=>{const b=e.target.closest('[data-event-choice]');if(b)chooseEvent(Number(b.dataset.eventChoice));});
 document.body.addEventListener('click',e=>{const b=e.target.closest('[data-day-live],[data-next-day]');if(!b)return;const m=$('dayEndModal');if(m)m.remove();if(b.hasAttribute('data-day-live')){showScreen('live');renderLive();}else nextDay();});
 function boot(){
  state=loadState();if(state&&typeof state.productionActive!=='boolean'){state.productionActive=false;save();}updateSoundButton();syncProductionNavigation();bindDynamic();
