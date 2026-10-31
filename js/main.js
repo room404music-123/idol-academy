@@ -89,7 +89,7 @@ function prepareIntro(){
  nameInput.hidden=!showName;
  if(nameNote&&nameNote.classList.contains('tiny-note'))nameNote.hidden=!showName;
  nameInput.value=saved?(state.fairyName||state.name||storedName||'ルミ'):(storedName||'ルミ');
- document.querySelectorAll('.idol-pick').forEach(b=>b.classList.toggle('selected',b.dataset.idol===(saved?state.idol:(localStorage.getItem(ACTIVE_IDOL_KEY)||'mirai'))));renderCostumeChoices();$('beginGame').textContent='育成を始める →';
+ document.querySelectorAll('.idol-pick').forEach(b=>b.classList.toggle('selected',b.dataset.idol===(saved?state.idol:(localStorage.getItem(ACTIVE_IDOL_KEY)||'mirai'))));renderCostumeChoices();$('beginGame').textContent='物語を始める →';
  $('setupError').textContent='';$('setupOverlay').classList.add('show');
 }
 
@@ -223,6 +223,8 @@ function renderPreparation(){
  $('prepCostume').addEventListener('change',e=>preparation.costume=e.target.value);
  $('productionPrepContent').querySelectorAll('[data-prep-idol]').forEach(b=>b.addEventListener('click',()=>{preparation.idol=b.dataset.prepIdol;preparation.costume='uniform';renderPreparation();}));
  $('productionPrepContent').querySelectorAll('[data-prep-item]').forEach(b=>b.addEventListener('click',()=>{preparation.item=b.dataset.prepItem;renderPreparation();}));
+ $('productionPrepContent').querySelector('[data-close-prep]').addEventListener('click',()=>$('productionPrepOverlay').classList.remove('show'));
+ $('productionPrepContent').querySelector('[data-confirm-production]').addEventListener('click',startProduction);
 }
 function startProduction(){
  const old=state, idol=preparation.idol, name=old.name||old.fairyName||'ルミ';
@@ -272,7 +274,7 @@ $('soundToggle').addEventListener('click',()=>{if(!state){state={sfx:localStorag
 $('eventChoices').addEventListener('click',e=>{const b=e.target.closest('[data-event-choice]');if(b)chooseEvent(Number(b.dataset.eventChoice));});
 document.body.addEventListener('click',e=>{const b=e.target.closest('[data-day-live],[data-next-day]');if(!b)return;const m=$('dayEndModal');if(m)m.remove();if(b.hasAttribute('data-day-live')){showScreen('live');renderLive();}else nextDay();});
 function boot(){
- state=loadState();if(state){state.productionActive=false;save();}updateSoundButton();bindDynamic();
+ state=loadState();if(state&&typeof state.productionActive!=='boolean'){state.productionActive=false;save();}updateSoundButton();bindDynamic();
  if(state&&state.stats){if(!state.eventDays)state.eventDays=[];if(!state.fairyName||!state.prologueSeen){prepareIntro();return;}$('setupOverlay').classList.remove('show');if(state.ending){showFestivalEnding();}else{renderHome();renderPlan();renderStory();renderLive();renderCloset();showScreen('home');}}
  else{prepareIntro();}
 }
