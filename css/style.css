@@ -86,3 +86,5 @@
 .prep-item b{font-size:11px}.prep-item small{font-size:10px;color:var(--muted)}
 .prep-actions{display:flex;justify-content:space-between;gap:12px;margin-top:26px}
 @media(max-width:620px){.home-production-entry{align-items:flex-start;flex-direction:column;padding:19px}.home-production-entry .primary{width:100%}.prep-idols,.prep-items{grid-template-columns:1fr}.prep-idol{flex-direction:row;text-align:left}.prep-idol>span{width:42px}.prep-idol small{margin-left:auto;max-width:48%}.bottom-nav{overflow-x:auto}.bottom-nav .nav{min-width:62px}}
+
+.production-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.production-menu-button{flex:0 0 auto;white-space:nowrap}.stamina-home{margin-top:14px;font-size:12px;font-weight:800;color:#786b9d}.stamina-home strong{font-size:17px;color:#6654bd;margin-left:6px}.stamina-home small{display:block;font-size:10px;font-weight:600;color:var(--muted);margin-top:4px}.production-menu-modal{max-width:480px}.production-menu-modal .choice-stack{margin-top:20px}
