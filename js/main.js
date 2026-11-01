@@ -115,6 +115,11 @@ function syncProductionNavigation(){
   el.setAttribute('aria-hidden',String(active));
   el.disabled=active;
  });
+ document.querySelectorAll('[data-nonproduction-nav]').forEach(el=>{
+  el.hidden=active;
+  el.setAttribute('aria-hidden',String(active));
+  el.disabled=active;
+ });
 }
 function showScreen(screen){
  if(state?.productionActive&&!['plan','live'].includes(screen)){toast('育成中はメニューから終了してね。');return;}
