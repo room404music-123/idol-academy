@@ -46,7 +46,7 @@ overlay.innerHTML=[
 ].join('');
 document.body.appendChild(overlay);
 const $=id=>document.getElementById(id),world=$('areaWorld'),player=$('areaPlayer');
-let opened=false,raf=0,lastFrame=0,tiltX=0,tiltY=0,baseBeta=null,baseGamma=null,latestBeta=null,latestGamma=null;
+let opened=false,raf=0,lastFrame=0,tiltX=0,tiltY=0,baseBeta=null,baseGamma=null,latestBeta=null,latestGamma=null,gyroEnabled=false;
 let currentNearby=null,dialogueId=null,dialogueIndex=0,target=null;
 const held={up:false,down:false,left:false,right:false},keys={};
 function save(){try{localStorage.setItem(AREA_KEY,JSON.stringify(saved));}catch(e){}}
@@ -84,12 +84,12 @@ async function enableGyro(){
  try{
   if(typeof D.requestPermission==='function'){const permission=await D.requestPermission();if(permission!=='granted'){setSensorStatus('センサーの許可が必要です');return;}}
   baseBeta=latestBeta;baseGamma=latestGamma;window.addEventListener('deviceorientation',onOrientation,true);
-  $('areaGyroButton').textContent='傾きを中央に合わせる';$('areaGyroButton').onclick=calibrateGyro;setSensorStatus('ジャイロ操作中',true);
+  gyroEnabled=true;$('areaGyroButton').textContent='傾きを中央に合わせる';setSensorStatus('ジャイロ操作中',true);
   if(latestBeta===null){baseBeta=null;baseGamma=null;}
  }catch(e){setSensorStatus('ジャイロを利用できません');}
 }
 function calibrateGyro(){baseBeta=latestBeta;baseGamma=latestGamma;tiltX=0;tiltY=0;setSensorStatus('中央位置を設定しました',true);}
-function stopGyro(){window.removeEventListener('deviceorientation',onOrientation,true);tiltX=0;tiltY=0;baseBeta=null;baseGamma=null;}
+function stopGyro(){window.removeEventListener('deviceorientation',onOrientation,true);tiltX=0;tiltY=0;baseBeta=null;baseGamma=null;gyroEnabled=false;$('areaGyroButton').textContent='ジャイロを有効にする';setSensorStatus('ジャイロ未接続');}
 function playConversation(id){
  const data=conversations[id];if(!data)return;dialogueId=id;dialogueIndex=0;
  $('areaDialogueTitle').textContent=data.title;$('areaDialogueKicker').textContent='AREA TALK · '+data.place;$('areaDialogue').classList.add('show');renderDialogueLine();
@@ -124,7 +124,7 @@ document.addEventListener('click',e=>{
  if(e.target.closest('#areaTalkButton')&&currentNearby){playConversation(currentNearby);return;}
  const npc=e.target.closest('[data-area-npc]');if(npc){const n=npcs[npc.dataset.areaNpc];target={x:n.x,y:n.y};return;}
 });
-$('areaGyroButton').addEventListener('click',enableGyro);
+$('areaGyroButton').addEventListener('click',()=>{if(gyroEnabled)calibrateGyro();else enableGyro();});
 document.querySelectorAll('[data-dir]').forEach(button=>{
  const dir=button.dataset.dir,down=e=>{e.preventDefault();held[dir]=true;},up=()=>{held[dir]=false;};
  button.addEventListener('pointerdown',down);button.addEventListener('pointerup',up);button.addEventListener('pointerleave',up);button.addEventListener('pointercancel',up);
