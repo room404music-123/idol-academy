@@ -71,7 +71,7 @@ function finishMiniGame(){miniGame.finished=true;const type=miniGame.type,score=
 function renderPosition(){
  player.style.left=saved.x+'%';player.style.top=saved.y+'%';
  let found=null,near=999;Object.entries(npcs).forEach(([id,npc])=>{const d=distance(saved,npc);if(d<near){near=d;found=id;}});
- currentNearby=near<=14?found:null;
+ currentNearby=activeRoom?found:(near<=14?found:null);
  const name=$('areaNearbyName'),desc=$('areaNearbyDesc'),talk=$('areaTalkButton');
  if(currentNearby){const npc=npcs[currentNearby],known=saved.unlocked.includes(currentNearby);name.textContent=npc.name;desc.textContent=npc.desc;talk.disabled=false;talk.textContent=npc.task?'お手伝いをする':(known?'会話を見る ／ もう一度見る':'話しかける');if(!known){saved.unlocked.push(currentNearby);save();}}
  else{name.textContent='周囲を見渡す';desc.textContent='学園を歩いて、アイドルたちの会話を探してみよう。';talk.disabled=true;talk.textContent='近くに会話はありません';}
