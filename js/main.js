@@ -346,6 +346,22 @@ $('eventChoices')?.addEventListener('click',e=>{const b=e.target.closest('[data-
 window.EtoileGame = {
  getFairyName:()=>state?.fairyName||state?.name||'妖精',
  getMoney:()=>Number(state?.money)||0,
+ getLessonUpgradeData(){
+  if(!state)return null;
+  return {money:Number(state.money)||0,lessonLevels:{vocal:1,dance:1,charm:1,...(state.lessonLevels||{})},productionActive:!!state.productionActive};
+ },
+ upgradeLesson(key){
+  if(!state||!state.productionActive)return {ok:false,reason:'inactive'};
+  if(!['vocal','dance','charm'].includes(key))return {ok:false,reason:'invalid'};
+  state.lessonLevels=state.lessonLevels||{vocal:1,dance:1,charm:1};
+  const level=state.lessonLevels[key]||1,cost=100*level;
+  if(level>=10)return {ok:false,reason:'max'};
+  if((Number(state.money)||0)<cost)return {ok:false,reason:'funds'};
+  state.money-=cost;state.lessonLevels[key]=level+1;save();
+  if($('screen-upgrade')?.classList.contains('active'))renderUpgrade();
+  toast(statName(key)+'レッスン Lv.'+(level+1)+'！');
+  return {ok:true,level:level+1,money:state.money};
+ },
  addMoney(amount){
   const value=Math.floor(Number(amount));
   if(!state||!Number.isFinite(value)||value<=0)return false;
