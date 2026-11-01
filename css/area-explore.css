@@ -87,3 +87,5 @@
  .area-explore-footer button{padding:9px;font-size:10px}
  .area-dialogue-card,.area-archive-card{padding:19px}
 }
+
+.area-stick-base{position:relative;width:126px;height:126px;margin:14px auto 4px;border:2px solid #e2d9ef;border-radius:50%;background:radial-gradient(circle at 35% 28%,#fff,#f0eafa 72%,#e7def4);box-shadow:inset 0 4px 12px #8a78a51a,0 5px 14px #7d6b9b12;touch-action:none;user-select:none}.area-stick-base:before{content:'';position:absolute;inset:20%;border:1px dashed #d8cce9;border-radius:50%}.area-stick-knob{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px;border:2px solid #fff;border-radius:50%;background:linear-gradient(145deg,#f4b3d1,#a091e6);box-shadow:0 5px 12px #66517d40;pointer-events:none;will-change:transform}.area-stick-caption{text-align:center;font-size:9px;color:var(--muted);margin-top:5px}@media(max-width:760px){.area-stick-base{width:116px;height:116px}.area-stick-knob{width:50px;height:50px;margin:-25px}}
