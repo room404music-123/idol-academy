@@ -38,7 +38,7 @@ overlay.innerHTML=[
  '<button type="button" class="area-npc area-outdoor" data-area-npc="shuffle" style="left:56%;top:37%"><span class="area-npc-bubble group">✦✦✦</span><span class="area-npc-label">シャッフル組</span></button><button type="button" class="area-npc area-outdoor" data-area-npc="shionRamu" style="left:29%;top:68%"><span class="area-npc-bubble">紫 / ら</span><span class="area-npc-label">紫音 ＆ らむ</span></button>',
  '<div class="area-player" id="areaPlayer" aria-label="あなた">✦</div></div><div class="area-world-hint">スティック・矢印キー・WASDで移動 ／ 建物を選ぶと中に入れます</div></div>',
  '<aside class="area-side"><section class="area-side-card"><h3>移動スティック</h3><p>丸いスティックを押したまま動かして移動</p><div class="area-stick-base" id="areaStickBase" role="application" aria-label="バーチャルアナログスティック"><div class="area-stick-knob" id="areaStickKnob"></div></div><div class="area-stick-caption">指を離すと止まります</div></section>',
- '<section class="area-side-card"><div class="area-nearby-title">NEARBY</div><div class="area-nearby-name" id="areaNearbyName">周囲を見渡す</div><p class="area-nearby-desc" id="areaNearbyDesc">学園を歩いて、アイドルたちの会話を探してみよう。</p><button type="button" class="area-talk-button" id="areaTalkButton" disabled>近くに会話はありません</button></section></aside></div>',
+ '<section class="area-side-card" id="areaBuildingCard"><h3>建物への移動</h3><p>建物の近くまで移動すると、ここから入れます。</p><button type="button" class="area-talk-button" id="areaEnterBuildingButton" disabled>建物の近くまで移動してね</button></section><section class="area-side-card"><div class="area-nearby-title">NEARBY</div><div class="area-nearby-name" id="areaNearbyName">周囲を見渡す</div><p class="area-nearby-desc" id="areaNearbyDesc">学園を歩いて、アイドルたちの会話を探してみよう。</p><button type="button" class="area-talk-button" id="areaTalkButton" disabled>近くに会話はありません</button></section></aside></div>',
  '<footer class="area-explore-footer"><span>✦ あなたはアイドルを支える妖精です。<br>会話を見つけると、会話ログに保存されます。</span><button type="button" class="area-exit" data-area-close>探索を終了</button></footer>',
  '<div class="area-dialogue-shade" id="areaDialogue"><section class="area-dialogue-card"><div class="area-dialogue-kicker" id="areaDialogueKicker">AREA TALK</div><h3 id="areaDialogueTitle"></h3><div class="area-dialogue-speaker" id="areaDialogueSpeaker"></div><div class="area-dialogue-text" id="areaDialogueText"></div><div class="area-dialogue-controls"><button type="button" data-dialogue-close>閉じる</button><button type="button" class="area-dialogue-next" id="areaDialogueNext">次へ　→</button></div></section></div>',
  '<div class="area-mini-shade" id="areaMiniGame"><section class="area-mini-card"><div class="area-dialogue-kicker" id="areaMiniKicker">CAMPUS HELP</div><h3 id="areaMiniTitle">お手伝い</h3><p class="area-mini-prompt" id="areaMiniPrompt"></p><div class="area-mini-choices" id="areaMiniChoices"></div><p class="area-mini-progress" id="areaMiniProgress"></p><div class="area-mini-result" id="areaMiniResult" hidden></div><div class="area-dialogue-controls"><button type="button" data-mini-close>探索に戻る</button></div></section></div><div class="area-archive-shade" id="areaArchive"><section class="area-archive-card"><div class="area-dialogue-kicker">AREA TALK ARCHIVE</div><h3>見つけた会話</h3><div class="area-archive-list" id="areaArchiveList"></div><div class="area-dialogue-controls"><button type="button" data-archive-close>閉じる</button></div></section></div>',
@@ -47,7 +47,7 @@ overlay.innerHTML=[
 document.body.appendChild(overlay);
 const $=id=>document.getElementById(id),world=$('areaWorld'),player=$('areaPlayer');
 let opened=false,raf=0,lastFrame=0,stickX=0,stickY=0,stickPointer=null;
-let currentNearby=null,dialogueId=null,dialogueIndex=0,target=null,activeRoom=null,miniGame=null,roomLayer=null;
+let currentNearby=null,currentBuilding=null,dialogueId=null,dialogueIndex=0,target=null,activeRoom=null,miniGame=null,roomLayer=null;
 const held={up:false,down:false,left:false,right:false},keys={};
 function save(){try{localStorage.setItem(AREA_KEY,JSON.stringify(saved));}catch(e){}}
 function distance(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
@@ -63,13 +63,17 @@ function enterRoom(id){
  $('areaNearbyName').textContent=room.npc.name;$('areaNearbyDesc').textContent=room.npc.desc;$('areaTalkButton').disabled=true;$('areaTalkButton').textContent='近くに移動してね';renderPosition();
 }
 function exitRoom(){if(roomLayer){roomLayer.remove();roomLayer=null;}activeRoom=null;npcs=campusNpcs;world.classList.remove('inside-room');saved.x=50;saved.y=84;target=null;renderPosition();}
-const miniTasks={shop:[{ask:'お客さん「いちごサンドをください！」',answer:'いちごサンド',choices:['いちごサンド','たまごサンド','メロンパン']},{ask:'店員「次は牛乳を渡してね」',answer:'牛乳',choices:['オレンジジュース','牛乳','お茶']},{ask:'お客さん「焼きそばパンをお願いします」',answer:'焼きそばパン',choices:['クリームパン','焼きそばパン','コロッケパン']}],teacher:[{ask:'先生「赤い表紙のプリントを取ってくれる？」',answer:'赤い表紙',choices:['青い表紙','赤い表紙','黄色い表紙']},{ask:'先生「次は出席簿をお願い」',answer:'出席簿',choices:['出席簿','楽譜','図書カード']},{ask:'先生「最後に連絡ノートを持ってきてね」',answer:'連絡ノート',choices:['連絡ノート','問題集','画用紙']}],library:[{ask:'先生「音楽の本を棚に戻してね」',answer:'発声の基礎',choices:['植物図鑑','発声の基礎','数学の公式']},{ask:'先生「歴史の本はどれかな？」',answer:'学園の歴史',choices:['学園の歴史','ダンス入門','星空観察']},{ask:'先生「小説の棚に戻す本は？」',answer:'星降る放課後',choices:['運動の科学','星降る放課後','音響機材の使い方']}]};
+const campusBuildings=[{id:'classroom',name:'校舎内',x:18,y:57.5},{id:'library',name:'図書室',x:77.5,y:17},{id:'lesson',name:'レッスン棟',x:79.5,y:80.5},{id:'roof',name:'屋上',x:47,y:13.5},{id:'store',name:'売店',x:15.5,y:19},{id:'music',name:'音楽室',x:47,y:80.5}];
+ const miniTasks={shop:[{ask:'お客さん「いちごサンドをください！」',answer:'いちごサンド',choices:['いちごサンド','たまごサンド','メロンパン']},{ask:'店員「次は牛乳を渡してね」',answer:'牛乳',choices:['オレンジジュース','牛乳','お茶']},{ask:'お客さん「焼きそばパンをお願いします」',answer:'焼きそばパン',choices:['クリームパン','焼きそばパン','コロッケパン']}],teacher:[{ask:'先生「赤い表紙のプリントを取ってくれる？」',answer:'赤い表紙',choices:['青い表紙','赤い表紙','黄色い表紙']},{ask:'先生「次は出席簿をお願い」',answer:'出席簿',choices:['出席簿','楽譜','図書カード']},{ask:'先生「最後に連絡ノートを持ってきてね」',answer:'連絡ノート',choices:['連絡ノート','問題集','画用紙']}],library:[{ask:'先生「音楽の本を棚に戻してね」',answer:'発声の基礎',choices:['植物図鑑','発声の基礎','数学の公式']},{ask:'先生「歴史の本はどれかな？」',answer:'学園の歴史',choices:['学園の歴史','ダンス入門','星空観察']},{ask:'先生「小説の棚に戻す本は？」',answer:'星降る放課後',choices:['運動の科学','星降る放課後','音響機材の使い方']}]};
 function startMiniGame(id){const npc=npcs[id];if(!npc?.task)return;miniGame={type:npc.task,round:0,correct:0,mistakes:0,finished:false};$('areaMiniKicker').textContent='CAMPUS HELP · '+(activeRoom?rooms[activeRoom].name:'学園');$('areaMiniTitle').textContent=npc.task==='shop'?'売店のお手伝い':npc.task==='library'?'本の整理を手伝おう':'先生のお手伝い';$('areaMiniResult').hidden=true;$('areaMiniChoices').hidden=false;$('areaMiniGame').classList.add('show');renderMiniRound();}
 function renderMiniRound(){const task=miniTasks[miniGame.type][miniGame.round];$('areaMiniPrompt').textContent=task.ask;$('areaMiniProgress').textContent='お手伝い '+(miniGame.round+1)+' / 3　正解 '+miniGame.correct+'　ミス '+miniGame.mistakes;$('areaMiniChoices').innerHTML=task.choices.map(choice=>'<button type="button" data-mini-choice="'+choice+'">'+choice+'</button>').join('');}
 function answerMini(choice){if(!miniGame||miniGame.finished)return;const task=miniTasks[miniGame.type][miniGame.round];if(choice===task.answer)miniGame.correct++;else miniGame.mistakes++;miniGame.round++;if(miniGame.round<3){renderMiniRound();return;}finishMiniGame();}
 function finishMiniGame(){miniGame.finished=true;const type=miniGame.type,score=miniGame.correct,reward=score===3?(type==='shop'?120:100):score===2?(type==='shop'?70:60):score===1?25:10;const fairy=window.EtoileGame?.getFairyName?.()||'妖精';let feedback='';if(type==='shop')feedback=score===3?'こんな優秀な妖精さんに恵まれたアイドルが羨ましいわねぇ':score<=1?'いっぱい練習して、お手伝いできるようになろうねぇ':'慣れない仕事なのに、よく頑張ったわねぇ。';else feedback=score===3?'ありがとう、'+fairy+'さん。あなたの相棒アイドルにもよろしくね。':score<=1?'うーん、次からは相棒アイドルと一緒に来てもらおうかしら。':'手伝ってくれてありがとう。次もよろしくね。';const paid=window.EtoileGame?.addMoney?.(reward);$('areaMiniChoices').hidden=true;$('areaMiniResult').hidden=false;$('areaMiniResult').innerHTML='<strong>'+(score===3?'大成功！':score<=1?'もう少し練習！':'お手伝い完了！')+'</strong><p>'+feedback+'</p><div class="area-mini-reward">獲得マネー　💰 '+(paid?reward:0)+'</div><small>正解 '+score+' / 3　ミス '+miniGame.mistakes+' 回</small>';$('areaMiniProgress').textContent='今回の評価';}
 function renderPosition(){
  player.style.left=saved.x+'%';player.style.top=saved.y+'%';
+ const buildingCard=$('areaBuildingCard'),buildingButton=$('areaEnterBuildingButton');
+ if(activeRoom){currentBuilding=null;buildingCard.hidden=true;}
+ else{buildingCard.hidden=false;let nearestBuilding=null,buildingDistance=999;campusBuildings.forEach(building=>{const d=distance(saved,building);if(d<buildingDistance){buildingDistance=d;nearestBuilding=building;}});currentBuilding=buildingDistance<=20?nearestBuilding:null;buildingButton.disabled=!currentBuilding;buildingButton.textContent=currentBuilding?currentBuilding.name+'に入る':'建物の近くまで移動してね';}
  let found=null,near=999;Object.entries(npcs).forEach(([id,npc])=>{const d=distance(saved,npc);if(d<near){near=d;found=id;}});
  currentNearby=activeRoom?found:(near<=14?found:null);
  const name=$('areaNearbyName'),desc=$('areaNearbyDesc'),talk=$('areaTalkButton');
@@ -133,6 +137,7 @@ document.addEventListener('click',e=>{
  const open=e.target.closest('[data-open-area-explore]');if(open){openArea();return;}
  if(e.target.closest('[data-area-close]')){closeArea();return;}
  const enter=e.target.closest('[data-enter-room]');if(enter){enterRoom(enter.dataset.enterRoom);return;}
+  if(e.target.closest('#areaEnterBuildingButton')&&currentBuilding){enterRoom(currentBuilding.id);return;}
  if(e.target.closest('[data-room-exit]')){exitRoom();return;}
  const miniChoice=e.target.closest('[data-mini-choice]');if(miniChoice){answerMini(miniChoice.dataset.miniChoice);return;}
  if(e.target.closest('[data-mini-close]')){$('areaMiniGame').classList.remove('show');miniGame=null;return;}
@@ -150,7 +155,7 @@ document.querySelectorAll('[data-dir]').forEach(button=>{
  button.addEventListener('pointerdown',down);button.addEventListener('pointerup',up);button.addEventListener('pointerleave',up);button.addEventListener('pointercancel',up);
 });
 world.addEventListener('pointerdown',e=>{
- if(e.target.closest('[data-area-npc],[data-enter-room],[data-room-exit]'))return;const rect=world.getBoundingClientRect();
+ if(e.target.closest('[data-area-npc],[data-enter-room],[data-room-exit],#areaEnterBuildingButton'))return;const rect=world.getBoundingClientRect();
  target={x:clamp((e.clientX-rect.left)/rect.width*100,3,97),y:clamp((e.clientY-rect.top)/rect.height*100,5,95)};
 });
 window.addEventListener('keydown',e=>{if(!opened)return;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();keys[e.key]=true;});
