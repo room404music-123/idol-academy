@@ -35,6 +35,7 @@ const eventPool = [
  {icon:'📰',title:'根も葉もないうわさ',body:'校内掲示板に、あなたについての妙なうわさが書かれている。',choices:[['事実を落ち着いて説明','charm',3,'誠実な対応で誤解が解けた。表現力が上がった。'],['仲間に支えてもらう','bond',4,'味方がいると実感できた。絆が深まった。'],['ステージで実力を示す','fans',10,'パフォーマンスで空気を変えた。ファンが増えた！']]}
 ];
 let state;
+let closetSort='default';
 let pendingEvent = null;
 let battle = null;
 let toastTimer;
@@ -246,7 +247,16 @@ function costumeSkillInfo(costume){
 function renderCloset(){
  state.costumeCoins=Number(state.costumeCoins)||0;
  state.costumeSkillLevels=state.costumeSkillLevels||{};
- $('screen-closet').innerHTML='<div class="section-head"><div class="eyebrow">COSTUME COLLECTION</div><h2>衣装ルーム</h2><p>衣装のスキルを強化しよう。着用する衣装はプロデュース開始前の準備画面で選べるよ。</p></div><div class="section-title"><h3>衣装コイン　'+state.costumeCoins+' 枚</h3></div><div class="closet-grid">'+costumes.filter(c=>state.closet.includes(c.id)||!!c.owner).map(c=>{const skill=costumeSkillInfo(c);const cost=10+skill.level*5;const effect=skill.special?skill.label+'カード '+skill.multiplier.toFixed(2)+'倍（最大1.50倍）':'現在の衣装ボーナス +'+skill.bonus;return '<div class="costume-card '+(state.equipped===c.id?'equipped':'')+'"><div class="costume-art">'+c.emoji+'</div><span class="rarity">'+c.rarity+' · BONUS +'+c.bonus+'</span><h3>'+c.name+'</h3><p>'+c.desc+'</p><p class="subcopy">'+(state.equipped===c.id?'現在の育成で選択中':(c.owner?'アイドル固有衣装':'未装備'))+'</p><p class="subcopy">'+skill.description+'<br>'+effect+'<br>スキル Lv.'+skill.level+'/10</p><button class="primary" data-upgrade-costume-skill="'+c.id+'" '+(skill.level>=10||state.costumeCoins<cost?'disabled':'')+'>衣装スキル強化（コイン '+cost+'枚）</button></div>';}).join('')+'</div><div class="notice">アイドル固有衣装は、担当アイドルや着用状態に関係なく全員分表示・強化できるよ。固有SSRは対応するスキルカードのポイント倍率に加え、衣装ボーナス +7 も適用されるよ。</div>';
+ const owned=costumes.filter(c=>state.closet.includes(c.id)||!!c.owner);
+ const rarityOrder={SSR:0,SR:1,R:2,N:3};
+ const sorted=[...owned].sort((a,b)=>{
+  if(closetSort==='rarity')return (rarityOrder[a.rarity]??9)-(rarityOrder[b.rarity]??9)||a.name.localeCompare(b.name,'ja');
+  if(closetSort==='name')return a.name.localeCompare(b.name,'ja');
+  if(closetSort==='level')return (Number(state.costumeSkillLevels[b.id])||0)-(Number(state.costumeSkillLevels[a.id])||0)|| (rarityOrder[a.rarity]??9)-(rarityOrder[b.rarity]??9);
+  return costumes.indexOf(a)-costumes.indexOf(b);
+ });
+ const sortButton=(value,label)=>'<button type="button" class="'+(closetSort===value?'primary':'secondary')+'" data-closet-sort="'+value+'">'+label+'</button>';
+ $('screen-closet').innerHTML='<div class="section-head"><div class="eyebrow">COSTUME COLLECTION</div><h2>衣装ルーム</h2><p>衣装のスキルを強化しよう。着用する衣装はプロデュース開始前の準備画面で選べるよ。</p></div><div class="section-title"><h3>衣装コイン　'+state.costumeCoins+' 枚</h3></div><div class="closet-sort-controls"><span class="subcopy">並び替え：</span>'+sortButton('default','初期順')+sortButton('rarity','レア度順')+sortButton('name','名前順')+sortButton('level','スキルLv順')+'</div><div class="closet-grid">'+sorted.map(c=>{const skill=costumeSkillInfo(c);const cost=10+skill.level*5;const effect=skill.special?skill.label+'カード '+skill.multiplier.toFixed(2)+'倍（最大1.50倍）':'現在の衣装ボーナス +'+skill.bonus;return '<div class="costume-card '+(state.equipped===c.id?'equipped':'')+'"><div class="costume-art">'+c.emoji+'</div><span class="rarity">'+c.rarity+' · BONUS +'+c.bonus+'</span><h3>'+c.name+'</h3><p>'+c.desc+'</p><p class="subcopy">'+(state.equipped===c.id?'現在の育成で選択中':(c.owner?'アイドル固有衣装':'未装備'))+'</p><p class="subcopy">'+skill.description+'<br>'+effect+'<br>スキル Lv.'+skill.level+'/10</p><button class="primary" data-upgrade-costume-skill="'+c.id+'" '+(skill.level>=10||state.costumeCoins<cost?'disabled':'')+'>衣装スキル強化（コイン '+cost+'枚）</button></div>';}).join('')+'</div><div class="notice">アイドル固有衣装は、担当アイドルや着用状態に関係なく全員分表示・強化できるよ。固有SSRは対応するスキルカードのポイント倍率に加え、衣装ボーナス +7 も適用されるよ。</div>';
 }
 function totalPower(){return Math.round((state.stats.vocal+state.stats.dance+state.stats.charm)/3+state.stats.bond*.18);}
 function rivalPower(){return 25+Math.min(45,state.day*5);}
@@ -344,7 +354,7 @@ function bindDynamic(){
   if(b.hasAttribute('data-start-live')){if(!state.productionActive){toast('プロデュース開始後に挑戦できるよ。');return;}startLive();return;}if(b.hasAttribute('data-festival-ending')){if(!state.productionActive)return;state.ending=true;state.productionActive=false;save();showFestivalEnding();return;}
   if(b.dataset.playCard!==undefined){playCard(Number(b.dataset.playCard));return;}
   if(b.hasAttribute('data-next-turn')){finishCardTurn();return;}
-  if(b.dataset.upgradeCostumeSkill){const id=b.dataset.upgradeCostumeSkill;const costume=costumes.find(c=>c.id===id);if(!costume||(!costume.owner&&!state.closet.includes(id)))return;state.costumeSkillLevels=state.costumeSkillLevels||{};const lv=Math.max(0,Number(state.costumeSkillLevels[id])||0);const cost=10+lv*5;if(lv>=10){toast('この衣装スキルは最大レベルだよ。');return;}if((Number(state.costumeCoins)||0)<cost){toast('衣装コインが足りないよ。');return;}state.costumeCoins-=cost;state.costumeSkillLevels[id]=lv+1;save();renderCloset();renderGacha();toast(costume.name+'の衣装スキルがLv.'+(lv+1)+'になったよ！');return;}
+  if(b.dataset.closetSort){closetSort=b.dataset.closetSort;renderCloset();return;}if(b.dataset.upgradeCostumeSkill){const id=b.dataset.upgradeCostumeSkill;const costume=costumes.find(c=>c.id===id);if(!costume||(!costume.owner&&!state.closet.includes(id)))return;state.costumeSkillLevels=state.costumeSkillLevels||{};const lv=Math.max(0,Number(state.costumeSkillLevels[id])||0);const cost=10+lv*5;if(lv>=10){toast('この衣装スキルは最大レベルだよ。');return;}if((Number(state.costumeCoins)||0)<cost){toast('衣装コインが足りないよ。');return;}state.costumeCoins-=cost;state.costumeSkillLevels[id]=lv+1;save();renderCloset();renderGacha();toast(costume.name+'の衣装スキルがLv.'+(lv+1)+'になったよ！');return;}
   if(b.hasAttribute('data-gacha-rates')){const panel=$('gachaRatesPanel');if(panel){panel.hidden=!panel.hidden;b.setAttribute('aria-expanded',String(!panel.hidden));b.textContent=panel.hidden?'提供割合':'提供割合を閉じる';}return;}if(b.hasAttribute('data-gacha')){pullGacha();return;}
   if(b.hasAttribute('data-buy-ticket')){if(state.jewels<35)return;state.jewels-=35;state.tickets=(state.tickets||0)+1;save();renderGacha();$('jewelCount').textContent=state.jewels;toast('チケットを1枚交換したよ！');return;}
   if(b.hasAttribute('data-restart')){resetToSetup();return;}
