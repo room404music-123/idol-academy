@@ -340,6 +340,20 @@ if (resetButton) {
 }
 $('soundToggle')?.addEventListener('click',()=>{if(!state){state={sfx:localStorage.getItem(SOUND_KEY)!=='off'};}state.sfx=!state.sfx;localStorage.setItem(SOUND_KEY,state.sfx?'on':'off');updateSoundButton();if(state.sfx)sfx('tap');save();});
 $('eventChoices')?.addEventListener('click',e=>{const b=e.target.closest('[data-event-choice]');if(b)chooseEvent(Number(b.dataset.eventChoice));});
+
+window.EtoileGame = {
+ getFairyName:()=>state?.fairyName||state?.name||'妖精',
+ getMoney:()=>Number(state?.money)||0,
+ addMoney(amount){
+  const value=Math.floor(Number(amount));
+  if(!state||!Number.isFinite(value)||value<=0)return false;
+  state.money=(Number(state.money)||0)+value;
+  save();
+  if($('screen-upgrade')?.classList.contains('active'))renderUpgrade();
+  if($('screen-home')?.classList.contains('active'))renderHome();
+  return true;
+ }
+};
 function boot(){
  state=loadState();if(state&&typeof state.productionActive!=='boolean'){state.productionActive=false;save();}updateSoundButton();syncProductionNavigation();bindDynamic();
  if(state&&state.stats){if(!state.eventDays)state.eventDays=[];if(!state.fairyName||!state.prologueSeen){prepareIntro();return;}$('setupOverlay').classList.remove('show');if(state.ending){showFestivalEnding();}else{renderHome();renderPlan();renderStory();renderLive();renderCloset();showScreen('home');}}
