@@ -110,6 +110,11 @@ function syncProductionNavigation(){
   el.setAttribute('aria-hidden',String(!active));
   el.disabled=!active;
  });
+ document.querySelectorAll('[data-area-explore-nav]').forEach(el=>{
+  el.hidden=active;
+  el.setAttribute('aria-hidden',String(active));
+  el.disabled=active;
+ });
 }
 function showScreen(screen){
  if(state?.productionActive&&!['plan','live'].includes(screen)){toast('育成中はメニューから終了してね。');return;}
@@ -344,6 +349,7 @@ $('soundToggle')?.addEventListener('click',()=>{if(!state){state={sfx:localStora
 $('eventChoices')?.addEventListener('click',e=>{const b=e.target.closest('[data-event-choice]');if(b)chooseEvent(Number(b.dataset.eventChoice));});
 
 window.EtoileGame = {
+ isProductionActive:()=>!!state?.productionActive,
  getFairyName:()=>state?.fairyName||state?.name||'妖精',
  getMoney:()=>Number(state?.money)||0,
  getLessonUpgradeData(){
@@ -351,7 +357,7 @@ window.EtoileGame = {
   return {money:Number(state.money)||0,lessonLevels:{vocal:1,dance:1,charm:1,...(state.lessonLevels||{})},productionActive:!!state.productionActive};
  },
  upgradeLesson(key){
-  if(!state||!state.productionActive)return {ok:false,reason:'inactive'};
+  if(!state||state.productionActive)return {ok:false,reason:'active'};
   if(!['vocal','dance','charm'].includes(key))return {ok:false,reason:'invalid'};
   state.lessonLevels=state.lessonLevels||{vocal:1,dance:1,charm:1};
   const level=state.lessonLevels[key]||1,cost=100*level;
