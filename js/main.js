@@ -12,6 +12,7 @@ const idols = {
  reika:{name:'如月 麗華',emoji:'🦋',role:'気品あふれる表現力を持つ、芯の強いアイドル。',special:'charm',voice:'「私らしい輝きで、必ず認めさせてみせるわ。」'},
  komugi:{name:'日高 こむぎ',emoji:'🌻',role:'明るさとキレのあるダンスで、みんなを笑顔にする。',special:'dance',voice:'「いっくよー！ みんなで最高のステージにしよう！」'}
 };
+function idolPortrait(id, extra=''){const index={mirai:0,reika:1,komugi:2,meru:3,tsukiyo:4,arashi:5,setsuna:6}[id]??0;return '<span class="idol-portrait-sprite portrait-'+id+' '+extra+'" role="img" aria-label="'+(idols[id]?.name||id)+'"></span>';}
 const initialCostumeByIdol = {mirai:'starter-mirai',reika:'starter-reika',komugi:'starter-komugi'};
 const costumes = [
  {id:'uniform',name:'はじまりの制服',emoji:'🎀',rarity:'N',desc:'基本の衣装。どんな一日にも似合う。',bonus:0},
