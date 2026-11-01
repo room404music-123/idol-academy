@@ -90,7 +90,7 @@
 .production-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.production-menu-button{flex:0 0 auto;white-space:nowrap}.stamina-home{margin-top:14px;font-size:12px;font-weight:800;color:#786b9d}.stamina-home strong{font-size:17px;color:#6654bd;margin-left:6px}.stamina-home small{display:block;font-size:10px;font-weight:600;color:var(--muted);margin-top:4px}.production-menu-modal{max-width:480px}.production-menu-modal .choice-stack{margin-top:20px}
 
 /* Character portrait sprites: order is Mirai, Reika, Komugi, Meru, Tsukiyo, Arashi, Setsuna. */
-.idol-portrait-sprite{display:block;flex:0 0 auto;aspect-ratio:2/5;width:auto;height:100%;background-image:url('../assets/idols/sprite.jpg');background-repeat:no-repeat;background-size:700% 100%;background-position-y:center}
+.idol-portrait-sprite{display:block;mix-blend-mode:multiply;flex:0 0 auto;aspect-ratio:2/5;width:auto;height:100%;background-image:url('../assets/idols/sprite.jpg');background-repeat:no-repeat;background-size:700% 100%;background-position-y:center}
 .portrait-mirai{background-position-x:0%}.portrait-reika{background-position-x:16.6667%}.portrait-komugi{background-position-x:33.3333%}.portrait-meru{background-position-x:50%}.portrait-tsukiyo{background-position-x:66.6667%}.portrait-arashi{background-position-x:83.3333%}.portrait-setsuna{background-position-x:100%}
 .mypage-portrait{align-items:flex-end}
 .mypage-portrait .idol-portrait-sprite{height:100%;max-height:430px;filter:drop-shadow(0 12px 14px #63517a28)}
