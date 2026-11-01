@@ -37,7 +37,7 @@ overlay.innerHTML=[
  '<div class="area-location" style="left:51%;top:45%"><span class="area-location-mark">✿</span><span class="area-location-name">中庭</span></div><div class="area-location" style="left:18%;top:76%"><span class="area-location-mark">⌂</span><span class="area-location-name">校舎前</span></div><div class="area-location" style="left:78%;top:29%"><span class="area-location-mark">▤</span><span class="area-location-name">図書室</span></div><div class="area-location" style="left:80%;top:89%"><span class="area-location-mark">♫</span><span class="area-location-name">レッスン棟</span></div>',
  '<button type="button" class="area-npc" data-area-npc="shuffle" style="left:56%;top:37%"><span class="area-npc-bubble group">✦✦✦</span><span class="area-npc-label">シャッフル組</span></button><button type="button" class="area-npc" data-area-npc="shionRamu" style="left:29%;top:68%"><span class="area-npc-bubble">紫 / ら</span><span class="area-npc-label">紫音 ＆ らむ</span></button>',
  '<div class="area-player" id="areaPlayer" aria-label="あなた">✦</div></div><div class="area-world-hint">スマホを傾けて移動 ／ PCは矢印キー・WASD ／ マップをタップして移動先を指定</div></div>',
- '<aside class="area-side"><section class="area-side-card"><h3>移動方法</h3><div class="area-sensor-status" id="areaSensorStatus"><span class="area-sensor-dot"></span><span id="areaSensorLabel">ジャイロ未接続</span></div><button class="area-gyro-button" id="areaGyroButton">ジャイロを有効にする</button><div class="area-dpad" aria-label="移動ボタン"><button type="button" data-dir="up" aria-label="上へ">▲</button><button type="button" data-dir="left" aria-label="左へ">◀</button><button type="button" data-dir="down" aria-label="下へ">▼</button><button type="button" data-dir="right" aria-label="右へ">▶</button></div></section>',
+ '<aside class="area-side"><section class="area-side-card"><h3>移動スティック</h3><p>丸いスティックを押したまま動かして移動</p><div class="area-stick-base" id="areaStickBase" role="application" aria-label="バーチャルアナログスティック"><div class="area-stick-knob" id="areaStickKnob"></div></div><div class="area-stick-caption">指を離すと止まります</div></section>',
  '<section class="area-side-card"><div class="area-nearby-title">NEARBY</div><div class="area-nearby-name" id="areaNearbyName">周囲を見渡す</div><p class="area-nearby-desc" id="areaNearbyDesc">学園を歩いて、アイドルたちの会話を探してみよう。</p><button type="button" class="area-talk-button" id="areaTalkButton" disabled>近くに会話はありません</button></section></aside></div>',
  '<footer class="area-explore-footer"><span>✦ あなたはアイドルを支える妖精です。<br>会話を見つけると、会話ログに保存されます。</span><button type="button" class="area-exit" data-area-close>探索を終了</button></footer>',
  '<div class="area-dialogue-shade" id="areaDialogue"><section class="area-dialogue-card"><div class="area-dialogue-kicker" id="areaDialogueKicker">AREA TALK</div><h3 id="areaDialogueTitle"></h3><div class="area-dialogue-speaker" id="areaDialogueSpeaker"></div><div class="area-dialogue-text" id="areaDialogueText"></div><div class="area-dialogue-controls"><button type="button" data-dialogue-close>閉じる</button><button type="button" class="area-dialogue-next" id="areaDialogueNext">次へ　→</button></div></section></div>',
@@ -46,7 +46,7 @@ overlay.innerHTML=[
 ].join('');
 document.body.appendChild(overlay);
 const $=id=>document.getElementById(id),world=$('areaWorld'),player=$('areaPlayer');
-let opened=false,raf=0,lastFrame=0,tiltX=0,tiltY=0,baseBeta=null,baseGamma=null,latestBeta=null,latestGamma=null,gyroEnabled=false;
+let opened=false,raf=0,lastFrame=0,stickX=0,stickY=0,stickPointer=null;
 let currentNearby=null,dialogueId=null,dialogueIndex=0,target=null;
 const held={up:false,down:false,left:false,right:false},keys={};
 function save(){try{localStorage.setItem(AREA_KEY,JSON.stringify(saved));}catch(e){}}
@@ -67,7 +67,7 @@ function loop(ts){
  let dx=(held.right||keys.ArrowRight||keys.d?1:0)-(held.left||keys.ArrowLeft||keys.a?1:0);
  let dy=(held.down||keys.ArrowDown||keys.s?1:0)-(held.up||keys.ArrowUp||keys.w?1:0);
  if(target){const tx=target.x-saved.x,ty=target.y-saved.y,len=Math.hypot(tx,ty);if(len<1.2)target=null;else{dx=tx/len;dy=ty/len;}}
- else if(!dx&&!dy){dx=tiltX;dy=tiltY;}
+ else if(!dx&&!dy){dx=stickX;dy=stickY;}
  if(dx||dy){const len=Math.hypot(dx,dy)||1;move(dx/len,dy/len,.055*dt);}
  renderPosition();raf=requestAnimationFrame(loop);
 }
@@ -89,7 +89,7 @@ async function enableGyro(){
  }catch(e){setSensorStatus('ジャイロを利用できません');}
 }
 function calibrateGyro(){baseBeta=latestBeta;baseGamma=latestGamma;tiltX=0;tiltY=0;setSensorStatus('中央位置を設定しました',true);}
-function stopGyro(){window.removeEventListener('deviceorientation',onOrientation,true);tiltX=0;tiltY=0;baseBeta=null;baseGamma=null;gyroEnabled=false;$('areaGyroButton').textContent='ジャイロを有効にする';setSensorStatus('ジャイロ未接続');}
+function stopGyro(){stickX=0;stickY=0;stickPointer=null;const knob=$('areaStickKnob');if(knob)knob.style.transform='translate(0,0)';}
 function playConversation(id){
  const data=conversations[id];if(!data)return;dialogueId=id;dialogueIndex=0;
  $('areaDialogueTitle').textContent=data.title;$('areaDialogueKicker').textContent='AREA TALK · '+data.place;$('areaDialogue').classList.add('show');renderDialogueLine();
@@ -124,7 +124,7 @@ document.addEventListener('click',e=>{
  if(e.target.closest('#areaTalkButton')&&currentNearby){playConversation(currentNearby);return;}
  const npc=e.target.closest('[data-area-npc]');if(npc){const n=npcs[npc.dataset.areaNpc];target={x:n.x,y:n.y};return;}
 });
-$('areaGyroButton').addEventListener('click',()=>{if(gyroEnabled)calibrateGyro();else enableGyro();});
+const stickBase=$('areaStickBase'),stickKnob=$('areaStickKnob');function updateStick(e){const rect=stickBase.getBoundingClientRect(),cx=rect.left+rect.width/2,cy=rect.top+rect.height/2,max=rect.width*.34,dx=e.clientX-cx,dy=e.clientY-cy,len=Math.hypot(dx,dy),scale=len>max?max/len:1,px=dx*scale,py=dy*scale;stickX=px/max;stickY=py/max;stickKnob.style.transform='translate('+px+'px,'+py+'px)';}stickBase.addEventListener('pointerdown',e=>{e.preventDefault();stickPointer=e.pointerId;stickBase.setPointerCapture(e.pointerId);updateStick(e);});stickBase.addEventListener('pointermove',e=>{if(stickPointer===e.pointerId)updateStick(e);});function releaseStick(e){if(stickPointer!==null&&(e.pointerId===undefined||e.pointerId===stickPointer)){stickPointer=null;stickX=0;stickY=0;stickKnob.style.transform='translate(0,0)';}}stickBase.addEventListener('pointerup',releaseStick);stickBase.addEventListener('pointercancel',releaseStick);
 document.querySelectorAll('[data-dir]').forEach(button=>{
  const dir=button.dataset.dir,down=e=>{e.preventDefault();held[dir]=true;},up=()=>{held[dir]=false;};
  button.addEventListener('pointerdown',down);button.addEventListener('pointerup',up);button.addEventListener('pointerleave',up);button.addEventListener('pointercancel',up);
