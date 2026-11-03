@@ -128,7 +128,7 @@ function syncProductionNavigation(){
  });
 }
 function showScreen(screen){
- if(state?.productionActive&&!developerMode&&!['plan','live'].includes(screen)){toast('育成中はメニューから終了してね。');return;}
+ if(state?.productionActive&&!developerMode&&!['plan','live','upgrade'].includes(screen)){toast('育成中はメニューから終了してね。');return;}
  if(screen==='live'&&state?.productionActive&&!developerMode&&!state.ending&&state.actions>0){toast('今日のスケジュールをすべて終えると、オーディションに参加できるよ。');return;}
  const allowedScreens=['home','plan','gacha','upgrade','story','live','closet'];
  if(!allowedScreens.includes(screen))return;
