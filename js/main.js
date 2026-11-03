@@ -34,6 +34,10 @@ const eventPool = [
  {icon:'🧁',title:'差し入れ争奪戦',body:'練習室に限定スイーツが届いた。最後のひとつをめぐって仲間と目が合う。',choices:[['半分こしよう','bond',4,'分け合ったおいしさで、場が和んだ。絆が深まった。'],['早食い勝負をする','fans',5,'なぜか見ていた後輩にウケた。ファンが少し増えた。'],['糖分を補給して練習','vocal',2,'元気を取り戻した。歌唱力が上がった。']]},
  {icon:'📰',title:'根も葉もないうわさ',body:'校内掲示板に、あなたについての妙なうわさが書かれている。',choices:[['事実を落ち着いて説明','charm',3,'誠実な対応で誤解が解けた。表現力が上がった。'],['仲間に支えてもらう','bond',4,'味方がいると実感できた。絆が深まった。'],['ステージで実力を示す','fans',10,'パフォーマンスで空気を変えた。ファンが増えた！']]}
 ];
+let developerMode=sessionStorage.getItem('etoile-academy-dev-mode')==='on';
+const DEV_SAVE_KEY=SAVE_KEY+'-developer-test';
+const DEV_MISSION_KEY='etoile-academy-missions-developer-test-v1';
+const DEV_HOME_IDOL_KEY=HOME_IDOL_KEY+'-developer-test';
 let state;
 let closetSort='default';
 let pendingEvent = null;
@@ -45,11 +49,11 @@ function freshState(name='ルミ', idol='mirai') {
  const starter=initialCostumeByIdol[idol]||'starter-mirai';
  return {name:name||'ルミ',idol,fairyName:name||'ルミ',prologueSeen:false,productionActive:false,stamina:3,staminaUpdatedAt:Date.now(),day:1,stats,fans:0,jewels:100,money:500,tickets:1,costumeCoins:0,costumeSkillLevels:{uniform:0,[starter]:0},lessonLevels:{vocal:1,dance:1,charm:1},exLessonLevel:0,costumeLevels:{uniform:0,[starter]:0},runCount:0,actions:2,doneActions:[],sessionStarted:false,storyIndex:0,storySeen:[],logs:[],eventDays:[],closet:['uniform'],equipped:'uniform',pendingStarter:starter,ending:false,won:false,liveAttempted:false,liveScore:0,sfx:localStorage.getItem(SOUND_KEY)!=='off'};
 }
-function loadState(){try{const activeIdol=localStorage.getItem(ACTIVE_IDOL_KEY);const raw=(activeIdol&&localStorage.getItem(idolSaveKey(activeIdol)))||localStorage.getItem(SAVE_KEY);if(!raw)return null;const s=JSON.parse(raw);if(!s||!s.stats||!Number.isFinite(s.day))return null;if(s.idol==='meru')s.idol='reika';if(s.idol==='setsuna')s.idol='komugi';if(!idols[s.idol])s.idol='mirai';s.closet=Array.isArray(s.closet)?s.closet:['uniform'];const starter=initialCostumeByIdol[s.idol]||'starter-mirai';s.closet=Array.isArray(s.closet)?s.closet.filter(id=>costumes.some(c=>c.id===id)):['uniform'];if(!s.equipped||!s.closet.includes(s.equipped))s.equipped='uniform';s.costumeLevels=s.costumeLevels||{uniform:0};if(!(starter in s.costumeLevels))s.costumeLevels[starter]=0;s.costumeCoins=Number.isFinite(s.costumeCoins)?Math.max(0,s.costumeCoins):0;s.costumeSkillLevels=s.costumeSkillLevels&&typeof s.costumeSkillLevels==='object'?s.costumeSkillLevels:{};Object.values(initialCostumeByIdol).forEach(id=>{if(!Number.isFinite(s.costumeSkillLevels[id]))s.costumeSkillLevels[id]=0;});if(!Number.isFinite(s.costumeSkillLevels.uniform))s.costumeSkillLevels.uniform=0;s.money=Number.isFinite(s.money)?s.money:500;s.tickets=Number.isFinite(s.tickets)?s.tickets:1;s.fairyName=typeof s.fairyName==='string'&&s.fairyName?s.fairyName:(s.name||'ルミ');s.name=s.fairyName;s.prologueSeen=!!s.prologueSeen;s.productionActive=!!s.productionActive;s.stamina=Number.isFinite(s.stamina)?Math.max(0,Math.min(3,s.stamina)):3;s.staminaUpdatedAt=Number.isFinite(s.staminaUpdatedAt)?s.staminaUpdatedAt:Date.now();s.lessonLevels=s.lessonLevels||{vocal:1,dance:1,charm:1};s.exLessonLevel=Number.isFinite(s.exLessonLevel)?Math.max(0,Math.min(10,s.exLessonLevel)):0;s.costumeLevels=s.costumeLevels||{uniform:0};s.runCount=Number.isFinite(s.runCount)?s.runCount:0;s.lifetimeFans=Number.isFinite(s.lifetimeFans)?s.lifetimeFans:s.fans||0;return s;}catch(e){return null;}}
+function loadState(){try{const activeIdol=localStorage.getItem(ACTIVE_IDOL_KEY);const raw=developerMode?localStorage.getItem(DEV_SAVE_KEY):((activeIdol&&localStorage.getItem(idolSaveKey(activeIdol)))||localStorage.getItem(SAVE_KEY));if(!raw)return null;const s=JSON.parse(raw);if(!s||!s.stats||!Number.isFinite(s.day))return null;if(s.idol==='meru')s.idol='reika';if(s.idol==='setsuna')s.idol='komugi';if(!idols[s.idol])s.idol='mirai';s.closet=Array.isArray(s.closet)?s.closet:['uniform'];const starter=initialCostumeByIdol[s.idol]||'starter-mirai';s.closet=Array.isArray(s.closet)?s.closet.filter(id=>costumes.some(c=>c.id===id)):['uniform'];if(!s.equipped||!s.closet.includes(s.equipped))s.equipped='uniform';s.costumeLevels=s.costumeLevels||{uniform:0};if(!(starter in s.costumeLevels))s.costumeLevels[starter]=0;s.costumeCoins=Number.isFinite(s.costumeCoins)?Math.max(0,s.costumeCoins):0;s.costumeSkillLevels=s.costumeSkillLevels&&typeof s.costumeSkillLevels==='object'?s.costumeSkillLevels:{};Object.values(initialCostumeByIdol).forEach(id=>{if(!Number.isFinite(s.costumeSkillLevels[id]))s.costumeSkillLevels[id]=0;});if(!Number.isFinite(s.costumeSkillLevels.uniform))s.costumeSkillLevels.uniform=0;s.money=Number.isFinite(s.money)?s.money:500;s.tickets=Number.isFinite(s.tickets)?s.tickets:1;s.fairyName=typeof s.fairyName==='string'&&s.fairyName?s.fairyName:(s.name||'ルミ');s.name=s.fairyName;s.prologueSeen=!!s.prologueSeen;s.productionActive=!!s.productionActive;s.stamina=Number.isFinite(s.stamina)?Math.max(0,Math.min(3,s.stamina)):3;s.staminaUpdatedAt=Number.isFinite(s.staminaUpdatedAt)?s.staminaUpdatedAt:Date.now();s.lessonLevels=s.lessonLevels||{vocal:1,dance:1,charm:1};s.exLessonLevel=Number.isFinite(s.exLessonLevel)?Math.max(0,Math.min(10,s.exLessonLevel)):0;s.costumeLevels=s.costumeLevels||{uniform:0};s.runCount=Number.isFinite(s.runCount)?s.runCount:0;s.lifetimeFans=Number.isFinite(s.lifetimeFans)?s.lifetimeFans:s.fans||0;return s;}catch(e){return null;}}
 const STAMINA_MAX=3, STAMINA_INTERVAL=30*60*1000;
 function recoverStamina(){if(!state)return;const now=Date.now();state.stamina=Math.max(0,Math.min(STAMINA_MAX,Number(state.stamina)||0));state.staminaUpdatedAt=Number(state.staminaUpdatedAt)||now;if(state.stamina<STAMINA_MAX){const recovered=Math.floor((now-state.staminaUpdatedAt)/STAMINA_INTERVAL);if(recovered>0){state.stamina=Math.min(STAMINA_MAX,state.stamina+recovered);state.staminaUpdatedAt=state.stamina>=STAMINA_MAX?now:state.staminaUpdatedAt+recovered*STAMINA_INTERVAL;}}else state.staminaUpdatedAt=now;}
 function staminaLabel(){recoverStamina();if(state.stamina>=STAMINA_MAX)return '全回復';const mins=Math.max(0,Math.ceil((STAMINA_INTERVAL-(Date.now()-state.staminaUpdatedAt))/60000));return '次の回復まで '+Math.floor(mins/60)+'時間'+String(mins%60).padStart(2,'0')+'分';}
-function save(){try{if(state&&state.idol){localStorage.setItem(SAVE_KEY,JSON.stringify(state));localStorage.setItem(idolSaveKey(state.idol),JSON.stringify(state));localStorage.setItem(ACTIVE_IDOL_KEY,state.idol);}}catch(e){}}
+function save(){try{if(state&&state.idol){if(developerMode){localStorage.setItem(DEV_SAVE_KEY,JSON.stringify(state));}else{localStorage.setItem(SAVE_KEY,JSON.stringify(state));localStorage.setItem(idolSaveKey(state.idol),JSON.stringify(state));localStorage.setItem(ACTIVE_IDOL_KEY,state.idol);}}}catch(e){}}
 
 const prologuePages = {
  mirai:[
@@ -124,8 +128,8 @@ function syncProductionNavigation(){
  });
 }
 function showScreen(screen){
- if(state?.productionActive&&!['plan','live'].includes(screen)){toast('育成中はメニューから終了してね。');return;}
- if(screen==='live'&&state?.productionActive&&!state.ending&&state.actions>0){toast('今日のスケジュールをすべて終えると、オーディションに参加できるよ。');return;}
+ if(state?.productionActive&&!developerMode&&!['plan','live'].includes(screen)){toast('育成中はメニューから終了してね。');return;}
+ if(screen==='live'&&state?.productionActive&&!developerMode&&!state.ending&&state.actions>0){toast('今日のスケジュールをすべて終えると、オーディションに参加できるよ。');return;}
  const allowedScreens=['home','plan','gacha','upgrade','story','live','closet'];
  if(!allowedScreens.includes(screen))return;
  const productionScreens=['plan','upgrade','live'];
@@ -162,8 +166,8 @@ function nextStoryText(){const s=state.storyIndex;const char=idols[state.idol].n
 ];return lines[Math.min(s,lines.length-1)];}
 const MISSION_KEY='etoile-academy-missions-v1';
 function missionDate(d=new Date()){return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
-function missionData(){let x;try{x=JSON.parse(localStorage.getItem(MISSION_KEY)||'{}')}catch(e){x={}}if(!x||typeof x!=='object')x={};const today=missionDate();if(x.day!==today){x.day=today;x.daily={actions:0,live:0,story:0};x.claimed=[];x.loginClaimed=false;}const d=new Date();d.setDate(d.getDate()-((d.getDay()+6)%7));const week=missionDate(d);if(x.week!==week){x.week=week;x.weekly={actions:0,live:0,story:0};x.weekClaims=[];}x.daily=x.daily||{actions:0,live:0,story:0};x.weekly=x.weekly||{actions:0,live:0,story:0};x.claimed=x.claimed||[];x.weekClaims=x.weekClaims||[];if(x.lastLogin!==today){const y=new Date();y.setDate(y.getDate()-1);x.streak=x.lastLogin===missionDate(y)?(x.streak||0)+1:1;x.lastLogin=today;x.loginClaimed=false;}try{localStorage.setItem(MISSION_KEY,JSON.stringify(x))}catch(e){}return x;}
-function missionSave(x){try{localStorage.setItem(MISSION_KEY,JSON.stringify(x))}catch(e){}}
+function missionData(){let x;try{x=JSON.parse(localStorage.getItem(developerMode?DEV_MISSION_KEY:MISSION_KEY)||'{}')}catch(e){x={}}if(!x||typeof x!=='object')x={};const today=missionDate();if(x.day!==today){x.day=today;x.daily={actions:0,live:0,story:0};x.claimed=[];x.loginClaimed=false;}const d=new Date();d.setDate(d.getDate()-((d.getDay()+6)%7));const week=missionDate(d);if(x.week!==week){x.week=week;x.weekly={actions:0,live:0,story:0};x.weekClaims=[];}x.daily=x.daily||{actions:0,live:0,story:0};x.weekly=x.weekly||{actions:0,live:0,story:0};x.claimed=x.claimed||[];x.weekClaims=x.weekClaims||[];if(x.lastLogin!==today){const y=new Date();y.setDate(y.getDate()-1);x.streak=x.lastLogin===missionDate(y)?(x.streak||0)+1:1;x.lastLogin=today;x.loginClaimed=false;}try{localStorage.setItem(developerMode?DEV_MISSION_KEY:MISSION_KEY,JSON.stringify(x))}catch(e){}return x;}
+function missionSave(x){try{localStorage.setItem(developerMode?DEV_MISSION_KEY:MISSION_KEY,JSON.stringify(x))}catch(e){}}
 function missionRewards(r){state.jewels=(state.jewels||0)+(r.jewels||0);state.money=(state.money||0)+(r.money||0);state.fans=(state.fans||0)+(r.fans||0);state.tickets=(state.tickets||0)+(r.tickets||0);save();}
 function renderMissions(){const d=missionData();const defs=[{id:'actions',label:'行動を2回完了',goal:2,reward:{jewels:20,money:50},daily:true},{id:'live',label:'ライブに挑戦',goal:1,reward:{jewels:25,fans:10},daily:true},{id:'story',label:'ストーリーを1回選択',goal:1,reward:{money:80,jewels:10},daily:true},{id:'actions',label:'行動を合計10回',goal:10,reward:{jewels:80,money:250}},{id:'live',label:'ライブに合計3回',goal:3,reward:{jewels:100,fans:50}},{id:'story',label:'ストーリーを合計3回',goal:3,reward:{money:300,tickets:1}}];function row(m){const p=m.daily?d.daily:d.weekly;const claims=m.daily?d.claimed:d.weekClaims;const n=Math.min(m.goal,p[m.id]||0);const key=(m.daily?'d:':'w:')+m.id;const claimed=claims.includes(key);const rewards=Object.entries(m.reward).map(([k,v])=>(({jewels:'💎',money:'💰',fans:'♡',tickets:'🎟️'}[k])+'+'+v)).join(' ');return '<div class="mission-row"><div class="mission-info"><strong>'+m.label+'</strong><small>'+n+'/'+m.goal+' · '+rewards+'</small><div class="mission-meter"><span style="width:'+(n/m.goal*100)+'%"></span></div></div><button class="mission-claim" data-claim-mission="'+key+'" '+(claimed||n<m.goal?'disabled':'')+'>'+(claimed?'受取済':n>=m.goal?'受け取る':'未達成')+'</button></div>'; }const login=50+Math.min(6,(d.streak||1)-1)*10;$('missionPanel').innerHTML='<div class="section-title"><h3>ミッション＆ログインボーナス</h3><small>報酬を受け取ろう</small></div><div class="mission-columns"><section class="card"><div class="card-head"><h3>☀ ログインボーナス</h3><span class="tag">連続 '+d.streak+' 日</span></div><p class="mission-login-note">今日の報酬：💎 '+login+'</p><button class="primary" data-claim-login '+(d.loginClaimed?'disabled':'')+'>'+(d.loginClaimed?'受取済':'受け取る')+'</button></section><section class="card"><div class="card-head"><h3>✦ デイリーミッション</h3><span class="tag">毎日更新</span></div>'+defs.filter(m=>m.daily).map(row).join('')+'</section><section class="card"><div class="card-head"><h3>🏆 ウィークリーミッション</h3><span class="tag">月曜更新</span></div>'+defs.filter(m=>!m.daily).map(row).join('')+'</section></div>';}
 function missionProgress(type){const d=missionData();d.daily[type]=(d.daily[type]||0)+1;d.weekly[type]=(d.weekly[type]||0)+1;missionSave(d);}
@@ -171,7 +175,7 @@ function claimMission(key){const d=missionData();const daily=key.startsWith('d:'
 function claimLogin(){const d=missionData();if(d.loginClaimed){toast('今日は受取済みだよ。');return;}d.loginClaimed=true;missionRewards({jewels:50+Math.min(6,(d.streak||1)-1)*10});missionSave(d);renderHome();toast('ログインボーナスを受け取ったよ！');}
 function renderHome(){
  recoverStamina();
- const homeIdol=localStorage.getItem(HOME_IDOL_KEY)||state.idol||'mirai';
+ const homeIdol=localStorage.getItem(developerMode?DEV_HOME_IDOL_KEY:HOME_IDOL_KEY)||state.idol||'mirai';
  const idol=idols[homeIdol]||idols.mirai;
  const lines={
   mirai:['おかえり！ 今日も一緒に過ごそうね！','今日は何してたの？ あたしにも聞かせて！','あなたが来てくれると、元気が出るんだ！'],
@@ -332,6 +336,61 @@ function startProduction(){
  renderPlan();renderLive();showScreen('plan');toast('7日間のプロデュースが始まったよ！');
 }
 
+
+function updateDeveloperButton(){['developerModeToggle','developerModeToggleSetup'].forEach(id=>{const button=$(id);if(button){button.textContent=developerMode?'開発者モード ON':'開発者モード';button.setAttribute('aria-pressed',String(developerMode));}});}
+function renderDeveloperScreens(screen='home'){if(!state)return;syncProductionNavigation();renderHome();renderPlan();renderUpgrade();renderStory();renderLive();renderGacha();renderCloset();showScreen(screen);}
+function renderDeveloperPanel(){
+ let panel=$('developerModePanel');
+ if(!panel){panel=document.createElement('div');panel.id='developerModePanel';panel.className='overlay';document.body.appendChild(panel);}
+ const active=state?.productionActive?'育成中':'育成前';
+ const ex=exLessonUnlocked()?'解放済':'未解放';
+ panel.innerHTML='<div class="modal" style="width:min(760px,100%);max-height:86vh;overflow:auto"><div class="eyebrow">ÉTOILE ACADEMY · DEVELOPER MODE</div><h2>開発者モード</h2><p class="modal-lead">ここでの変更はテスト用データだけに保存されるよ。通常のセーブデータには反映されないよ。</p><div class="card"><strong>テスト状況</strong><p class="subcopy">'+active+' · DAY '+state.day+' · 行動 '+state.actions+' · ジュエル '+state.jewels+' · 所持金 '+(state.money||0)+' · EX '+ex+'</p></div><div class="section-title"><h3>データ操作</h3></div><div class="action-grid"><button class="secondary" data-dev-action="add-jewels">ジュエル +1,000</button><button class="secondary" data-dev-action="add-money">所持金 +10,000</button><button class="secondary" data-dev-action="add-tickets">チケット +10</button><button class="secondary" data-dev-action="restore-stamina">スタミナ全回復</button><button class="secondary" data-dev-action="max-stats">全パラメータ 100</button><button class="secondary" data-dev-action="max-lessons">通常レッスン全Lv.10</button><button class="secondary" data-dev-action="unlock-costumes">全衣装解放</button><button class="secondary" data-dev-action="max-costume-skills">全衣装スキルLv.10</button></div><div class="section-title"><h3>進行・画面テスト</h3></div><div class="action-grid"><button class="secondary" data-dev-action="begin-production">育成状態を開始</button><button class="secondary" data-dev-action="day-one">DAY 1にする</button><button class="secondary" data-dev-action="day-seven">DAY 7にする</button><button class="secondary" data-dev-action="reset-actions">行動回数を2に戻す</button><button class="secondary" data-dev-action="random-event">イベントを表示</button><button class="secondary" data-dev-action="replay-prologue">プロローグ再生</button><button class="secondary" data-dev-action="final-audition">最終オーディションへ</button><button class="secondary" data-dev-action="go-home">ホーム画面</button><button class="secondary" data-dev-action="go-plan">育成画面</button><button class="secondary" data-dev-action="go-live">オーディション画面</button><button class="secondary" data-dev-action="go-upgrade">強化ルーム</button><button class="secondary" data-dev-action="go-story">ストーリー画面</button><button class="secondary" data-dev-action="go-gacha">ガチャ画面</button><button class="secondary" data-dev-action="go-closet">衣装ルーム</button></div><div class="choice-stack"><button class="danger" data-dev-action="reset-test">テスト用データを初期化</button><button class="secondary" data-dev-action="close">閉じる</button><button class="primary" data-dev-action="exit">開発者モードを終了して通常データへ戻る</button></div></div>';
+ panel.classList.add('show');
+}
+function toggleDeveloperMode(){
+ if(developerMode){
+  if(!state){state=freshState();state.prologueSeen=true;state.productionActive=true;state.actions=2;save();}
+  renderDeveloperPanel();return;
+ }
+ let testState=state?JSON.parse(JSON.stringify(state)):freshState();
+ if(!state){testState.prologueSeen=true;testState.productionActive=true;testState.actions=2;}
+ developerMode=true;sessionStorage.setItem('etoile-academy-dev-mode','on');state=testState;
+ try{localStorage.setItem(DEV_SAVE_KEY,JSON.stringify(state));}catch(e){}
+ updateDeveloperButton();renderDeveloperScreens(state.productionActive?'plan':'home');renderDeveloperPanel();toast('開発者モードに切り替えたよ。通常データは保護されているよ。');
+}
+function exitDeveloperMode(){
+ const panel=$('developerModePanel');if(panel)panel.classList.remove('show');
+ $('eventOverlay')?.classList.remove('show');$('productionPrepOverlay')?.classList.remove('show');
+ developerMode=false;sessionStorage.removeItem('etoile-academy-dev-mode');state=loadState();battle=null;pendingEvent=null;updateDeveloperButton();
+ if(state&&state.stats){renderHome();renderPlan();renderUpgrade();renderStory();renderLive();renderGacha();renderCloset();showScreen(state.productionActive?'plan':'home');}
+ else{document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));prepareIntro();}
+ toast('通常のセーブデータに戻ったよ。');
+}
+function handleDeveloperAction(action){
+ if(!developerMode||!state)return;
+ const close=()=>{const p=$('developerModePanel');if(p)p.classList.remove('show');};
+ if(action==='close'){close();return;}
+ if(action==='exit'){exitDeveloperMode();return;}
+ if(action==='add-jewels')state.jewels=(Number(state.jewels)||0)+1000;
+ else if(action==='add-money')state.money=(Number(state.money)||0)+10000;
+ else if(action==='add-tickets')state.tickets=(Number(state.tickets)||0)+10;
+ else if(action==='restore-stamina'){state.stamina=STAMINA_MAX;state.staminaUpdatedAt=Date.now();}
+ else if(action==='max-stats'){['vocal','dance','charm','bond'].forEach(k=>state.stats[k]=100);}
+ else if(action==='max-lessons'){state.lessonLevels={vocal:10,dance:10,charm:10};}
+ else if(action==='unlock-costumes'){state.closet=[...new Set([...state.closet,...costumes.map(c=>c.id)])];}
+ else if(action==='max-costume-skills'){state.closet=[...new Set([...state.closet,...costumes.map(c=>c.id)])];state.costumeSkillLevels=Object.fromEntries(costumes.map(c=>[c.id,10]));}
+ else if(action==='begin-production'){state.productionActive=true;state.prologueSeen=true;state.ending=false;state.day=Math.max(1,Math.min(7,state.day||1));state.actions=2;state.doneActions=[];state.liveAttempted=false;battle=null;}
+ else if(action==='day-one')state.day=1;
+ else if(action==='day-seven')state.day=7;
+ else if(action==='reset-actions'){state.actions=2;state.doneActions=[];state.liveAttempted=false;battle=null;}
+ else if(action==='random-event'){const ev=eventPool[Math.floor(Math.random()*eventPool.length)];pendingEvent=ev;close();save();showEvent(ev);return;}
+ else if(action==='replay-prologue'){close();save();showPrologue('story');return;}
+ else if(action==='final-audition'){state.productionActive=true;state.prologueSeen=true;state.ending=false;state.day=7;state.actions=0;state.liveAttempted=false;battle=null;close();save();renderDeveloperScreens('live');return;}
+ else if(action.startsWith('go-')){const screen=action.slice(3);close();renderDeveloperScreens(screen);return;}
+ else if(action==='reset-test'){if(!confirm('テスト用データだけを初期化する？通常データは変更されないよ。'))return;state=freshState(state.fairyName||state.name||'ルミ',state.idol||'mirai');state.prologueSeen=true;state.productionActive=true;state.actions=2;state.doneActions=[];battle=null;pendingEvent=null;}
+ save();renderDeveloperScreens(document.querySelector('.screen.active')?.id?.replace('screen-','')||'home');renderDeveloperPanel();
+}
+
 let dynamicDelegateBound=false;
 function bindDynamic(){
  const boundButtons=new WeakSet();
@@ -342,7 +401,7 @@ function bindDynamic(){
    const target=e.target instanceof Element?e.target:e.target?.parentElement;
    const nav=button.matches('[data-screen]')?button:null;
    if(nav){
-    if(nav.hidden||nav.disabled||(state?.productionActive&&!['plan','live'].includes(nav.dataset.screen))||nav.hasAttribute('data-production-nav')&&!(typeof state !== 'undefined' && state && state.productionActive)){syncProductionNavigation();return;}
+    if(nav.hidden||nav.disabled||(state?.productionActive&&!developerMode&&!['plan','live'].includes(nav.dataset.screen))||nav.hasAttribute('data-production-nav')&&!(typeof state !== 'undefined' && state && state.productionActive)){syncProductionNavigation();return;}
     e.preventDefault();
     showScreen(nav.dataset.screen);return;
    }
@@ -350,8 +409,9 @@ function bindDynamic(){
    if(b.hasAttribute('data-day-live')||b.hasAttribute('data-next-day')){const m=$('dayEndModal');if(m)m.remove();if(b.hasAttribute('data-day-live')){showScreen('live');renderLive();}else nextDay();return;}
    if(b.dataset.eventChoice!==undefined){chooseEvent(Number(b.dataset.eventChoice));return;}
    const main=$('gameMain');
+   if(b.id==='developerModeToggle'||b.id==='developerModeToggleSetup'){toggleDeveloperMode();return;}if(b.dataset.devAction){handleDeveloperAction(b.dataset.devAction);return;}
    if(!main?.contains(b))return;
-   if(b.hasAttribute('data-open-production-menu')){openProductionMenu();return;}if(b.hasAttribute('data-retire-production')){retireProduction();return;}if(b.hasAttribute('data-return-home')){if(state?.productionActive){toast('育成メニューからリタイアしてね。');return;}state.ending=false;battle=null;pendingEvent=null;save();syncProductionNavigation();showScreen('home');return;}if(b.dataset.go){showScreen(b.dataset.go);return;}if(b.dataset.prepIdol||b.dataset.prepItem){}if(b.hasAttribute('data-start-production')){openProductionPreparation();return;}if(b.dataset.homeIdol){localStorage.setItem(HOME_IDOL_KEY,b.dataset.homeIdol);state.homeLineIndex=0;renderHome();return;}if(b.hasAttribute('data-close-prep')){$('productionPrepOverlay').classList.remove('show');return;}if(b.hasAttribute('data-confirm-production')){startProduction();return;}if(b.hasAttribute('data-home-line')){state.homeLineIndex=((state.homeLineIndex||0)+1)%3;renderHome();return;}
+   if(b.hasAttribute('data-open-production-menu')){openProductionMenu();return;}if(b.hasAttribute('data-retire-production')){retireProduction();return;}if(b.hasAttribute('data-return-home')){if(state?.productionActive){toast('育成メニューからリタイアしてね。');return;}state.ending=false;battle=null;pendingEvent=null;save();syncProductionNavigation();showScreen('home');return;}if(b.dataset.go){showScreen(b.dataset.go);return;}if(b.dataset.prepIdol||b.dataset.prepItem){}if(b.hasAttribute('data-start-production')){openProductionPreparation();return;}if(b.dataset.homeIdol){localStorage.setItem(developerMode?DEV_HOME_IDOL_KEY:HOME_IDOL_KEY,b.dataset.homeIdol);state.homeLineIndex=0;renderHome();return;}if(b.hasAttribute('data-close-prep')){$('productionPrepOverlay').classList.remove('show');return;}if(b.hasAttribute('data-confirm-production')){startProduction();return;}if(b.hasAttribute('data-home-line')){state.homeLineIndex=((state.homeLineIndex||0)+1)%3;renderHome();return;}
   if(b.dataset.action){if(!state.productionActive){toast('プロデュース開始後にレッスンできるよ。');return;}useAction(b.dataset.action);return;}if(b.dataset.openUpgrade){const panel=$('screen-upgrade').querySelector('[data-upgrade-panel="'+b.dataset.openUpgrade+'"]');if(panel)panel.hidden=!panel.hidden;return;}if(b.dataset.upgradeLesson){const k=b.dataset.upgradeLesson;state.lessonLevels=state.lessonLevels||{vocal:1,dance:1,charm:1};const lv=state.lessonLevels[k]||1;const cost=100*lv;if(lv>=10||state.money<cost){toast('お金が足りないか、最大レベルだよ。');return;}state.money-=cost;state.lessonLevels[k]=lv+1;save();renderUpgrade();renderPlan();toast(statName(k)+'レッスン Lv.'+(lv+1)+'！');return;}if(b.hasAttribute('data-upgrade-ex')){const lv=Number(state.exLessonLevel)||0,cost=200*(lv+1);if(!exLessonUnlocked()||lv>=10||state.money<cost){toast('EXレッスンを強化できないよ。');return;}state.money-=cost;state.exLessonLevel=lv+1;save();renderUpgrade();renderPlan();toast('EXレッスン Lv.'+(lv+1)+'！ 全能力の成長量が上がったよ。');return;}
   if(b.dataset.claimMission){claimMission(b.dataset.claimMission);return;}if(b.hasAttribute('data-claim-login')){claimLogin();return;}if(b.hasAttribute('data-read-prologue')){showPrologue('story');return;}
   if(b.dataset.readStory!==undefined){state.storyIndex=Number(b.dataset.readStory);save();renderStory();return;}
@@ -383,7 +443,7 @@ function bindDynamic(){
  }
 }
 function chooseStory(i){if(!state.productionActive){toast('プロデュース中にストーリーを進められるよ。');return;}const s=nextStoryText();if(state.storySeen.includes(state.storyIndex))return;const c=s.choices[i];if(!c)return;const key=c[1];if(key==='bold'){state.stats.vocal=clamp(state.stats.vocal+3);state.stats.charm=clamp(state.stats.charm+2);addLog('🔥','物語で強気な選択。歌唱力 +3、表現力 +2。');}else if(key==='kind'){state.stats.bond=clamp(state.stats.bond+4);state.stats.charm=clamp(state.stats.charm+2);addLog('♡','物語で思いやりを選んだ。絆 +4、表現力 +2。');}else if(key==='team'){state.stats.bond=clamp(state.stats.bond+3);state.jewels+=5;addLog('✦','仲間と作戦を立てた。絆 +3、ジュエル +5。');}else if(['vocal','dance','charm'].includes(key)){state.stats[key]=clamp(state.stats[key]+5);addLog('✦','フェスの作戦を決めた。'+statName(key)+' +5。');}state.storySeen.push(state.storyIndex);missionProgress('story');save();renderStory();renderHome();toast('選択を記録したよ。結果はステータスに反映！');sfx('card');}
-function resetToSetup(){if(state&&state.ending){const old=state;const next=freshState(old.name,old.idol);next.productionActive=false;next.money=old.money||0;next.tickets=Math.max(1,old.tickets||0);next.jewels=old.jewels||0;next.closet=[...new Set(old.closet||['uniform'])];next.equipped=old.equipped||'uniform';next.costumeCoins=Number(old.costumeCoins)||0;next.costumeSkillLevels={...(old.costumeSkillLevels||{})};next.costumeLevels={...(old.costumeLevels||{})};next.lessonLevels={...(old.lessonLevels||{vocal:1,dance:1,charm:1})};next.exLessonLevel=Number(old.exLessonLevel)||0;next.runCount=(old.runCount||0)+1;next.lifetimeFans=(old.lifetimeFans||0)+(old.fans||0);next.logs=[{icon:'↻',text:'周回 '+next.runCount+' 開始！育成・衣装・所持品を引き継いだ。'}];state=next;battle=null;pendingEvent=null;save();document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));$('setupOverlay').classList.remove('show');renderHome();renderPlan();renderStory();renderLive();renderCloset();showScreen('home');toast('育成を引き継いで周回 '+state.runCount+' 開始！');return;}if(!confirm('セーブデータを消して最初から始める？'))return;localStorage.removeItem(SAVE_KEY);localStorage.removeItem(ACTIVE_IDOL_KEY);['mirai','reika','komugi'].forEach(id=>localStorage.removeItem(idolSaveKey(id)));localStorage.removeItem(SAVE_KEY+'-fairy-name');localStorage.removeItem(SAVE_KEY+'-first-idol');state=null;battle=null;pendingEvent=null;document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));$('setupOverlay').classList.add('show');$('playerName').value='ひかり';document.querySelectorAll('.idol-pick').forEach(b=>b.classList.toggle('selected',b.dataset.idol==='mirai'));}
+function resetToSetup(){if(developerMode){if(!confirm('テスト用データだけを初期状態に戻す？通常のセーブデータには影響しないよ。'))return;state=freshState(state?.fairyName||state?.name||'ルミ',state?.idol||'mirai');state.prologueSeen=true;state.productionActive=true;state.actions=2;save();battle=null;pendingEvent=null;renderDeveloperScreens('plan');toast('テスト用データを初期化したよ。');return;}if(state&&state.ending){const old=state;const next=freshState(old.name,old.idol);next.productionActive=false;next.money=old.money||0;next.tickets=Math.max(1,old.tickets||0);next.jewels=old.jewels||0;next.closet=[...new Set(old.closet||['uniform'])];next.equipped=old.equipped||'uniform';next.costumeCoins=Number(old.costumeCoins)||0;next.costumeSkillLevels={...(old.costumeSkillLevels||{})};next.costumeLevels={...(old.costumeLevels||{})};next.lessonLevels={...(old.lessonLevels||{vocal:1,dance:1,charm:1})};next.exLessonLevel=Number(old.exLessonLevel)||0;next.runCount=(old.runCount||0)+1;next.lifetimeFans=(old.lifetimeFans||0)+(old.fans||0);next.logs=[{icon:'↻',text:'周回 '+next.runCount+' 開始！育成・衣装・所持品を引き継いだ。'}];state=next;battle=null;pendingEvent=null;save();document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));$('setupOverlay').classList.remove('show');renderHome();renderPlan();renderStory();renderLive();renderCloset();showScreen('home');toast('育成を引き継いで周回 '+state.runCount+' 開始！');return;}if(!confirm('セーブデータを消して最初から始める？'))return;localStorage.removeItem(SAVE_KEY);localStorage.removeItem(ACTIVE_IDOL_KEY);['mirai','reika','komugi'].forEach(id=>localStorage.removeItem(idolSaveKey(id)));localStorage.removeItem(SAVE_KEY+'-fairy-name');localStorage.removeItem(SAVE_KEY+'-first-idol');state=null;battle=null;pendingEvent=null;document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));$('setupOverlay').classList.add('show');$('playerName').value='ひかり';document.querySelectorAll('.idol-pick').forEach(b=>b.classList.toggle('selected',b.dataset.idol==='mirai'));}
 // Navigation is handled once by the delegated capture-phase listener in bindDynamic().
 document.querySelectorAll('.idol-pick').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.idol-pick').forEach(x=>x.classList.toggle('selected',x===b));renderCostumeChoices();}));
 function renderCostumeChoices(){const id=document.querySelector('.idol-pick.selected')?.dataset.idol||'mirai';const signature=initialCostumeByIdol[id];const firstIdol=localStorage.getItem(SAVE_KEY+'-first-idol');const area=$('costumeChoices');if(!area)return;let saved=null;try{saved=JSON.parse(localStorage.getItem(idolSaveKey(id))||'null')}catch(e){}const owned=saved&&Array.isArray(saved.closet)?saved.closet:['uniform'];const canGetSignature=(!firstIdol&& !state?.stats)||firstIdol===id;const options=costumes.filter(cost=>cost.id==='uniform'||(owned.includes(cost.id)&&(!cost.owner||cost.owner===id))||(cost.id===signature&&canGetSignature));area.innerHTML='<div class="field-label">育成するアイドルの衣装を選ぼう</div><div class="setup-costume-picks">'+options.map((cost,i)=>'<button type="button" class="setup-costume-pick '+(i===0?'selected':'')+'" data-setup-costume="'+cost.id+'"><span>'+cost.emoji+'</span><strong>'+esc(cost.name)+'</strong><small>'+cost.rarity+'</small></button>').join('')+'</div><p class="tiny-note">初期固有SSRは最初に選んだアイドルだけが獲得できるよ。</p>';area.querySelectorAll('[data-setup-costume]').forEach(b=>b.addEventListener('click',()=>{area.querySelectorAll('[data-setup-costume]').forEach(x=>x.classList.toggle('selected',x===b));}));}
@@ -396,6 +456,7 @@ $('soundToggle')?.addEventListener('click',()=>{if(!state){state={sfx:localStora
 $('eventChoices')?.addEventListener('click',e=>{const b=e.target.closest('[data-event-choice]');if(b)chooseEvent(Number(b.dataset.eventChoice));});
 
 window.EtoileGame = {
+ isDeveloperMode:()=>!!developerMode,
  isProductionActive:()=>!!state?.productionActive,
  getFairyName:()=>state?.fairyName||state?.name||'妖精',
  getMoney:()=>Number(state?.money)||0,
@@ -426,7 +487,7 @@ window.EtoileGame = {
  }
 };
 function boot(){
- state=loadState();if(state&&typeof state.productionActive!=='boolean'){state.productionActive=false;save();}updateSoundButton();syncProductionNavigation();bindDynamic();
+ state=loadState();updateDeveloperButton();if(state&&typeof state.productionActive!=='boolean'){state.productionActive=false;save();}updateSoundButton();syncProductionNavigation();bindDynamic();
  if(state&&state.stats){if(!state.eventDays)state.eventDays=[];if(!state.fairyName||!state.prologueSeen){prepareIntro();return;}$('setupOverlay').classList.remove('show');if(state.ending){showFestivalEnding();}else{renderHome();renderPlan();renderStory();renderLive();renderCloset();showScreen('home');}}
  else{prepareIntro();}
 }
