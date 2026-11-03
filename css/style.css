@@ -98,24 +98,3 @@
 .cast-big .idol-portrait-sprite{height:100%;max-height:145px}
 .fairy-story-art{display:flex;align-items:center;justify-content:center;height:220px;overflow:hidden}
 .fairy-story-art .idol-portrait-sprite{height:100%;max-height:220px}
-
-
-/* High-resolution transparent portraits for the three initial idols only. */
-.idol-portrait-sprite.portrait-mirai{
- background-image:url('../assets/idols/initial-idols.webp');
- background-size:300% 100%;
- background-position:0% center;
- aspect-ratio:167 / 420;
-}
-.idol-portrait-sprite.portrait-reika{
- background-image:url('../assets/idols/initial-idols.webp');
- background-size:300% 100%;
- background-position:50% center;
- aspect-ratio:171 / 420;
-}
-.idol-portrait-sprite.portrait-komugi{
- background-image:url('../assets/idols/initial-idols.webp');
- background-size:300% 100%;
- background-position:100% center;
- aspect-ratio:178 / 420;
-}
