@@ -350,10 +350,10 @@ function renderDeveloperPanel(){
 function toggleDeveloperMode(){
  if(developerMode){
   if(!state){state=freshState();state.prologueSeen=true;state.productionActive=true;state.actions=2;save();}
-  renderDeveloperPanel();return;
+  $('setupOverlay').classList.remove('show');renderDeveloperScreens(state.productionActive?'plan':'home');renderDeveloperPanel();return;
  }
  let testState=state?JSON.parse(JSON.stringify(state)):freshState();
- if(!state){testState.prologueSeen=true;testState.productionActive=true;testState.actions=2;}
+ if(!state){testState.prologueSeen=true;testState.productionActive=true;testState.actions=2;$('setupOverlay').classList.remove('show');}
  developerMode=true;sessionStorage.setItem('etoile-academy-dev-mode','on');state=testState;
  try{localStorage.setItem(DEV_SAVE_KEY,JSON.stringify(state));}catch(e){}
  updateDeveloperButton();renderDeveloperScreens(state.productionActive?'plan':'home');renderDeveloperPanel();toast('開発者モードに切り替えたよ。通常データは保護されているよ。');
