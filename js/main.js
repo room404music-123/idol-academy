@@ -132,7 +132,7 @@ function showScreen(screen){
  if(screen==='live'&&state?.productionActive&&!developerMode&&!state.ending&&state.actions>0){toast('今日のスケジュールをすべて終えると、オーディションに参加できるよ。');return;}
  const allowedScreens=['home','plan','gacha','upgrade','story','live','closet'];
  if(!allowedScreens.includes(screen))return;
- const productionScreens=['plan','upgrade','live'];
+ const productionScreens=['plan','live'];
  if(productionScreens.includes(screen) && !(typeof state !== 'undefined' && state && state.productionActive)){syncProductionNavigation();showScreen('home');return;}
  const screens=document.querySelectorAll('#gameMain .screen');
  screens.forEach(el=>{
