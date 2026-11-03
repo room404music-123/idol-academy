@@ -128,11 +128,11 @@ function syncProductionNavigation(){
  });
 }
 function showScreen(screen){
- if(state?.productionActive&&!developerMode&&!['plan','live','upgrade'].includes(screen)){toast('育成中はメニューから終了してね。');return;}
+ if(state?.productionActive&&!developerMode&&!['plan','live'].includes(screen)){toast('育成中はメニューから終了してね。');return;}
  if(screen==='live'&&state?.productionActive&&!developerMode&&!state.ending&&state.actions>0){toast('今日のスケジュールをすべて終えると、オーディションに参加できるよ。');return;}
  const allowedScreens=['home','plan','gacha','upgrade','story','live','closet'];
  if(!allowedScreens.includes(screen))return;
- const productionScreens=['plan','live'];
+ const productionScreens=['plan','upgrade','live'];
  if(productionScreens.includes(screen) && !(typeof state !== 'undefined' && state && state.productionActive)){syncProductionNavigation();showScreen('home');return;}
  const screens=document.querySelectorAll('#gameMain .screen');
  screens.forEach(el=>{
@@ -462,7 +462,7 @@ window.EtoileGame = {
  getMoney:()=>Number(state?.money)||0,
  getLessonUpgradeData(){
   if(!state)return null;
-  return {money:Number(state.money)||0,lessonLevels:{vocal:1,dance:1,charm:1,...(state.lessonLevels||{})},productionActive:!!state.productionActive};
+  return {money:Number(state.money)||0,lessonLevels:{vocal:1,dance:1,charm:1,...(state.lessonLevels||{})},exLessonLevel:Number(state.exLessonLevel)||0,exLessonUnlocked:exLessonUnlocked(),productionActive:!!state.productionActive};
  },
  upgradeLesson(key){
   if(!state||state.productionActive)return {ok:false,reason:'active'};
@@ -474,6 +474,16 @@ window.EtoileGame = {
   state.money-=cost;state.lessonLevels[key]=level+1;save();
   if($('screen-upgrade')?.classList.contains('active'))renderUpgrade();
   toast(statName(key)+'レッスン Lv.'+(level+1)+'！');
+  return {ok:true,level:level+1,money:state.money};
+ },
+ upgradeExLesson(){
+  if(!state||state.productionActive)return {ok:false,reason:'active'};
+  if(!exLessonUnlocked())return {ok:false,reason:'locked'};
+  const level=Number(state.exLessonLevel)||0,cost=200*(level+1);
+  if(level>=10)return {ok:false,reason:'max'};
+  if((Number(state.money)||0)<cost)return {ok:false,reason:'funds'};
+  state.money-=cost;state.exLessonLevel=level+1;save();
+  toast('EXレッスン Lv.'+(level+1)+'！');
   return {ok:true,level:level+1,money:state.money};
  },
  addMoney(amount){
